@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 
 # https://github.com/psychopy/psychopy/blob/master/psychopy/demos/coder/experiment%20control/TrialHandler.py
+# on archlinux, python is python3
+# ^M-: (run-python "/usr/bin/python2")
 
 from psychopy import visual, core, data
 from psychopy import logging
+from __future__ import division
 import numpy,math,numpy.matlib,random,numpy.random
 
 def shuf_for_ntrials(vec,ntrials):
@@ -31,14 +34,49 @@ stimList = [  {'isi': .5, 'imgno': i, 'horz': positions[i]   } for i in range(nt
 trials = data.TrialHandler(stimList,10,extraInfo ={})
 
 
-## run
-message = visual.TextStim(win, text='hello')
-message.setAutoDraw(True)  # automatically draw every frame
-win.flip()
-core.wait(2.0)
-message.setText('world')  # change properties of existing stim
+# we could  img.units='deg', but that might complicate testing on diff screens
+def ratio(x,y,scale): return(float(x) * scale/float(y))
+def replace_img(img,filename,horz,imgpercent=.04):
+  # set image, get props
+  img.image=filename
+  (iw,ih) = img._origSize
+  (sw,sh) = img.win.size
+  
+  # resize img
+  scalew= ratio(sw,iw,imgpercent)
+  #scaleh= ratio(sh,ih,imgpercent) 
+  # scale evenly in relation to x-axis
+  img.size=(scalew,scalew) 
 
-img = visual.ImageStim(win,'img_circle/winter.02.png')
-img.setAutoDraw(False)
-win.flip()
-core.wait(2.0)
+  ## position
+  horzpos=sw/2.0 * (1 + horz)
+  halfimgsize=scalew*iw/2.0
+  # are we off the left side of the screen?
+  #if   horzpos - halfimgsize < 0 : horz = halfimgsize/float(sw)
+  #elif horzpos + halfimgsize > sw: horz = (sw -halfimgsize)/float(sw)
+  if   horzpos - halfimgsize < 0 : horz = halfimgsize*2/float(sw) - 1
+  elif horzpos + halfimgsize > sw: horz = (sw -halfimgsize)*2/float(sw) -1
+  # set
+  img.pos=(horz,0)
+
+  ## draw
+  img.draw()
+
+## initialize
+img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
+
+iti_fix = visual.TextStim(win, text='+',name='iti_fixation',color='white')
+isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
+trg_fix = visual.TextStim(win, text='+',name='trg_fixation',color='red')
+
+
+## run
+def trial(imgfile,horz): 
+    trg_fix.draw(); win.flip(); core.wait(0.5)
+    replace_img(img,imgfile,horz,.15); win.flip(); core.wait(.5) 
+    isi_fix.draw(); win.flip(); core.wait(0.5)
+    win.flip(); core.wait(.5)
+    iti_fix.draw(); win.flip(); core.wait(1.0)
+
+trial("img_circle/winter.01.png",-.25)
+trial("img_circle/mountain.01.png",-.75)
