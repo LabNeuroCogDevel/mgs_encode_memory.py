@@ -23,24 +23,27 @@ def replace_img(img,filename,horz,imgpercent=.04):
   img.image=filename
   (iw,ih) = img._origSize
   (sw,sh) = img.win.size
-  
+
+  img.units='pixels'
   
   # resize img
   scalew= ratio(sw,iw,imgpercent)
   #scaleh= ratio(sh,ih,imgpercent) 
   # scale evenly in relation to x-axis
-  img.size=(scalew,scalew*sw/sh) 
+  img.size=(scalew*iw,scalew*sw/sh*ih) 
 
   ## position
-  horzpos=sw/2.0 * (1 + horz)
+  winmax=sw/float(2)
+  # -1 => -400 for 800 wide screen
+  horzpos=horz*winmax
   halfimgsize=scalew*iw/2.0
   # are we partially off the screen? max edges perfect
-  if   horzpos - halfimgsize < 0 :
-      horz = halfimgsize*2/float(sw) - 1
-  elif horzpos + halfimgsize > sw:
-      horz = (sw -halfimgsize)*2/float(sw) -1
+  if   horzpos - halfimgsize < -winmax :
+      horzpos = halfimgsize - winmax
+  elif horzpos + halfimgsize > winmax:
+      horzpos = winmax - halfimgsize
   # set
-  img.pos=(horz,0)
+  img.pos=(horzpos,0)
 
   ## draw
   img.draw()
