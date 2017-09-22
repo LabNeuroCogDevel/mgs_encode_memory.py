@@ -5,10 +5,10 @@
 # ^M-: (run-python "/usr/bin/python2")
 
 from __future__ import division
-from psychopy import visual, core, data, logging, gui
+from psychopy import visual, core, data, logging, gui, event
 import datetime
-import glob, re, math
-from mgs_task import shuf_for_ntrials, replace_img, gen_stimlist
+import glob, re, math, numpy
+from mgs_task import *
 
 ## get subj info
 box = gui.Dlg()
@@ -22,6 +22,9 @@ seconds=datetime.datetime.strftime(datetime.datetime.now(),"%s")
 lastLog = logging.LogFile("info_%s_%s.log"%(subjid,seconds), level=logging.INFO, filemode='w')
 logging.log(level=logging.INFO, msg='starting at %s'%core.Clock())
 logging.flush() # when its okay to write
+# timing
+timer = core.Clock()
+blocktimer = core.Clock()
 
 
 ## settings
@@ -35,32 +38,29 @@ novelfile=re.compile('.*\.01\..*') # any .01. image
 sacc_images = [ x for x in allimages if not novelfile.match(x) ]
 novel_images = [ x for x in allimages if novelfile.match(x) ]
 
+## put together for saccade trials
 sacc_stimList= gen_stimlist(sacc_images,possiblepos,n_sacc_trials)
 # unique image position: for quiz later
 img_pos = set([ (x['imgfile'],x['horz']) for x in sacc_stimList ])
 
-sacc_trials = data.TrialHandler(sacc_stimList,1,extraInfo ={'subjid': subjid, 'epoch': seconds})
+sacc_trials = data.TrialHandler2(sacc_stimList,1,extraInfo ={'subjid': subjid, 'epoch': seconds})
 
-### recall quiz setup
+## recall quiz setup
 nrecall=len(img_pos)
 nquiz=len(novel_images)
 novel_pos = set([ (x,float("nan")) for x in novel_images ] )
 img_pos_and_novel = list(novel_pos | img_pos) 
 numpy.random.shuffle(img_pos_and_novel)
 
-def response_should_be(pos):
-    known='K';unkown='D';
-    left ='D';right ='K';oops='O'
-    
-    if(math.isnan(pos )): return( (unkown,oops) )
-    elif( pos < 0): return(known,left)
-    elif( pos > 0): return(known,right)
-    else: raise ValueError('bad pos?! how!?')
 
-recall_stim = [ { 'imgfile': img,'pos': pos,'keys': response_should_be(pos) } for img,pos in img_pos_and_novel ]
-recall_trials = data.TrailHandler(reacall_stim,1,extraInfo ={'subjid': subjid, 'epoch': seconds})
-### screen setup
+accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }
 
+
+recall_stim = [ { 'imgfile': img,'pos': pos,'corkeys': response_should_be(pos,accept_keys) } for img,pos in img_pos_and_novel ]
+recall_trials = data.TrialHandler2(recall_stim,1,extraInfo ={'subjid': subjid, 'epoch': seconds})
+
+
+## screen setup
 #win = visual.Window([400,400],screen=0)
 #win = visual.Window(fullscr=True)
 win = visual.Window([800,600])
@@ -73,32 +73,37 @@ isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
 trg_fix = visual.TextStim(win, text='+',name='trg_fixation',color='red')
 
 ## for quiz
-text_KU = visual.TextStim(win, text='known or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
-text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
+KUstr='unknown or known'
+LRstr='left or right'
+text_KU = visual.TextStim(win, text=KUstr,name='KnownUnknown',color='white',pos=(0,-.75))
+text_LR = visual.TextStim(win, text=LRstr,name='LeftRight',color='white',pos=(0,-.75))
 
-def sacc_trial(imgfile,horz,iti): 
-    trg_fix.draw(); win.flip(); core.wait(0.5)
-    replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
-    isi_fix.draw(); win.flip(); core.wait(0.5)
-    win.flip(); core.wait(.5)
-    iti_fix.draw(); win.flip(); logging.flush(); core.wait(iti)
+dir_key_text   = [ (accept_keys['left'] , 'left         '),\
+                   (accept_keys['right'], '        right'),\
+                   (accept_keys['oops'] , '    oops     ')]
+known_key_text = [ (accept_keys['known']  , 'unknown         '),\
+                   (accept_keys['unknown'], '           known') ]
 
-def sacc_trial(imgfile,keys,iti=.5): 
-    replace_img(img,imgfile,0,.25);text_KU.draw(); win.flip();
-    # TODO key catpure
-    core.wait(1)
-    # if report known
-    replace_img(img,imgfile,0,.25);text_LR.draw(); win.flip();
-    core.wait(1)
 
-    iti_fix.draw(); win.flip(); logging.flush(); core.wait(iti)
-
-## run
+## run saccade trials
+blocktimer.reset()
 for t in sacc_trials:
-    sacc_trial(t['imgfile'],t['horz'],1.0)
+    trailstarttime=bocktimer.getTime()
+    sacc_trial(t['imgfile'],t['horz'])
+    recall_trials.addData('startTime',trialstarttime)
+    run_iti(.5)
 
-## recall
+## run recall quiz trials
+#blocktimer.reset()
 for t in recall_trials:
-    trial(t['imgfile'],t['horz'],1.0)
+    (keypresses,rts) =recall_trial(t['imgfile'],t['pos'])
+    grade = [ expect==given for expect,given in zip( t['corkeys'], keypresses ) ]
+    # add key and rt
+    recall_trials.addData('know_key',keypresses[0])
+    recall_trials.addData('dir_key',keypresses[1])
+    recall_trials.addData('know_rt',rts[0])
+    recall_trials.addData('dir_rt',rts[1])
+    # finish with iti
+    run_iti(.5)
 
 win.close()
