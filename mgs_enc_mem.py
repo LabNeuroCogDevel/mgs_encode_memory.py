@@ -88,7 +88,7 @@ known_key_text = [ (accept_keys['known']  , 'unknown         '),\
 ## run saccade trials
 blocktimer.reset()
 for t in sacc_trials:
-    trailstarttime=bocktimer.getTime()
+    trailstarttime=blocktimer.getTime()
     sacc_trial(t['imgfile'],t['horz'])
     recall_trials.addData('startTime',trialstarttime)
     run_iti(.5)

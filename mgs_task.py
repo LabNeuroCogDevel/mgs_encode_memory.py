@@ -2,6 +2,7 @@
 
 from __future__ import division
 import numpy, math, numpy.matlib, random, numpy.random
+from psychopy import core
 
 '''
  shuf_for_ntrials creates a shuffled vector repeated to match the number of trials
@@ -101,19 +102,55 @@ def run_iti(iti):
     logging.flush(); core.wait(iti)
 
 """
+just like core.wait, but instead of waiting a duration
+we wait until a stoptime.
+optional maxwait will throw an error if we are wating too long 
+so we dont get stuck. defaults to 30 seconds
+"""
+def wait_until(stoptime,maxwait=30):
+  if stoptime - core.getTime()  > maxtime:
+    raise ValueError("requiest to wait until stoptime is more than 30 seconds, secify maxwait to avoid this error")
+  # will hog cpu -- no pyglet.media.dispatch_events here
+  while core.getTime() < stoptime:
+    continue
+
+"""
 saccade trial
  globals:
   win, trg_fix, isi_fix
 """
-def sacc_trial(imgfile,horz): 
-    # get ready
-    trg_fix.draw(); win.flip(); core.wait(0.5)
-    # visual guided
-    replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
+def sacc_trial(imgfile,horz,starttime=0): 
+    if(starttime==0): startime=core.getTime();
+    trgon=starttime;
+    imgon=trgon+.5
+    ision=imgon+.5
+    sacon=ision+.5
+
+    # get ready red target
+    trg_fix.draw()
+    wait_until(trgon); win.flip()
+
+    # show an image
+    replace_img(img,imgfile,horz,.05)
+    wait_until(imgon); win.flip()
+    
     # back to fix
-    isi_fix.draw(); win.flip(); core.wait(0.5)
-    # memory guided
-    win.flip(); core.wait(.5)
+    isi_fix.draw()
+    wait_until(ision); win.flip()
+
+    # memory guided                                                 
+    # -- empty screen nothing to draw
+    wait_until(sacon); win.flip()
+
+    # coded with wait instead of wait_until:
+    ## get ready
+    #trg_fix.draw(); win.flip(); core.wait(0.5)
+    ## visual guided
+    #replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
+    ## back to fix
+    #isi_fix.draw(); win.flip(); core.wait(0.5)
+    ## memory guided
+    #win.flip(); core.wait(.5)
 
 """
 record button response  and reaction time
