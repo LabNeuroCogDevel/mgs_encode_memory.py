@@ -65,38 +65,20 @@ recall_trials = data.TrialHandler2(recall_stim,1,extraInfo ={'subjid': subjid, '
 #win = visual.Window(fullscr=True)
 win = visual.Window([800,600])
 
-img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
-
-# could have just one and change the color
-iti_fix = visual.TextStim(win, text='+',name='iti_fixation',color='white')
-isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
-trg_fix = visual.TextStim(win, text='+',name='trg_fixation',color='red')
-
-## for quiz
-KUstr='unknown or known'
-LRstr='left or right'
-text_KU = visual.TextStim(win, text=KUstr,name='KnownUnknown',color='white',pos=(0,-.75))
-text_LR = visual.TextStim(win, text=LRstr,name='LeftRight',color='white',pos=(0,-.75))
-
-dir_key_text   = [ (accept_keys['left'] , 'left         '),\
-                   (accept_keys['right'], '        right'),\
-                   (accept_keys['oops'] , '    oops     ')]
-known_key_text = [ (accept_keys['known']  , 'unknown         '),\
-                   (accept_keys['unknown'], '           known') ]
-
+task = mgsTask(win,accept_keys)
 
 ## run saccade trials
 blocktimer.reset()
 for t in sacc_trials:
-    trailstarttime=blocktimer.getTime()
-    sacc_trial(t['imgfile'],t['horz'])
-    recall_trials.addData('startTime',trialstarttime)
-    run_iti(.5)
+    trialstarttime=blocktimer.getTime()
+    task.sacc_trial(t['imgfile'],t['horz'])
+    sacc_trials.addData('startTime',trialstarttime)
+    task.run_iti(.5)
 
 ## run recall quiz trials
 #blocktimer.reset()
 for t in recall_trials:
-    (keypresses,rts) =recall_trial(t['imgfile'],t['pos'])
+    (keypresses,rts) = task.recall_trial(t['imgfile'])
     grade = [ expect==given for expect,given in zip( t['corkeys'], keypresses ) ]
     # add key and rt
     recall_trials.addData('know_key',keypresses[0])
@@ -104,6 +86,6 @@ for t in recall_trials:
     recall_trials.addData('know_rt',rts[0])
     recall_trials.addData('dir_rt',rts[1])
     # finish with iti
-    run_iti(.5)
+    task.run_iti(.5)
 
 win.close()
