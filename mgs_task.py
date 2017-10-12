@@ -171,7 +171,7 @@ class mgsTask:
       self.accept_keys=accept_keys
 
       self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
-      self.crcl = visual.Circle(win,radius=25,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
+      self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
       self.crcl.units='pix'
 
       self.timer = core.Clock()
