@@ -35,6 +35,9 @@ everything not in pattern is stripped from returned onset dict
 def read_timing(onsetprefix):
   onsetdict = {}
   onsetfiles = glob.glob(onsetprefix + '*1D')
+  if(len(onsetfiles)<=0):
+    print('no files in %s'%onsetprefix)
+    raise Exception('bad files')
   for onset1D in onsetfiles:
     # key name will be file name but 
     # remove the last 3 chars (.1D) and the glob part
@@ -145,6 +148,8 @@ images will be repeated if needed (ntrial>nimags), but postion will be constant 
 def gen_stimlist(allimages,possiblepos,onsetsprefix):
    # read in onset times, curerntly just the start of the trial
    onsets = read_timing(onsetsprefix)
+   print(onsetsprefix)
+   print(onsets)
    ## generate positions and images order
    # match positions to an image
    ntrials = len(onsets['01_cue'])

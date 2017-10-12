@@ -42,7 +42,8 @@ possiblepos=[-1, 1, -.75, .75, -.5, .5] # numpy.linspace(.5,1,3).reshape(-1,1) *
 (sacc_images,novel_images) = image_sets()
 
 ## put together for saccade trials
-sacc_stimList= gen_stimlist(sacc_images,possiblepos,'C:\Users\Hetherington\Desktop\mgs_encode_memory.py\stims\example_00001_')
+# C:\Users\Public\Desktop\Tasks\mgs_encode_memory.py\
+sacc_stimList= gen_stimlist(sacc_images,possiblepos,'stims\example_00001_')
 sacc_trials = data.TrialHandler2(sacc_stimList,1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
 
 if( any(numpy.diff([x['01_cue'] for x in sacc_stimList ]) < 0 ) ):
@@ -78,7 +79,7 @@ task.sacc_instructions()
 
 ## run saccade trials
 #blockstarttime=core.getTime()
-blockstarttime=task.wait_for_scanner(['asciicircum','equal','escape']) # ^, =, or esc
+blockstarttime=task.wait_for_scanner(['asciicircum','equal','escape','6']) # ^, =, or esc
 for t in sacc_trials:
     trialstarttime=blockstarttime + t['01_cue']
     mgson=blockstarttime + t['02_mgs']
@@ -104,19 +105,9 @@ task.run_iti(12)
 
 ## run recall quiz trials
 #blocktimer.reset()
-for t in recall_trials:
-    (keypresses,rts) = task.recall_trial(t['imgfile'])
-    grade = [ expect==given for expect,given in zip( t['corkeys'], keypresses ) ]
-    # add key and rt
-    recall_trials.addData('know_key',keypresses[0])
-    recall_trials.addData('dir_key',keypresses[1])
-    recall_trials.addData('know_rt',rts[0])
-    recall_trials.addData('dir_rt',rts[1])
-    # finish with iti
-    task.run_iti(.5)
 
 # this should work but does not!
-recall_trails.data.to_csv(subjid + '_recall.csv')
+#recall_trails.data.to_csv(subjid + '_recall.csv')
 
 logging.flush()
 # TODO save recall_trials and sacc_trials
