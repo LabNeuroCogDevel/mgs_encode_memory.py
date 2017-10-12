@@ -68,6 +68,9 @@ recall_trials = data.TrialHandler2(recall_stim,1,extraInfo ={'subjid': subjid, '
 #win = visual.Window([400,400],screen=0)
 #win = visual.Window(fullscr=True)
 win = visual.Window([800,600])
+win.winHandle.activate() # make sure the display window has focus
+win.mouseVisible=False # and that we dont see the mouse
+
 task = mgsTask(win,accept_keys)
 
 ## instructions
