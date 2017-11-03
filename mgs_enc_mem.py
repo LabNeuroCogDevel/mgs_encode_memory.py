@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- py-which-shell: "python2"; -*-
 
 # https://github.com/psychopy/psychopy/blob/master/psychopy/demos/coder/experiment%20control/TrialHandler.py
 # on archlinux, python is python3
@@ -29,7 +30,9 @@ seconds=datetime.datetime.strftime(datetime.datetime.now(),"%H%M%S")
 
 
 ## logging
-lastLog = logging.LogFile("info_%s_%s.log"%(subjid,seconds), level=logging.INFO, filemode='w')
+if not os.path.exists('log'): os.path.mkdir('log')
+logfile=os.path.join('log',"info_%s_%s.log"%(subjid,seconds))
+lastLog = logging.LogFile(logfile, level=logging.INFO, filemode='w')
 logging.log(level=logging.INFO, msg='starting at %s'%core.Clock())
 logging.flush() # when its okay to write
 # timing
@@ -43,7 +46,7 @@ possiblepos=[-1, 1, -.75, .75, -.5, .5] # numpy.linspace(.5,1,3).reshape(-1,1) *
 
 ## put together for saccade trials
 # C:\Users\Public\Desktop\Tasks\mgs_encode_memory.py\
-sacc_stimList= gen_stimlist(sacc_images,possiblepos,'stims\example_00001_')
+sacc_stimList= gen_stimlist(sacc_images,possiblepos,os.path.join('stims','example_00001_'))
 sacc_trials = data.TrialHandler2(sacc_stimList,1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
 
 if( any(numpy.diff([x['01_cue'] for x in sacc_stimList ]) < 0 ) ):
@@ -70,8 +73,8 @@ recall_trials = data.TrialHandler2(recall_stim,1,extraInfo ={'subjid': subjid, '
 
 ## screen setup
 #win = visual.Window([400,400],screen=0)
-win = visual.Window(fullscr=True)
-#win = visual.Window([800,600])
+#win = visual.Window(fullscr=True)
+win = visual.Window([800,600])
 win.winHandle.activate() # make sure the display window has focus
 win.mouseVisible=False # and that we dont see the mouse
 
@@ -79,6 +82,10 @@ task = mgsTask(win,accept_keys)
 
 ## instructions
 task.sacc_instructions()
+
+# take screenshots:
+takeshots=None
+#takeshots="20171101"
 
 ## run saccade trials
 #blockstarttime=core.getTime()
@@ -93,11 +100,14 @@ for t in sacc_trials:
     print("%f,%f,%f,%f"%(t['01_cue'],core.getTime(), trialstarttime, trialstarttime-core.getTime()))
     print("delay time: %.2f"%(delaytime))
 
-    task.sacc_trial(t['imgfile'],t['horz'],trialstarttime,mgson)
+    task.sacc_trial(t['imgfile'],t['horz'],trialstarttime,mgson,takeshots=takeshots)
     sacc_trials.addData('startTime',trialstarttime)
     sacc_trials.addData('mgson',mgson)
     sacc_trials.addData('delaylen',delaytime)
     task.run_iti() #.5)
+    if takeshots:
+        take_screenshot(win,takeshots+'_05_iti')
+        break
 
 #sacc_trials.saveAsText(subjid + '_view.txt')
 sacc_trials.data.to_csv(subjid + '_view.csv')
@@ -115,3 +125,4 @@ task.run_iti(12)
 logging.flush()
 # TODO save recall_trials and sacc_trials
 win.close()
+

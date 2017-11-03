@@ -1,9 +1,16 @@
 #!/usr/bin/env python2
+# -*- py-which-shell: "python2"; -*-
 
 from __future__ import division
 import numpy, math, numpy.matlib, random, numpy.random
 from psychopy import visual, core,  event, logging
-import glob,re
+import glob,re,os
+
+# this causes some artifacts!?
+def take_screenshot(win,name):
+  if not os.path.exists('screenshots/'): os.mkdir('screenshots')
+  win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now.
+  win.saveMovieFrames('screenshots/' + name +'.png')
 
 """
 generate example timing
@@ -22,8 +29,25 @@ def make_timing():
     curtime += 1.5 + 1.5 + delay[i] # cue + target + delay
     sonsets.append(curtime)
     curtime += 1.5 + ITI[i] # MGS + ITI
-  with open('stims/example_00001_01_cue.1D','w') as f: f.write(" ".join([ "%.02f"%x for x in tonsets ]))
-  with open('stims/example_00001_02_mgs.1D','w') as f: f.write(" ".join([ "%.02f"%x for x in sonsets ]))
+  # only one type of mgs
+  with open('stims/example_00002_02_mgs.1D','w') as f:
+    f.write(" ".join([ "%.02f"%x for x in sonsets ]))
+
+  # write different types of cue
+  type_names=['A','B','C','none']
+  n_types=len(type_names)
+  n_on = len(tonsets)
+  idx = [x for x in range(0,n_on) ]
+  step = int(n_on/n_types)
+  numpy.random.shuffle(idx)
+  
+  for i,t in enumerate(type_names):
+      si = i*step
+      se = (i+1)*step
+      if i == n_types: se=n_on
+      with open('stims/example_00002_01_cue_cat'+t+'.1D','w') as f:
+        f.write(" ".join([ "%.02f"%x for x in tonsets[si:se] ]))
+
   return( (tonsets,sonsets))
   
 """
@@ -157,11 +181,23 @@ def gen_stimlist(allimages,possiblepos,onsetsprefix):
    positions=shuf_for_ntrials(possiblepos,nimages )
    imgpos = { allimages[i]: positions[i] for i in range(nimages) }
    imgfiles = shuf_for_ntrials( allimages, ntrials)
-   
+
+   # what types of cues do we have
+   cues = [ x.replace('_01_cue_','') for x in onsets.keys() if re.match('_01_cue',x) ]
+   # cueon=[]
+   # for k in cues:
+   #   for x in onsets['_01_cue_'+k]:
+   #      cueon.append( (k,x) )
+   # same as above
+   [(k,x) for k in cues for x in onsets['_01_cue_'+k]]
+   cueon.sort(key=lambda x:  x[1])
+
    stimList = [
       {'imgfile': imgfiles[i],
        'horz': imgpos[imgfiles[i]],
-       '01_cue': onsets['01_cue'][i],
+       #'01_cue': onsets['01_cue'][i], # when it was just one cue type
+       'cuetype': cueon[i][0],
+       '01_cue': cueon[i][1],
        '02_mgs': onsets['02_mgs'][i]
       } for i in range(ntrials) ]
 
@@ -170,11 +206,18 @@ def gen_stimlist(allimages,possiblepos,onsetsprefix):
 class mgsTask:
    # initialize all the compoents we need
    def __init__(self,win,accept_keys={'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }):
+      # settings for eyetracking and parallel port ttl (eeg)
+      self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
+      self.pp_adress = 0x0378 # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
+
+      # images relative to screen size
       self.imgratsize=.15
 
+      # window and keys
       self.win=win
       self.accept_keys=accept_keys
 
+      # allocate screen parts 
       self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
       self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
       self.crcl.units='pix'
@@ -197,8 +240,44 @@ class mgsTask:
       self.known_key_text = [ (self.accept_keys['known']  , 'known           '),\
                               (self.accept_keys['unknown'], '         unknown') ]
 
+   """
+   send a trigger on parallel port (eeg) or ethernet (eyetracker)
+   in MR, we do eyetracking, and want to send a trigger to the tracker
+   in EEG, we dont have eye tracking, but want to annotate screen flips
+   """
+   def send_code(ttlstr):
+      # TODO: TEST SOMEWHERE
+      if(self.usePP):
+        # initialize parallel port
+        if not hasattr(send_code,'port'):
+          from psychopy import parallel
+          send_code.port = parallel.ParallelPort(address=self.ppaddress)
+          send_code.d = {
+            'cue' = 1,
+            'cue_inside' = 2,
+            'cue_outside_natural' = 3,
+            'cue_outside_made' = 4,
+            'mgs' = 10,
+            'mgsLeft' = 12,
+            'mgsRight' = 13
+          }
+            
+        # send code, or 100 if cannot find
+        send_code.port.setData(send_code.d.get(ttlstr,100))
 
-
+      # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
+      if(self.useArrington):
+        # initialze eyetracking
+        if not hasattr(send_code,'vpx'):
+          #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
+          if not os.access(self.vpxDll,os.F_OK):
+            Exception('cannot find eyetracking dll @ '+vpxDll)
+          vpx = CDLL( cdll.LoadLibrary(vpxDll) )
+          if vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
+            Exception('ViewPoint is not running!')
+        vpx.VPX_SendCommand("dataFile_InsertString "+ttlstr)
+        # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
+        
 
    """
    wait for scanner trigger press
@@ -229,11 +308,13 @@ class mgsTask:
     globals:
      win, cue_fix, isi_fix
    """
-   def sacc_trial(self,imgfile,horz,starttime=0,mgson=0): 
+   def sacc_trial(self,imgfile,horz,starttime=0,mgson=0,takeshots=None): 
        if(starttime==0): starttime=core.getTime()
        cueon=starttime;
        imgon=cueon+1.5
        ision=imgon+1.5
+
+       #if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
        if(mgson ==0): mgson=ision+1.5
        mgsoff=mgson+1.5
@@ -241,20 +322,24 @@ class mgsTask:
        # get ready red target
        self.cue_fix.draw()
        wait_until(cueon); self.win.flip()
+       if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
    
        # show an image
        imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
        self.crcl.pos=imgpos
        self.crcl.draw()
        wait_until(imgon); self.win.flip()
+       if takeshots: take_screenshot(self.win,takeshots+'_02_imgon')
        
        # back to fix
        self.isi_fix.draw()
        wait_until(ision); self.win.flip()
+       if takeshots: take_screenshot(self.win,takeshots+'_03_isi')
    
        # memory guided (recall)
        # -- empty screen nothing to draw
        wait_until(mgson); self.win.flip()
+       if takeshots: take_screenshot(self.win,takeshots+'_04_mgs')
        wait_until(mgsoff)
    
        # coded with wait instead of wait_until:
@@ -334,6 +419,7 @@ class mgsTask:
    quick def to flip, stall half a second, and wait for any key
    """
    def instruction_flip(self): self.win.flip();core.wait(.4);event.waitKeys()
+
    """
    saccade task instructions
    """
