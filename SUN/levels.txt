@@ -1,0 +1,628 @@
+category	specific	generic
+/b/bakery/shop	shopping and dining	indoor
+/b/banquet_hall	shopping and dining	indoor
+/b/bar	shopping and dining	indoor
+/b/bazaar/indoor	shopping and dining	indoor
+/b/beauty_salon	shopping and dining	indoor
+/b/bistro/indoor	shopping and dining	indoor
+/b/bookstore	shopping and dining	indoor
+/b/butchers_shop	shopping and dining	indoor
+/c/cafeteria	shopping and dining	indoor
+/c/candy_store	shopping and dining	indoor
+/c/clothing_store	shopping and dining	indoor
+/c/coffee_shop	shopping and dining	indoor
+/d/delicatessen	shopping and dining	indoor
+/d/diner/indoor	shopping and dining	indoor
+/d/discotheque	shopping and dining	indoor
+/d/drugstore	shopping and dining	indoor
+/e/escalator/indoor	shopping and dining	indoor
+/f/fastfood_restaurant	shopping and dining	indoor
+/f/florist_shop/indoor	shopping and dining	indoor
+/f/food_court	shopping and dining	indoor
+/g/general_store/indoor	shopping and dining	indoor
+/g/gift_shop	shopping and dining	indoor
+/i/ice_cream_parlor	shopping and dining	indoor
+/j/jewelry_shop	shopping and dining	indoor
+/m/market/indoor	shopping and dining	indoor
+/m/music_store	shopping and dining	indoor
+/p/pharmacy	shopping and dining	indoor
+/p/pub/indoor	shopping and dining	indoor
+/r/restaurant	shopping and dining	indoor
+/r/restaurant_kitchen	shopping and dining	indoor
+/s/shoe_shop	shopping and dining	indoor
+/s/shopping_mall/indoor	shopping and dining	indoor
+/s/supermarket	shopping and dining	indoor
+/s/sushi_bar	shopping and dining	indoor
+/t/thriftshop	shopping and dining	indoor
+/t/ticket_booth	shopping and dining	indoor
+/t/toyshop	shopping and dining	indoor
+/v/videostore	shopping and dining	indoor
+/w/wine_cellar/barrel_storage	shopping and dining	indoor
+/w/wine_cellar/bottle_storage	shopping and dining	indoor
+/a/anechoic_chamber	workplace (office building, factory, lab, etc.)	indoor
+/a/assembly_line	workplace (office building, factory, lab, etc.)	indoor
+/a/atrium/public	workplace (office building, factory, lab, etc.)	indoor
+/a/auto_factory	workplace (office building, factory, lab, etc.)	indoor
+/b/biology_laboratory	workplace (office building, factory, lab, etc.)	indoor
+/b/booth/indoor	workplace (office building, factory, lab, etc.)	indoor
+/b/brewery/indoor	workplace (office building, factory, lab, etc.)	indoor
+/c/cheese_factory	workplace (office building, factory, lab, etc.)	indoor
+/c/chemistry_lab	workplace (office building, factory, lab, etc.)	indoor
+/c/chicken_coop/indoor	workplace (office building, factory, lab, etc.)	indoor
+/c/clean_room	workplace (office building, factory, lab, etc.)	indoor
+/c/computer_room	workplace (office building, factory, lab, etc.)	indoor
+/c/conference_room	workplace (office building, factory, lab, etc.)	indoor
+/c/control_room	workplace (office building, factory, lab, etc.)	indoor
+/c/corridor	workplace (office building, factory, lab, etc.)	indoor
+/c/cubicle/office	workplace (office building, factory, lab, etc.)	indoor
+/d/dentists_office	workplace (office building, factory, lab, etc.)	indoor
+/e/elevator/door	workplace (office building, factory, lab, etc.)	indoor
+/e/elevator/interior	workplace (office building, factory, lab, etc.)	indoor
+/e/elevator_shaft	workplace (office building, factory, lab, etc.)	indoor
+/e/engine_room	workplace (office building, factory, lab, etc.)	indoor
+/e/escalator/indoor	workplace (office building, factory, lab, etc.)	indoor
+/f/factory/indoor	workplace (office building, factory, lab, etc.)	indoor
+/g/greenhouse/indoor	workplace (office building, factory, lab, etc.)	indoor
+/h/hospital_room	workplace (office building, factory, lab, etc.)	indoor
+/k/kennel/indoor	workplace (office building, factory, lab, etc.)	indoor
+/l/laundromat	workplace (office building, factory, lab, etc.)	indoor
+/l/lobby	workplace (office building, factory, lab, etc.)	indoor
+/o/office	workplace (office building, factory, lab, etc.)	indoor
+/o/operating_room	workplace (office building, factory, lab, etc.)	indoor
+/p/parking_garage/indoor	workplace (office building, factory, lab, etc.)	indoor
+/p/physics_laboratory	workplace (office building, factory, lab, etc.)	indoor
+/r/reception	workplace (office building, factory, lab, etc.)	indoor
+/s/server_room	workplace (office building, factory, lab, etc.)	indoor
+/s/stable	workplace (office building, factory, lab, etc.)	indoor
+/s/staircase	workplace (office building, factory, lab, etc.)	indoor
+/t/ticket_booth	workplace (office building, factory, lab, etc.)	indoor
+/v/veterinarians_office	workplace (office building, factory, lab, etc.)	indoor
+/w/waiting_room	workplace (office building, factory, lab, etc.)	indoor
+/w/warehouse/indoor	workplace (office building, factory, lab, etc.)	indoor
+/a/attic	home or hotel	indoor
+/b/basement	home or hotel	indoor
+/b/bathroom	home or hotel	indoor
+/b/bedroom	home or hotel	indoor
+/b/bow_window/indoor	home or hotel	indoor
+/c/chicken_coop/indoor	home or hotel	indoor
+/c/childs_room	home or hotel	indoor
+/c/closet	home or hotel	indoor
+/d/dinette/home	home or hotel	indoor
+/d/dining_room	home or hotel	indoor
+/d/dorm_room	home or hotel	indoor
+/g/game_room	home or hotel	indoor
+/g/garage/indoor	home or hotel	indoor
+/h/home_office	home or hotel	indoor
+/h/hotel_room	home or hotel	indoor
+/k/kennel/indoor	home or hotel	indoor
+/k/kitchen	home or hotel	indoor
+/k/kitchenette	home or hotel	indoor
+/l/laundromat	home or hotel	indoor
+/l/living_room	home or hotel	indoor
+/n/nursery	home or hotel	indoor
+/p/pantry	home or hotel	indoor
+/p/parlor	home or hotel	indoor
+/p/playroom	home or hotel	indoor
+/p/poolroom/home	home or hotel	indoor
+/r/recreation_room	home or hotel	indoor
+/r/restaurant_kitchen	home or hotel	indoor
+/s/shower	home or hotel	indoor
+/s/stable	home or hotel	indoor
+/s/staircase	home or hotel	indoor
+/u/utility_room	home or hotel	indoor
+/w/wet_bar	home or hotel	indoor
+/w/wine_cellar/barrel_storage	home or hotel	indoor
+/w/wine_cellar/bottle_storage	home or hotel	indoor
+/y/youth_hostel	home or hotel	indoor
+/a/airplane_cabin	transportation (vehicle interiors, stations, etc.)	indoor
+/a/airport_terminal	transportation (vehicle interiors, stations, etc.)	indoor
+/b/baggage_claim	transportation (vehicle interiors, stations, etc.)	indoor
+/b/berth	transportation (vehicle interiors, stations, etc.)	indoor
+/b/bus_interior	transportation (vehicle interiors, stations, etc.)	indoor
+/c/car_interior/backseat	transportation (vehicle interiors, stations, etc.)	indoor
+/c/car_interior/frontseat	transportation (vehicle interiors, stations, etc.)	indoor
+/c/cockpit	transportation (vehicle interiors, stations, etc.)	indoor
+/d/dinette/vehicle	transportation (vehicle interiors, stations, etc.)	indoor
+/d/dining_car	transportation (vehicle interiors, stations, etc.)	indoor
+/e/engine_room	transportation (vehicle interiors, stations, etc.)	indoor
+/e/escalator/indoor	transportation (vehicle interiors, stations, etc.)	indoor
+/g/galley	transportation (vehicle interiors, stations, etc.)	indoor
+/h/hangar/indoor	transportation (vehicle interiors, stations, etc.)	indoor
+/l/limousine_interior	transportation (vehicle interiors, stations, etc.)	indoor
+/p/pilothouse/indoor	transportation (vehicle interiors, stations, etc.)	indoor
+/p/promenade_deck	transportation (vehicle interiors, stations, etc.)	indoor
+/s/subway_interior	transportation (vehicle interiors, stations, etc.)	indoor
+/s/subway_station/platform	transportation (vehicle interiors, stations, etc.)	indoor
+/t/train_station/platform	transportation (vehicle interiors, stations, etc.)	indoor
+/v/van_interior	transportation (vehicle interiors, stations, etc.)	indoor
+/a/amusement_arcade	sports and leisure	indoor
+/b/badminton_court/indoor	sports and leisure	indoor
+/b/ball_pit	sports and leisure	indoor
+/b/ballroom	sports and leisure	indoor
+/b/bowling_alley	sports and leisure	indoor
+/b/boxing_ring	sports and leisure	indoor
+/c/casino/indoor	sports and leisure	indoor
+/d/discotheque	sports and leisure	indoor
+/f/firing_range/indoor	sports and leisure	indoor
+/g/gymnasium/indoor	sports and leisure	indoor
+/i/ice_skating_rink/indoor	sports and leisure	indoor
+/j/jacuzzi/indoor	sports and leisure	indoor
+/l/locker_room	sports and leisure	indoor
+/m/martial_arts_gym	sports and leisure	indoor
+/p/poolroom/establishment	sports and leisure	indoor
+/r/riding_arena	sports and leisure	indoor
+/s/sauna	sports and leisure	indoor
+/s/squash_court	sports and leisure	indoor
+/s/swimming_pool/indoor	sports and leisure	indoor
+/t/tennis_court/indoor	sports and leisure	indoor
+/v/volleyball_court/indoor	sports and leisure	indoor
+/w/wrestling_ring/indoor	sports and leisure	indoor
+/a/apse/indoor	cultural (art, education, religion, etc.)	indoor
+/a/aquarium	cultural (art, education, religion, etc.)	indoor
+/a/archive	cultural (art, education, religion, etc.)	indoor
+/a/art_gallery	cultural (art, education, religion, etc.)	indoor
+/a/art_school	cultural (art, education, religion, etc.)	indoor
+/a/art_studio	cultural (art, education, religion, etc.)	indoor
+/a/auditorium	cultural (art, education, religion, etc.)	indoor
+/b/beauty_salon	cultural (art, education, religion, etc.)	indoor
+/b/booth/indoor	cultural (art, education, religion, etc.)	indoor
+/b/burial_chamber	cultural (art, education, religion, etc.)	indoor
+/c/catacomb	cultural (art, education, religion, etc.)	indoor
+/c/cathedral/indoor	cultural (art, education, religion, etc.)	indoor
+/c/church/indoor	cultural (art, education, religion, etc.)	indoor
+/c/classroom	cultural (art, education, religion, etc.)	indoor
+/c/cloister/indoor	cultural (art, education, religion, etc.)	indoor
+/c/conference_center	cultural (art, education, religion, etc.)	indoor
+/c/courtroom	cultural (art, education, religion, etc.)	indoor
+/j/jail/indoor	cultural (art, education, religion, etc.)	indoor
+/j/jail_cell	cultural (art, education, religion, etc.)	indoor
+/k/kindergarden_classroom	cultural (art, education, religion, etc.)	indoor
+/l/lecture_room	cultural (art, education, religion, etc.)	indoor
+/l/library/indoor	cultural (art, education, religion, etc.)	indoor
+/m/mosque/indoor	cultural (art, education, religion, etc.)	indoor
+/m/movie_theater/indoor	cultural (art, education, religion, etc.)	indoor
+/m/museum/indoor	cultural (art, education, religion, etc.)	indoor
+/m/music_store	cultural (art, education, religion, etc.)	indoor
+/m/music_studio	cultural (art, education, religion, etc.)	indoor
+/p/podium/indoor	cultural (art, education, religion, etc.)	indoor
+/p/pulpit	cultural (art, education, religion, etc.)	indoor
+/s/stage/indoor	cultural (art, education, religion, etc.)	indoor
+/s/synagogue/indoor	cultural (art, education, religion, etc.)	indoor
+/t/television_studio	cultural (art, education, religion, etc.)	indoor
+/t/theater/indoor_procenium	cultural (art, education, religion, etc.)	indoor
+/t/theater/indoor_seats	cultural (art, education, religion, etc.)	indoor
+/t/throne_room	cultural (art, education, religion, etc.)	indoor
+/t/ticket_booth	cultural (art, education, religion, etc.)	indoor
+/p/promenade_deck	transportation (roads, parking, bridges, boats, airports, etc.)	indoor
+/t/ticket_booth	commercial buildings, shops, markets, cities, and towns	indoor
+/b/bayou	water, ice, snow	outdoor, natural
+/b/beach	water, ice, snow	outdoor, natural
+/b/boardwalk	water, ice, snow	outdoor, natural
+/b/boathouse	water, ice, snow	outdoor, natural
+/c/canal/natural	water, ice, snow	outdoor, natural
+/c/coast	water, ice, snow	outdoor, natural
+/c/creek	water, ice, snow	outdoor, natural
+/c/crevasse	water, ice, snow	outdoor, natural
+/d/dam	water, ice, snow	outdoor, natural
+/d/dock	water, ice, snow	outdoor, natural
+/f/fishpond	water, ice, snow	outdoor, natural
+/h/hot_spring	water, ice, snow	outdoor, natural
+/i/ice_floe	water, ice, snow	outdoor, natural
+/i/ice_shelf	water, ice, snow	outdoor, natural
+/i/iceberg	water, ice, snow	outdoor, natural
+/i/igloo	water, ice, snow	outdoor, natural
+/i/islet	water, ice, snow	outdoor, natural
+/l/lake/natural	water, ice, snow	outdoor, natural
+/m/marsh	water, ice, snow	outdoor, natural
+/m/mountain_snowy	water, ice, snow	outdoor, natural
+/o/ocean	water, ice, snow	outdoor, natural
+/p/pond	water, ice, snow	outdoor, natural
+/r/raft	water, ice, snow	outdoor, natural
+/r/river	water, ice, snow	outdoor, natural
+/s/sandbar	water, ice, snow	outdoor, natural
+/s/sea_cliff	water, ice, snow	outdoor, natural
+/s/ski_slope	water, ice, snow	outdoor, natural
+/s/snowfield	water, ice, snow	outdoor, natural
+/s/swamp	water, ice, snow	outdoor, natural
+/u/underwater/coral_reef	water, ice, snow	outdoor, natural
+/w/waterfall/block	water, ice, snow	outdoor, natural
+/w/waterfall/fan	water, ice, snow	outdoor, natural
+/w/waterfall/plunge	water, ice, snow	outdoor, natural
+/w/watering_hole	water, ice, snow	outdoor, natural
+/w/wave	water, ice, snow	outdoor, natural
+/b/badlands	mountains, hills, desert, sky	outdoor, natural
+/b/butte	mountains, hills, desert, sky	outdoor, natural
+/c/canyon	mountains, hills, desert, sky	outdoor, natural
+/c/cavern/indoor	mountains, hills, desert, sky	outdoor, natural
+/c/cliff	mountains, hills, desert, sky	outdoor, natural
+/d/desert/sand	mountains, hills, desert, sky	outdoor, natural
+/d/desert/vegetation	mountains, hills, desert, sky	outdoor, natural
+/h/hill	mountains, hills, desert, sky	outdoor, natural
+/m/mountain	mountains, hills, desert, sky	outdoor, natural
+/m/mountain_snowy	mountains, hills, desert, sky	outdoor, natural
+/r/rock_arch	mountains, hills, desert, sky	outdoor, natural
+/s/sky	mountains, hills, desert, sky	outdoor, natural
+/v/valley	mountains, hills, desert, sky	outdoor, natural
+/v/volcano	mountains, hills, desert, sky	outdoor, natural
+/b/bamboo_forest	forest, field, jungle	outdoor, natural
+/b/barn	forest, field, jungle	outdoor, natural
+/b/bayou	forest, field, jungle	outdoor, natural
+/b/boardwalk	forest, field, jungle	outdoor, natural
+/b/botanical_garden	forest, field, jungle	outdoor, natural
+/c/corn_field	forest, field, jungle	outdoor, natural
+/c/corral	forest, field, jungle	outdoor, natural
+/c/cottage_garden	forest, field, jungle	outdoor, natural
+/f/fairway	forest, field, jungle	outdoor, natural
+/f/field/cultivated	forest, field, jungle	outdoor, natural
+/f/field/wild	forest, field, jungle	outdoor, natural
+/f/forest/broadleaf	forest, field, jungle	outdoor, natural
+/f/forest/needleleaf	forest, field, jungle	outdoor, natural
+/f/forest_path	forest, field, jungle	outdoor, natural
+/f/forest_road	forest, field, jungle	outdoor, natural
+/f/formal_garden	forest, field, jungle	outdoor, natural
+/g/golf_course	forest, field, jungle	outdoor, natural
+/h/hayfield	forest, field, jungle	outdoor, natural
+/h/herb_garden	forest, field, jungle	outdoor, natural
+/m/marsh	forest, field, jungle	outdoor, natural
+/o/orchard	forest, field, jungle	outdoor, natural
+/o/outhouse/outdoor	forest, field, jungle	outdoor, natural
+/p/park	forest, field, jungle	outdoor, natural
+/p/pasture	forest, field, jungle	outdoor, natural
+/p/picnic_area	forest, field, jungle	outdoor, natural
+/p/playground	forest, field, jungle	outdoor, natural
+/p/putting_green	forest, field, jungle	outdoor, natural
+/r/rainforest	forest, field, jungle	outdoor, natural
+/r/rice_paddy	forest, field, jungle	outdoor, natural
+/s/swamp	forest, field, jungle	outdoor, natural
+/t/topiary_garden	forest, field, jungle	outdoor, natural
+/t/tree_farm	forest, field, jungle	outdoor, natural
+/t/tree_house	forest, field, jungle	outdoor, natural
+/v/vegetable_garden	forest, field, jungle	outdoor, natural
+/v/vineyard	forest, field, jungle	outdoor, natural
+/w/wheat_field	forest, field, jungle	outdoor, natural
+/w/wind_farm	forest, field, jungle	outdoor, natural
+/y/yard	forest, field, jungle	outdoor, natural
+/a/aqueduct	man-made elements	outdoor, natural
+/b/barn	man-made elements	outdoor, natural
+/b/bayou	man-made elements	outdoor, natural
+/b/boardwalk	man-made elements	outdoor, natural
+/b/boathouse	man-made elements	outdoor, natural
+/b/botanical_garden	man-made elements	outdoor, natural
+/c/corral	man-made elements	outdoor, natural
+/c/cottage_garden	man-made elements	outdoor, natural
+/d/dam	man-made elements	outdoor, natural
+/d/dock	man-made elements	outdoor, natural
+/f/fairway	man-made elements	outdoor, natural
+/f/field/cultivated	man-made elements	outdoor, natural
+/f/fishpond	man-made elements	outdoor, natural
+/f/forest_road	man-made elements	outdoor, natural
+/f/formal_garden	man-made elements	outdoor, natural
+/g/golf_course	man-made elements	outdoor, natural
+/h/hayfield	man-made elements	outdoor, natural
+/h/herb_garden	man-made elements	outdoor, natural
+/h/highway	man-made elements	outdoor, natural
+/i/igloo	man-made elements	outdoor, natural
+/o/outhouse/outdoor	man-made elements	outdoor, natural
+/p/park	man-made elements	outdoor, natural
+/p/picnic_area	man-made elements	outdoor, natural
+/p/playground	man-made elements	outdoor, natural
+/p/putting_green	man-made elements	outdoor, natural
+/r/raft	man-made elements	outdoor, natural
+/r/rice_paddy	man-made elements	outdoor, natural
+/r/rope_bridge	man-made elements	outdoor, natural
+/r/ruin	man-made elements	outdoor, natural
+/s/ski_slope	man-made elements	outdoor, natural
+/t/tent/outdoor	man-made elements	outdoor, natural
+/t/topiary_garden	man-made elements	outdoor, natural
+/t/tree_house	man-made elements	outdoor, natural
+/t/trench	man-made elements	outdoor, natural
+/v/vegetable_garden	man-made elements	outdoor, natural
+/v/viaduct	man-made elements	outdoor, natural
+/v/vineyard	man-made elements	outdoor, natural
+/w/wind_farm	man-made elements	outdoor, natural
+/y/yard	man-made elements	outdoor, natural
+/b/bayou	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, natural
+/b/boathouse	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, natural
+/d/dock	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, natural
+/f/forest_road	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, natural
+/h/highway	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, natural
+/a/aqueduct	cultural or historical building/place	outdoor, natural
+/r/ruin	cultural or historical building/place	outdoor, natural
+/v/viaduct	cultural or historical building/place	outdoor, natural
+/b/boardwalk	sports fields, parks, leisure spaces	outdoor, natural
+/f/fairway	sports fields, parks, leisure spaces	outdoor, natural
+/f/fishpond	sports fields, parks, leisure spaces	outdoor, natural
+/f/forest_road	sports fields, parks, leisure spaces	outdoor, natural
+/g/golf_course	sports fields, parks, leisure spaces	outdoor, natural
+/i/igloo	sports fields, parks, leisure spaces	outdoor, natural
+/p/park	sports fields, parks, leisure spaces	outdoor, natural
+/p/picnic_area	sports fields, parks, leisure spaces	outdoor, natural
+/p/playground	sports fields, parks, leisure spaces	outdoor, natural
+/p/putting_green	sports fields, parks, leisure spaces	outdoor, natural
+/r/rope_bridge	sports fields, parks, leisure spaces	outdoor, natural
+/s/ski_slope	sports fields, parks, leisure spaces	outdoor, natural
+/t/tent/outdoor	sports fields, parks, leisure spaces	outdoor, natural
+/t/tree_house	sports fields, parks, leisure spaces	outdoor, natural
+/d/dam	industrial and construction	outdoor, natural
+/t/trench	industrial and construction	outdoor, natural
+/w/wind_farm	industrial and construction	outdoor, natural
+/b/barn	houses, cabins, gardens, and farms	outdoor, natural
+/b/botanical_garden	houses, cabins, gardens, and farms	outdoor, natural
+/c/corral	houses, cabins, gardens, and farms	outdoor, natural
+/c/cottage_garden	houses, cabins, gardens, and farms	outdoor, natural
+/f/field/cultivated	houses, cabins, gardens, and farms	outdoor, natural
+/f/formal_garden	houses, cabins, gardens, and farms	outdoor, natural
+/h/hayfield	houses, cabins, gardens, and farms	outdoor, natural
+/h/herb_garden	houses, cabins, gardens, and farms	outdoor, natural
+/o/outhouse/outdoor	houses, cabins, gardens, and farms	outdoor, natural
+/r/rice_paddy	houses, cabins, gardens, and farms	outdoor, natural
+/t/topiary_garden	houses, cabins, gardens, and farms	outdoor, natural
+/t/tree_house	houses, cabins, gardens, and farms	outdoor, natural
+/v/vegetable_garden	houses, cabins, gardens, and farms	outdoor, natural
+/v/vineyard	houses, cabins, gardens, and farms	outdoor, natural
+/y/yard	houses, cabins, gardens, and farms	outdoor, natural
+/t/ticket_booth	shopping and dining	outdoor, man-made
+/t/ticket_booth	workplace (office building, factory, lab, etc.)	outdoor, man-made
+/p/promenade_deck	transportation (vehicle interiors, stations, etc.)	outdoor, man-made
+/t/ticket_booth	cultural (art, education, religion, etc.)	outdoor, man-made
+/b/bayou	water, ice, snow	outdoor, man-made
+/b/boardwalk	water, ice, snow	outdoor, man-made
+/b/boathouse	water, ice, snow	outdoor, man-made
+/d/dam	water, ice, snow	outdoor, man-made
+/d/dock	water, ice, snow	outdoor, man-made
+/f/fishpond	water, ice, snow	outdoor, man-made
+/i/igloo	water, ice, snow	outdoor, man-made
+/s/ski_slope	water, ice, snow	outdoor, man-made
+/b/barn	forest, field, jungle	outdoor, man-made
+/b/bayou	forest, field, jungle	outdoor, man-made
+/b/boardwalk	forest, field, jungle	outdoor, man-made
+/b/botanical_garden	forest, field, jungle	outdoor, man-made
+/c/corral	forest, field, jungle	outdoor, man-made
+/c/cottage_garden	forest, field, jungle	outdoor, man-made
+/f/fairway	forest, field, jungle	outdoor, man-made
+/f/field/cultivated	forest, field, jungle	outdoor, man-made
+/f/forest_road	forest, field, jungle	outdoor, man-made
+/f/formal_garden	forest, field, jungle	outdoor, man-made
+/g/golf_course	forest, field, jungle	outdoor, man-made
+/h/hayfield	forest, field, jungle	outdoor, man-made
+/h/herb_garden	forest, field, jungle	outdoor, man-made
+/o/outhouse/outdoor	forest, field, jungle	outdoor, man-made
+/p/park	forest, field, jungle	outdoor, man-made
+/p/picnic_area	forest, field, jungle	outdoor, man-made
+/p/playground	forest, field, jungle	outdoor, man-made
+/p/putting_green	forest, field, jungle	outdoor, man-made
+/r/rice_paddy	forest, field, jungle	outdoor, man-made
+/t/topiary_garden	forest, field, jungle	outdoor, man-made
+/t/tree_house	forest, field, jungle	outdoor, man-made
+/v/vegetable_garden	forest, field, jungle	outdoor, man-made
+/v/vineyard	forest, field, jungle	outdoor, man-made
+/w/wind_farm	forest, field, jungle	outdoor, man-made
+/y/yard	forest, field, jungle	outdoor, man-made
+/a/aqueduct	man-made elements	outdoor, man-made
+/b/barn	man-made elements	outdoor, man-made
+/b/bayou	man-made elements	outdoor, man-made
+/b/boardwalk	man-made elements	outdoor, man-made
+/b/boathouse	man-made elements	outdoor, man-made
+/b/botanical_garden	man-made elements	outdoor, man-made
+/c/corral	man-made elements	outdoor, man-made
+/c/cottage_garden	man-made elements	outdoor, man-made
+/d/dam	man-made elements	outdoor, man-made
+/d/dock	man-made elements	outdoor, man-made
+/f/fairway	man-made elements	outdoor, man-made
+/f/field/cultivated	man-made elements	outdoor, man-made
+/f/fishpond	man-made elements	outdoor, man-made
+/f/forest_road	man-made elements	outdoor, man-made
+/f/formal_garden	man-made elements	outdoor, man-made
+/g/golf_course	man-made elements	outdoor, man-made
+/h/hayfield	man-made elements	outdoor, man-made
+/h/herb_garden	man-made elements	outdoor, man-made
+/h/highway	man-made elements	outdoor, man-made
+/i/igloo	man-made elements	outdoor, man-made
+/o/outhouse/outdoor	man-made elements	outdoor, man-made
+/p/park	man-made elements	outdoor, man-made
+/p/picnic_area	man-made elements	outdoor, man-made
+/p/playground	man-made elements	outdoor, man-made
+/p/putting_green	man-made elements	outdoor, man-made
+/r/rice_paddy	man-made elements	outdoor, man-made
+/r/rope_bridge	man-made elements	outdoor, man-made
+/r/ruin	man-made elements	outdoor, man-made
+/s/ski_slope	man-made elements	outdoor, man-made
+/t/tent/outdoor	man-made elements	outdoor, man-made
+/t/topiary_garden	man-made elements	outdoor, man-made
+/t/tree_house	man-made elements	outdoor, man-made
+/t/trench	man-made elements	outdoor, man-made
+/v/vegetable_garden	man-made elements	outdoor, man-made
+/v/viaduct	man-made elements	outdoor, man-made
+/v/vineyard	man-made elements	outdoor, man-made
+/w/wind_farm	man-made elements	outdoor, man-made
+/y/yard	man-made elements	outdoor, man-made
+/a/arrival_gate/outdoor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/b/bayou	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/b/boat_deck	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/b/boathouse	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/b/bridge	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/c/canal/urban	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/c/control_tower/outdoor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/c/covered_bridge/exterior	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/c/crosswalk	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/d/dock	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/f/forest_road	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/g/gas_station	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/h/hangar/outdoor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/h/harbor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/h/heliport	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/h/highway	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/l/landing_deck	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/l/lido_deck/outdoor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/l/lift_bridge	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/l/lock_chamber	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/p/parking_garage/outdoor	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/p/parking_lot	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/p/promenade_deck	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/r/railroad_track	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/r/runway	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/t/toll_plaza	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/t/train_railway	transportation (roads, parking, bridges, boats, airports, etc.)	outdoor, man-made
+/a/abbey	cultural or historical building/place	outdoor, man-made
+/a/amphitheater	cultural or historical building/place	outdoor, man-made
+/a/aqueduct	cultural or historical building/place	outdoor, man-made
+/a/arch	cultural or historical building/place	outdoor, man-made
+/b/basilica	cultural or historical building/place	outdoor, man-made
+/b/bazaar/outdoor	cultural or historical building/place	outdoor, man-made
+/c/campus	cultural or historical building/place	outdoor, man-made
+/c/castle	cultural or historical building/place	outdoor, man-made
+/c/cathedral/outdoor	cultural or historical building/place	outdoor, man-made
+/c/cemetery	cultural or historical building/place	outdoor, man-made
+/c/church/outdoor	cultural or historical building/place	outdoor, man-made
+/c/courthouse	cultural or historical building/place	outdoor, man-made
+/c/courtyard	cultural or historical building/place	outdoor, man-made
+/f/fountain	cultural or historical building/place	outdoor, man-made
+/k/kasbah	cultural or historical building/place	outdoor, man-made
+/l/labyrinth/outdoor	cultural or historical building/place	outdoor, man-made
+/l/library/outdoor	cultural or historical building/place	outdoor, man-made
+/l/lighthouse	cultural or historical building/place	outdoor, man-made
+/m/mausoleum	cultural or historical building/place	outdoor, man-made
+/m/medina	cultural or historical building/place	outdoor, man-made
+/m/moat/water	cultural or historical building/place	outdoor, man-made
+/m/monastery/outdoor	cultural or historical building/place	outdoor, man-made
+/m/mosque/outdoor	cultural or historical building/place	outdoor, man-made
+/o/oast_house	cultural or historical building/place	outdoor, man-made
+/o/observatory/outdoor	cultural or historical building/place	outdoor, man-made
+/p/pagoda	cultural or historical building/place	outdoor, man-made
+/p/palace	cultural or historical building/place	outdoor, man-made
+/p/planetarium/outdoor	cultural or historical building/place	outdoor, man-made
+/p/plaza	cultural or historical building/place	outdoor, man-made
+/p/podium/outdoor	cultural or historical building/place	outdoor, man-made
+/r/ruin	cultural or historical building/place	outdoor, man-made
+/s/synagogue/outdoor	cultural or historical building/place	outdoor, man-made
+/t/temple/east_asia	cultural or historical building/place	outdoor, man-made
+/t/temple/south_asia	cultural or historical building/place	outdoor, man-made
+/t/tower	cultural or historical building/place	outdoor, man-made
+/v/viaduct	cultural or historical building/place	outdoor, man-made
+/w/windmill	cultural or historical building/place	outdoor, man-made
+/a/amusement_park	sports fields, parks, leisure spaces	outdoor, man-made
+/a/athletic_field/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/b/baseball_field	sports fields, parks, leisure spaces	outdoor, man-made
+/b/basketball_court/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/b/batters_box	sports fields, parks, leisure spaces	outdoor, man-made
+/b/boardwalk	sports fields, parks, leisure spaces	outdoor, man-made
+/b/bullring	sports fields, parks, leisure spaces	outdoor, man-made
+/c/campsite	sports fields, parks, leisure spaces	outdoor, man-made
+/c/carrousel	sports fields, parks, leisure spaces	outdoor, man-made
+/d/driving_range/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/f/fairway	sports fields, parks, leisure spaces	outdoor, man-made
+/f/fishpond	sports fields, parks, leisure spaces	outdoor, man-made
+/f/forest_road	sports fields, parks, leisure spaces	outdoor, man-made
+/g/gazebo/exterior	sports fields, parks, leisure spaces	outdoor, man-made
+/g/golf_course	sports fields, parks, leisure spaces	outdoor, man-made
+/h/hot_tub/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/i/ice_skating_rink/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/i/igloo	sports fields, parks, leisure spaces	outdoor, man-made
+/l/labyrinth/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/l/lido_deck/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/p/park	sports fields, parks, leisure spaces	outdoor, man-made
+/p/pavilion	sports fields, parks, leisure spaces	outdoor, man-made
+/p/picnic_area	sports fields, parks, leisure spaces	outdoor, man-made
+/p/playground	sports fields, parks, leisure spaces	outdoor, man-made
+/p/podium/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/p/putting_green	sports fields, parks, leisure spaces	outdoor, man-made
+/r/racecourse	sports fields, parks, leisure spaces	outdoor, man-made
+/r/raceway	sports fields, parks, leisure spaces	outdoor, man-made
+/r/rope_bridge	sports fields, parks, leisure spaces	outdoor, man-made
+/s/sandbox	sports fields, parks, leisure spaces	outdoor, man-made
+/s/skatepark	sports fields, parks, leisure spaces	outdoor, man-made
+/s/ski_slope	sports fields, parks, leisure spaces	outdoor, man-made
+/s/stadium/baseball	sports fields, parks, leisure spaces	outdoor, man-made
+/s/stadium/football	sports fields, parks, leisure spaces	outdoor, man-made
+/s/swimming_pool/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/t/tennis_court/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/t/tent/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/t/track/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/t/tree_house	sports fields, parks, leisure spaces	outdoor, man-made
+/v/volleyball_court/outdoor	sports fields, parks, leisure spaces	outdoor, man-made
+/c/construction_site	industrial and construction	outdoor, man-made
+/d/dam	industrial and construction	outdoor, man-made
+/e/electrical_substation	industrial and construction	outdoor, man-made
+/e/excavation	industrial and construction	outdoor, man-made
+/g/garbage_dump	industrial and construction	outdoor, man-made
+/i/industrial_area	industrial and construction	outdoor, man-made
+/l/landfill	industrial and construction	outdoor, man-made
+/n/nuclear_power_plant/outdoor	industrial and construction	outdoor, man-made
+/o/oil_refinery/outdoor	industrial and construction	outdoor, man-made
+/o/oilrig	industrial and construction	outdoor, man-made
+/p/power_plant/outdoor	industrial and construction	outdoor, man-made
+/t/trench	industrial and construction	outdoor, man-made
+/w/water_tower	industrial and construction	outdoor, man-made
+/w/wind_farm	industrial and construction	outdoor, man-made
+/w/windmill	industrial and construction	outdoor, man-made
+/b/balcony/exterior	houses, cabins, gardens, and farms	outdoor, man-made
+/b/balcony/interior	houses, cabins, gardens, and farms	outdoor, man-made
+/b/barn	houses, cabins, gardens, and farms	outdoor, man-made
+/b/barndoor	houses, cabins, gardens, and farms	outdoor, man-made
+/b/botanical_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/b/bow_window/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/c/cabin/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/c/chalet	houses, cabins, gardens, and farms	outdoor, man-made
+/c/chicken_coop/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/c/corral	houses, cabins, gardens, and farms	outdoor, man-made
+/c/cottage_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/c/courtyard	houses, cabins, gardens, and farms	outdoor, man-made
+/d/doorway/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/d/driveway	houses, cabins, gardens, and farms	outdoor, man-made
+/f/field/cultivated	houses, cabins, gardens, and farms	outdoor, man-made
+/f/formal_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/g/greenhouse/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/h/hayfield	houses, cabins, gardens, and farms	outdoor, man-made
+/h/herb_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/h/house	houses, cabins, gardens, and farms	outdoor, man-made
+/h/hunting_lodge/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/k/kennel/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/m/mansion	houses, cabins, gardens, and farms	outdoor, man-made
+/m/manufactured_home	houses, cabins, gardens, and farms	outdoor, man-made
+/o/outhouse/outdoor	houses, cabins, gardens, and farms	outdoor, man-made
+/p/patio	houses, cabins, gardens, and farms	outdoor, man-made
+/r/residential_neighborhood	houses, cabins, gardens, and farms	outdoor, man-made
+/r/rice_paddy	houses, cabins, gardens, and farms	outdoor, man-made
+/s/shed	houses, cabins, gardens, and farms	outdoor, man-made
+/s/ski_lodge	houses, cabins, gardens, and farms	outdoor, man-made
+/s/ski_resort	houses, cabins, gardens, and farms	outdoor, man-made
+/t/topiary_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/t/tree_house	houses, cabins, gardens, and farms	outdoor, man-made
+/v/vegetable_garden	houses, cabins, gardens, and farms	outdoor, man-made
+/v/veranda	houses, cabins, gardens, and farms	outdoor, man-made
+/v/vineyard	houses, cabins, gardens, and farms	outdoor, man-made
+/y/yard	houses, cabins, gardens, and farms	outdoor, man-made
+/a/alley	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/a/apartment_building/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/b/balcony/exterior	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/b/balcony/interior	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/b/bazaar/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/b/building_facade	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/c/courtyard	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/c/crosswalk	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/d/diner/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/d/doorway/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/f/fire_escape	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/f/fire_station	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/g/gas_station	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/g/general_store/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/h/hospital	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/h/hotel/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/i/inn/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/m/market/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/m/medina	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/m/motel	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/o/office_building	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/p/parking_garage/outdoor	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/p/phone_booth	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/p/plaza	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/r/residential_neighborhood	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/r/restaurant_patio	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/s/schoolhouse	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/s/shopfront	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/s/skyscraper	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/s/slum	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/s/street	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/t/ticket_booth	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/v/village	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
+/w/windmill	commercial buildings, shops, markets, cities, and towns	outdoor, man-made
