@@ -245,7 +245,7 @@ class mgsTask:
    in MR, we do eyetracking, and want to send a trigger to the tracker
    in EEG, we dont have eye tracking, but want to annotate screen flips
    """
-   def send_code(ttlstr):
+   def send_code(self,ttlstr):
       # TODO: TEST SOMEWHERE
       if(self.usePP):
         # initialize parallel port
@@ -253,13 +253,19 @@ class mgsTask:
           from psychopy import parallel
           send_code.port = parallel.ParallelPort(address=self.ppaddress)
           send_code.d = {
+            'iti' = 255,
             'cue' = 1,
-            'cue_inside' = 2,
-            'cue_outside_natural' = 3,
-            'cue_outside_made' = 4,
+            'img' = 2,
+            'img_inside' = 3,
+            'img_outside_natural' = 4,
+            'img_outside_made' = 5,
+            'img_outside_none' = 6,
+            'isi' = 200,
             'mgs' = 10,
-            'mgsLeft' = 12,
-            'mgsRight' = 13
+            'mgsLeftFar' = 12,
+            'mgsLeftCenter' = 13,
+            'mgsRightCenter' = 14,
+            'mgsRightFar' = 15
           }
             
         # send code, or 100 if cannot find
@@ -275,8 +281,10 @@ class mgsTask:
           vpx = CDLL( cdll.LoadLibrary(vpxDll) )
           if vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
             Exception('ViewPoint is not running!')
-        vpx.VPX_SendCommand("dataFile_InsertString "+ttlstr)
+        vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
         # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
+      if(self.verbose):
+        print("sent code %s"%ttlstr)
         
 
    """
@@ -299,7 +307,9 @@ class mgsTask:
      iti_fix visual.TextStim
    """
    def run_iti(self,iti=0):
-       self.iti_fix.draw(); self.win.flip(); 
+       self.iti_fix.draw();
+       self.send_code('iti')
+       self.win.flip(); 
        logging.flush();
        if(iti>0): core.wait(iti)
    
@@ -321,24 +331,33 @@ class mgsTask:
    
        # get ready red target
        self.cue_fix.draw()
-       wait_until(cueon); self.win.flip()
+       wait_until(cueon)
+       self.send_code('cue')
+       self.win.flip()
        if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
    
        # show an image
-       imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
+       if not imgfile == None:
+         imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
        self.crcl.pos=imgpos
        self.crcl.draw()
-       wait_until(imgon); self.win.flip()
+       wait_until(imgon);
+       self.send_code('img')
+       self.win.flip()
        if takeshots: take_screenshot(self.win,takeshots+'_02_imgon')
        
        # back to fix
        self.isi_fix.draw()
-       wait_until(ision); self.win.flip()
+       wait_until(ision);
+       self.send_code('isi')
+       self.win.flip()
        if takeshots: take_screenshot(self.win,takeshots+'_03_isi')
    
        # memory guided (recall)
        # -- empty screen nothing to draw
-       wait_until(mgson); self.win.flip()
+       wait_until(mgson);
+       self.send_code('mgs')
+       self.win.flip()
        if takeshots: take_screenshot(self.win,takeshots+'_04_mgs')
        wait_until(mgsoff)
    
