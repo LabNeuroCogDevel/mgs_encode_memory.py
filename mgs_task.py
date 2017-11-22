@@ -5,12 +5,13 @@ from __future__ import division
 import numpy
 import math
 import numpy.matlib
-import random
 import numpy.random
 from psychopy import visual, core,  event, logging
 import glob
 import re
 import os
+import pandas
+import numpy
 
 
 # this causes some artifacts!?
@@ -19,6 +20,7 @@ def take_screenshot(win, name):
         os.mkdir('screenshots')
     win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now
     win.saveMovieFrames('screenshots/' + name + '.png')
+
 
 def make_timing():
     """
@@ -65,71 +67,86 @@ def read_timing(onsetprefix):
     read onsets files given a pattern. will append *1D to pattern
     everything not in pattern is stripped from returned onset dict
        # input looks like
-       with open('stims/example_0001_01_cue.1D','w') as f: f.write(" ".join([ "%.02f"%x for x in numpy.cumsum(.5+numpy.repeat(2,10) ) ]));
+       with open('stims/example_0001_01_cue.1D','w') as f:
+            f.write(" ".join(["%.02f:dur" % x
+                      for x in numpy.cumsum(.5+numpy.repeat(2,10) ) ]));
+       stims/4060499668621037816/
+         dly.1D
+         mgs.1D
+         vgs_Left_Indoor.1D
+         vgs_Left_None.1D
+         vgs_Left_Outdoor.1D
+         vgs_Right_Indoor.1D
+         vgs_Right_None.1D
+         vgs_Right_Outdoor.1D
     """
     onsetdict = {}
     onsetfiles = glob.glob(onsetprefix + '*1D')
     if(len(onsetfiles) <= 0):
-        print('no files in %s' % onsetprefix)
-        raise Exception('bad files')
+        msg = 'no onset files in %s' % onsetprefix
+        raise Exception(msg)
     for onset1D in onsetfiles:
         # key name will be file name but
         # remove the last 3 chars (.1D) and the glob part
         onsettype = onset1D[:-3].replace(onsetprefix, '')
         with open(onset1D) as f:
-            onsetdict[onsettype] = [float(x) for x in f.read().split()]
+            onsetdict[onsettype] = [float(x.split(':')[0])
+                                    for x in f.read().split()]
     return(onsetdict)
 
 
 def image_sets():
-  allimages=glob.glob('img_circle/*png')
-  ## break images into saccade images and novel (for memory quiz)
-  novelfile=re.compile('.*\.01\..*') # any .01. image
-  sacc_images = [ x for x in allimages if not novelfile.match(x) ]
-  novel_images = [ x for x in allimages if novelfile.match(x) ]
-  return( (sacc_images, novel_images) )
+    allimages = glob.glob('img_circle/*png')
+    # # break images into saccade images and novel (for memory quiz)
+    novelfile = re.compile('.*\.01\..*')  # any .01. image
+    sacc_images = [x for x in allimages if not novelfile.match(x)]
+    novel_images = [x for x in allimages if novelfile.match(x)]
+    return((sacc_images, novel_images))
 
-'''
- shuf_for_ntrials creates a shuffled vector repeated to match the number of trials
-'''
+
 def shuf_for_ntrials(vec,ntrials):
-  nitems=len(vec)
-  if nitems == 0 or ntrials == 0: return([])
+    '''
+     shuf_for_ntrials creates a shuffled vector repeated to match the number of trials
+    '''
+    nitems = len(vec)
+    if nitems == 0 or ntrials == 0:
+        return([])
 
-  items_over= ntrials % nitems
-  nfullvec = int(math.floor( ntrials/nitems))
-  # have 3 items want 5 trials
-  # nfullvec=1; items_over=2
+    items_over = ntrials % nitems
+    nfullvec = int(math.floor(ntrials/nitems))
+    # have 3 items want 5 trials
+    # nfullvec=1; items_over=2
 
-  # repeat full vector as many times as we can
-  mat=numpy.matlib.repmat(vec,1, nfullvec).flatten()
-  # then add a truncated shuffled vector as needed
-  if items_over>0:
-    numpy.random.shuffle(vec)
-    mat=numpy.append(mat,vec[:items_over])
+    # repeat full vector as many times as we can
+    mat = numpy.matlib.repmat(vec, 1, nfullvec).flatten()
+    # then add a truncated shuffled vector as needed
+    if items_over > 0:
+        numpy.random.shuffle(vec)
+        mat = numpy.append(mat, vec[:items_over])
 
-  numpy.random.shuffle(mat)
-  return(mat)
+    numpy.random.shuffle(mat)
+    return(mat)
 
-"""
-just like core.wait, but instead of waiting a duration
-we wait until a stoptime.
-optional maxwait will throw an error if we are wating too long 
-so we dont get stuck. defaults to 30 seconds
-"""
-def wait_until(stoptime,maxwait=30):
+
+def wait_until(stoptime, maxwait=30):
+  """
+  just like core.wait, but instead of waiting a duration
+  we wait until a stoptime.
+  optional maxwait will throw an error if we are wating too long 
+  so we dont get stuck. defaults to 30 seconds
+  """
   if stoptime - core.getTime()  > maxwait:
     raise ValueError("requiest to wait until stoptime is more than 30 seconds, secify maxwait to avoid this error")
   # will hog cpu -- no pyglet.media.dispatch_events here
   while core.getTime() < stoptime:
     continue
    
-"""
-evaluate known/unkown and left/right based on position and accept_keys
-position==nan means it was never seen
-neg. position is left, positive position is right
-"""
 def response_should_be(pos,accept_keys):
+    """
+    evaluate known/unkown and left/right based on position and accept_keys
+    position==nan means it was never seen
+    neg. position is left, positive position is right
+    """
     if(math.isnan(pos )): return( (accept_keys['unknown'],accept_keys['oops']) )
     elif( pos < 0): return( (accept_keys['known'],accept_keys['left']) ) 
     elif( pos > 0): return( (accept_keys['known'],accept_keys['left'])  )
@@ -175,322 +192,373 @@ def replace_img(img,filename,horz,imgpercent=.04):
   img.draw()
   return(img.pos)
 
-"""
-create stimlist for saccade trials.
-expects allimages to be unique list (no repeats)
-images will be repeated if needed (ntrial>nimags), but postion will be constant for each image
-"""
-def gen_stimlist(allimages,possiblepos,onsetsprefix):
-   # read in onset times, curerntly just the start of the trial
-   onsets = read_timing(onsetsprefix)
-   print(onsetsprefix)
-   print(onsets)
-   ## generate positions and images order
-   # match positions to an image
-   ntrials = len(onsets['01_cue'])
-   nimages=len(allimages)
-   positions=shuf_for_ntrials(possiblepos,nimages )
-   imgpos = { allimages[i]: positions[i] for i in range(nimages) }
-   imgfiles = shuf_for_ntrials( allimages, ntrials)
 
-   # what types of cues do we have
-   cues = [ x.replace('_01_cue_','') for x in onsets.keys() if re.match('_01_cue',x) ]
-   # cueon=[]
-   # for k in cues:
-   #   for x in onsets['_01_cue_'+k]:
-   #      cueon.append( (k,x) )
-   # same as above
-   [(k,x) for k in cues for x in onsets['_01_cue_'+k]]
-   cueon.sort(key=lambda x:  x[1])
+def parse_onsets(onsetsprefix):
+    onsets = read_timing(onsetsprefix)
+    # make long format data frame
+    d = pandas.DataFrame([[k, t] for k, v in onsets.items() for t in v])
+    d.columns = ['event', 'onset']
 
-   stimList = [
-      {'imgfile': imgfiles[i],
-       'horz': imgpos[imgfiles[i]],
-       #'01_cue': onsets['01_cue'][i], # when it was just one cue type
-       'cuetype': cueon[i][0],
-       '01_cue': cueon[i][1],
-       '02_mgs': onsets['02_mgs'][i]
-      } for i in range(ntrials) ]
+    # set trial numbers
+    d = d.sort_values('onset')
+    d['trial'] = numpy.nan
+    vgsrows = d.event.str.startswith('vgs')
+    tnums = [x + 1 for x in range(len(d[vgsrows]))]
+    d.loc[vgsrows, 'trial'] = tnums
 
-   return(stimList)
+    # merge with info about vgs
+    vgssplit = [[x] + x.split('_')[1:]
+                for x in onsets.keys()
+                if re.match('vgs', x)]
+    # merge vgs array split with timing, name columns,
+    # fill forward (so dly and mgs get side, image type, number)
+    # remove all but first 3 chars of the event name
+    df = pandas.DataFrame(vgssplit).\
+         rename(columns={0: 'event', 1: 'side', 2: 'imgtype'}).\
+         merge(d, how='outer').\
+         sort_values(by='onset').\
+         fillna(method='ffill').\
+         assign(event=lambda x: [s[0:3] for s in x.event])
+    return(df)
+
+
+def gen_stimlist_df(onsetsdf, imagedf):
+    """
+    given onset list (with image type and position)
+    return "stimlist" array of dicts describing each trial
+    """
+    # trial wide format
+    by_trial = onsetsdf.\
+            set_index(['trial', 'event', 'side', 'imgtype']).\
+            unstack('event').\
+            reset_index()
+    # reset columns
+    by_trial.columns = [i[1] if i[0] == 'onset' else i[0]
+                        for i in by_trial.columns]
+
+
+def gen_stimlist(allimages, possiblepos, onsetsprefix):
+    """
+    create stimlist for saccade trials.
+    expects allimages to be unique list (no repeats)
+    images will be repeated if needed (ntrial>nimags), but postion will be constant for each image
+    """
+    # read in onset times, curerntly just the start of the trial
+    # eg. read_timing('stims/3674871612691207147/')
+    # keys: vgs_Left_Outdoor, vgs_Left_None,
+    #       vgs_Left_Indoor, vgs_Right_None,
+    #       vgs_Right_Indoor, vgs_Right_Outdoor,
+    #       mgs, dly
+    onsets = read_timing(onsetsprefix)
+    print(onsetsprefix)
+    print(onsets)
+    # # generate positions and images order
+    # match positions to an image
+    ntrials = len(onsets['dly'])
+    nimages = len(allimages)
+    positions = shuf_for_ntrials(possiblepos, nimages)
+    imgpos = {allimages[i]: positions[i] for i in range(nimages)}
+    imgfiles = shuf_for_ntrials(allimages, ntrials)
+
+    # what types of cues do we have
+    cues = [x.replace('_01_cue_', '')
+            for x in onsets.keys()
+            if re.match('_01_cue', x)]
+    # cueon=[]
+    # for k in cues:
+    #   for x in onsets['_01_cue_'+k]:
+    #      cueon.append( (k,x) )
+    # same as above
+    [(k, x) for k in cues for x in onsets['_01_cue_'+k]]
+    cueon.sort(key=lambda x:  x[1])
+
+    stimList = [
+       {'imgfile': imgfiles[i],
+        'horz': imgpos[imgfiles[i]],
+        # '01_cue': onsets['01_cue'][i], # when it was just one cue type
+        'cuetype': cueon[i][0],
+        '01_cue': cueon[i][1],
+        '02_mgs': onsets['02_mgs'][i]
+        } for i in range(ntrials)]
+
+    return(stimList)
 
 class mgsTask:
-   # initialize all the compoents we need
-   def __init__(self,win,accept_keys={'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }):
-      # settings for eyetracking and parallel port ttl (eeg)
-      self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
-      self.pp_adress = 0x0378 # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
+    # initialize all the compoents we need
+    def __init__(self,win,accept_keys={'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }):
+        # settings for eyetracking and parallel port ttl (eeg)
+        self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
+        self.pp_adress = 0x0378 # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
 
-      # images relative to screen size
-      self.imgratsize=.15
+        # images relative to screen size
+        self.imgratsize=.15
 
-      # window and keys
-      self.win=win
-      self.accept_keys=accept_keys
+        # window and keys
+        self.win=win
+        self.accept_keys=accept_keys
 
-      # allocate screen parts 
-      self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
-      self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
-      self.crcl.units='pix'
+        # allocate screen parts 
+        self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
+        self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
+        self.crcl.units='pix'
 
-      self.timer = core.Clock()
-      
-      # could have just one and change the color
-      self.iti_fix = visual.TextStim(win, text='+',name='iti_fixation',color='white')
-      self.isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
-      self.cue_fix = visual.TextStim(win, text='+',name='cue_fixation',color='red')
-      self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
-      
-      ## for quiz
-      self.text_KU = visual.TextStim(win, text='kown or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
-      self.text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
-      
-      self.dir_key_text   = [ (self.accept_keys['left'] , 'left         '),\
-                              (self.accept_keys['right'], '        right'),\
-                              (self.accept_keys['oops'] , '    oops     ')]
-      self.known_key_text = [ (self.accept_keys['known']  , 'known           '),\
-                              (self.accept_keys['unknown'], '         unknown') ]
+        self.timer = core.Clock()
 
-   """
-   send a trigger on parallel port (eeg) or ethernet (eyetracker)
-   in MR, we do eyetracking, and want to send a trigger to the tracker
-   in EEG, we dont have eye tracking, but want to annotate screen flips
-   """
-   def send_code(self,ttlstr):
-      # TODO: TEST SOMEWHERE
-      if(self.usePP):
-        # initialize parallel port
-        if not hasattr(send_code,'port'):
-          from psychopy import parallel
-          send_code.port = parallel.ParallelPort(address=self.ppaddress)
-          send_code.d = {
-            'iti' = 255,
-            'cue' = 1,
-            'img' = 2,
-            'img_inside' = 3,
-            'img_outside_natural' = 4,
-            'img_outside_made' = 5,
-            'img_outside_none' = 6,
-            'isi' = 200,
-            'mgs' = 10,
-            'mgsLeftFar' = 12,
-            'mgsLeftCenter' = 13,
-            'mgsRightCenter' = 14,
-            'mgsRightFar' = 15
-          }
-            
-        # send code, or 100 if cannot find
-        send_code.port.setData(send_code.d.get(ttlstr,100))
-
-      # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
-      if(self.useArrington):
-        # initialze eyetracking
-        if not hasattr(send_code,'vpx'):
-          #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
-          if not os.access(self.vpxDll,os.F_OK):
-            Exception('cannot find eyetracking dll @ '+vpxDll)
-          vpx = CDLL( cdll.LoadLibrary(vpxDll) )
-          if vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
-            Exception('ViewPoint is not running!')
-        vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
-        # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
-      if(self.verbose):
-        print("sent code %s"%ttlstr)
+        # could have just one and change the color
+        self.iti_fix = visual.TextStim(win, text='+',name='iti_fixation',color='white')
+        self.isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
+        self.cue_fix = visual.TextStim(win, text='+',name='cue_fixation',color='red')
+        self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
         
+        ## for quiz
+        self.text_KU = visual.TextStim(win, text='kown or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
+        self.text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
+        
+        self.dir_key_text   = [ (self.accept_keys['left'] , 'left         '),\
+                                (self.accept_keys['right'], '        right'),\
+                                (self.accept_keys['oops'] , '    oops     ')]
+        self.known_key_text = [ (self.accept_keys['known']  , 'known           '),\
+                               (self.accept_keys['unknown'], '         unknown') ]
 
-   """
-   wait for scanner trigger press
-   return time of keypush
-   """
-   def wait_for_scanner(self,trigger):
-       self.textbox.pos=(-1,0)
-       self.textbox.setText('Waiting for scanner (pulse trigger)'%trigger)
-       self.textbox.draw()
-       self.win.flip()
-       event.waitKeys(keyList=trigger)
-       starttime=core.getTime()
-       self.run_iti()
-       return(starttime)
+    def send_code(self, ttlstr):
+        """
+        send a trigger on parallel port (eeg) or ethernet (eyetracker)
+        in MR, we do eyetracking, and want to send a trigger to the tracker
+        in EEG, we dont have eye tracking, but want to annotate screen flips
+        """
+        # TODO: TEST SOMEWHERE
+        if(self.usePP):
+            # initialize parallel port
+            if not hasattr(send_code, 'port'):
+                from psychopy import parallel
+                send_code.port = parallel.ParallelPort(address=self.ppaddress)
+                send_code.d = {
+                  'iti': 255,
+                  'cue': 1,
+                  'img': 2,
+                  'img_inside': 3,
+                  'img_outside_natural': 4,
+                  'img_outside_made': 5,
+                  'img_outside_none': 6,
+                  'isi': 200,
+                  'mgs': 10,
+                  'mgsLeftFar': 12,
+                  'mgsLeftCenter': 13,
+                  'mgsRightCenter': 14,
+                  'mgsRightFar': 15
+                }
 
-   """
-   simple iti. flush logs 
-   globals:
-     iti_fix visual.TextStim
-   """
-   def run_iti(self,iti=0):
-       self.iti_fix.draw();
-       self.send_code('iti')
-       self.win.flip(); 
-       logging.flush();
-       if(iti>0): core.wait(iti)
-   
-   """
-   saccade trial
+            # send code, or 100 if cannot find
+            send_code.port.setData(send_code.d.get(ttlstr, 100))
+
+        # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
+        if(self.useArrington):
+          # initialze eyetracking
+          if not hasattr(send_code,'vpx'):
+            #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
+            if not os.access(self.vpxDll,os.F_OK):
+              Exception('cannot find eyetracking dll @ '+vpxDll)
+            vpx = CDLL( cdll.LoadLibrary(vpxDll) )
+            if vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
+              Exception('ViewPoint is not running!')
+          vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
+          # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
+        if(self.verbose):
+          print("sent code %s"%ttlstr)
+
+    def wait_for_scanner(self,trigger):
+        """
+        wait for scanner trigger press
+        return time of keypush
+        """
+        self.textbox.pos=(-1,0)
+        self.textbox.setText('Waiting for scanner (pulse trigger)'%trigger)
+        self.textbox.draw()
+        self.win.flip()
+        event.waitKeys(keyList=trigger)
+        starttime=core.getTime()
+        self.run_iti()
+        return(starttime)
+
+    """
+    simple iti. flush logs 
     globals:
-     win, cue_fix, isi_fix
-   """
-   def sacc_trial(self,imgfile,horz,starttime=0,mgson=0,takeshots=None): 
-       if(starttime==0): starttime=core.getTime()
-       cueon=starttime;
-       imgon=cueon+1.5
-       ision=imgon+1.5
-
-       #if takeshots: take_screenshot(self.win,takeshots+'_00_start')
-
-       if(mgson ==0): mgson=ision+1.5
-       mgsoff=mgson+1.5
-   
-       # get ready red target
-       self.cue_fix.draw()
-       wait_until(cueon)
-       self.send_code('cue')
-       self.win.flip()
-       if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
-   
-       # show an image
-       if not imgfile == None:
-         imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
-       self.crcl.pos=imgpos
-       self.crcl.draw()
-       wait_until(imgon);
-       self.send_code('img')
-       self.win.flip()
-       if takeshots: take_screenshot(self.win,takeshots+'_02_imgon')
-       
-       # back to fix
-       self.isi_fix.draw()
-       wait_until(ision);
-       self.send_code('isi')
-       self.win.flip()
-       if takeshots: take_screenshot(self.win,takeshots+'_03_isi')
-   
-       # memory guided (recall)
-       # -- empty screen nothing to draw
-       wait_until(mgson);
-       self.send_code('mgs')
-       self.win.flip()
-       if takeshots: take_screenshot(self.win,takeshots+'_04_mgs')
-       wait_until(mgsoff)
-   
-       # coded with wait instead of wait_until:
-       ## get ready
-       #cue_fix.draw(); win.flip(); core.wait(0.5)
-       ## visual guided
-       #replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
-       ## back to fix
-       #isi_fix.draw(); win.flip(); core.wait(0.5)
-       ## memory guided
-       #win.flip(); core.wait(.5)
-   
-   """
-   record button response  and reaction time
-   display equally long for regardless of RT
-   provide feedback after push
-   globals:
-     win
-   """
-   def key_feedback(self,keys_text_tupple,feedback,timer,maxtime=1.5):
-       validkeys= [ x[0] for x in keys_text_tupple ]
-       origtext=feedback.text
-   
-       # get list of tuple (keypush,rt)
-       t=event.waitKeys(keyList=validkeys,maxWait=maxtime,timeStamped=timer )
-       # we're only going to look at single button pushes (already only accepting 2 or 3 keys)
-       if(t != None and len(t)==1):
-           (keypressed,rt)=t[0]
-           for (k,txt) in keys_text_tupple:
-               if(keypressed == k): # todo, allow multple keys?
-                   feedback.text=txt
-                   break
-   
-           feedback.draw();
-           self.win.flip();
-           feedback.text=origtext
-       # no response or too many responses means no keypress and no rt
-       else:
-           t=[(None,None)]
-       # wait to finish
-       while(timer.getTime() < maxtime ): pass
-       # give key and rt
-       return(t[0])
-   
-       
-   """
-   run a recall trial. 
-   globals:
-    img, text_KU, text_LR, dir_key_text, known_key_text
-   """
-   def recall_trial(self,imgfile): 
-       # draw the image and the text (keep image on across flips)
-       replace_img(self.img,imgfile,0,.25)
-       self.img.setAutoDraw(True)
-       self.text_KU.draw()
-       self.win.flip() 
-       
-       self.timer.reset();
-       # do we know this image?
-       (knowkey,knowrt) = self.key_feedback( self.known_key_text, self.text_KU, self.timer,1.5)
-
-       # end early if we have not seen this before
-       if( knowkey != self.accept_keys['known']):
-         self.img.setAutoDraw(False);
-         return( (knowkey,None), (knowrt,None) )
-   
-       # we think we remember this image, do we remember where it was
-       self.text_LR.draw(); self.win.flip()
-
-       self.timer.reset();
-       (dirkey,dirrt) = self.key_feedback( self.dir_key_text, self.text_LR, self.timer,1.5)
-   
-       self.img.setAutoDraw(False);
-       return( (knowkey,dirkey), (knowrt,dirrt) )
-
-   """
-   quick def to flip, stall half a second, and wait for any key
-   """
-   def instruction_flip(self): self.win.flip();core.wait(.4);event.waitKeys()
-
-   """
-   saccade task instructions
-   """
-   def sacc_instructions(self):
-
-       self.textbox.pos=(-.9,0)
-       self.textbox.text = \
-          '1. When the image appears, look at it. Remember where you looked\n' + \
-          '2. Look at the + in the center when the image goes away\n' + \
-          '3. Look where the image was when the + goes away\n' + \
-          'Hint: The + will be red before an image appears.\n' + \
-          'Hint: The + will be yellow before you have to look where an image was'
-           
-       self.textbox.draw()
-       self.instruction_flip()
-
-       self.textbox.pos=(-.9,.9)
-       self.textbox.text='target: get ready to look at an image'
-       self.textbox.draw()
-       self.cue_fix.draw()
-       self.instruction_flip()
-
-       self.textbox.text='image: look at the dot on top of the image'
-       imgpos=replace_img(self.img,'img_circle/winter.02.png',1,self.imgratsize)
-       self.textbox.draw()
-       self.crcl.pos=imgpos
-       self.crcl.draw()
-       self.instruction_flip()
-
-       self.textbox.text='wait: go back to center'
-       self.textbox.draw()
-       self.isi_fix.draw()
-       self.instruction_flip()
-
-       self.textbox.text='recall: look to where image was'
-       self.textbox.draw()
-       self.instruction_flip()
-
-       self.textbox.text='relax: wait for the red cross to signal a new round'
-       self.textbox.draw()
-       self.iti_fix.draw()
-       self.instruction_flip()
-       self.textbox.pos=(0,0)
+      iti_fix visual.TextStim
+    """
+    def run_iti(self,iti=0):
+        self.iti_fix.draw();
+        self.send_code('iti')
+        self.win.flip(); 
+        logging.flush();
+        if(iti>0): core.wait(iti)
     
+    """
+    saccade trial
+     globals:
+      win, cue_fix, isi_fix
+    """
+    def sacc_trial(self,imgfile,horz,starttime=0,mgson=0,takeshots=None): 
+        if(starttime==0): starttime=core.getTime()
+        cueon=starttime;
+        imgon=cueon+1.5
+        ision=imgon+1.5
+
+        #if takeshots: take_screenshot(self.win,takeshots+'_00_start')
+
+        if(mgson ==0): mgson=ision+1.5
+        mgsoff=mgson+1.5
+    
+        # get ready red target
+        self.cue_fix.draw()
+        wait_until(cueon)
+        self.send_code('cue')
+        self.win.flip()
+        if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
+    
+        # show an image
+        if not imgfile == None:
+          imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
+        self.crcl.pos=imgpos
+        self.crcl.draw()
+        wait_until(imgon);
+        self.send_code('img')
+        self.win.flip()
+        if takeshots: take_screenshot(self.win,takeshots+'_02_imgon')
+        
+        # back to fix
+        self.isi_fix.draw()
+        wait_until(ision);
+        self.send_code('isi')
+        self.win.flip()
+        if takeshots: take_screenshot(self.win,takeshots+'_03_isi')
+    
+        # memory guided (recall)
+        # -- empty screen nothing to draw
+        wait_until(mgson);
+        self.send_code('mgs')
+        self.win.flip()
+        if takeshots: take_screenshot(self.win,takeshots+'_04_mgs')
+        wait_until(mgsoff)
+    
+        # coded with wait instead of wait_until:
+        ## get ready
+        #cue_fix.draw(); win.flip(); core.wait(0.5)
+        ## visual guided
+        #replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
+        ## back to fix
+        #isi_fix.draw(); win.flip(); core.wait(0.5)
+        ## memory guided
+        #win.flip(); core.wait(.5)
+    
+    """
+    record button response  and reaction time
+    display equally long for regardless of RT
+    provide feedback after push
+    globals:
+      win
+    """
+    def key_feedback(self,keys_text_tupple,feedback,timer,maxtime=1.5):
+        validkeys= [ x[0] for x in keys_text_tupple ]
+        origtext=feedback.text
+    
+        # get list of tuple (keypush,rt)
+        t=event.waitKeys(keyList=validkeys,maxWait=maxtime,timeStamped=timer )
+        # we're only going to look at single button pushes (already only accepting 2 or 3 keys)
+        if(t != None and len(t)==1):
+            (keypressed,rt)=t[0]
+            for (k,txt) in keys_text_tupple:
+                if(keypressed == k): # todo, allow multple keys?
+                    feedback.text=txt
+                    break
+    
+            feedback.draw();
+            self.win.flip();
+            feedback.text=origtext
+        # no response or too many responses means no keypress and no rt
+        else:
+            t=[(None,None)]
+        # wait to finish
+        while(timer.getTime() < maxtime ): pass
+        # give key and rt
+        return(t[0])
+    
+        
+    """
+    run a recall trial. 
+    globals:
+     img, text_KU, text_LR, dir_key_text, known_key_text
+    """
+    def recall_trial(self,imgfile): 
+        # draw the image and the text (keep image on across flips)
+        replace_img(self.img,imgfile,0,.25)
+        self.img.setAutoDraw(True)
+        self.text_KU.draw()
+        self.win.flip() 
+        
+        self.timer.reset();
+        # do we know this image?
+        (knowkey,knowrt) = self.key_feedback( self.known_key_text, self.text_KU, self.timer,1.5)
+
+        # end early if we have not seen this before
+        if( knowkey != self.accept_keys['known']):
+          self.img.setAutoDraw(False);
+          return( (knowkey,None), (knowrt,None) )
+    
+        # we think we remember this image, do we remember where it was
+        self.text_LR.draw(); self.win.flip()
+
+        self.timer.reset();
+        (dirkey,dirrt) = self.key_feedback( self.dir_key_text, self.text_LR, self.timer,1.5)
+    
+        self.img.setAutoDraw(False);
+        return( (knowkey,dirkey), (knowrt,dirrt) )
+
+    """
+    quick def to flip, stall half a second, and wait for any key
+    """
+    def instruction_flip(self): self.win.flip();core.wait(.4);event.waitKeys()
+
+    """
+    saccade task instructions
+    """
+    def sacc_instructions(self):
+
+        self.textbox.pos=(-.9,0)
+        self.textbox.text = \
+           '1. When the image appears, look at it. Remember where you looked\n' + \
+           '2. Look at the + in the center when the image goes away\n' + \
+           '3. Look where the image was when the + goes away\n' + \
+           'Hint: The + will be red before an image appears.\n' + \
+           'Hint: The + will be yellow before you have to look where an image was'
+            
+        self.textbox.draw()
+        self.instruction_flip()
+
+        self.textbox.pos=(-.9,.9)
+        self.textbox.text='target: get ready to look at an image'
+        self.textbox.draw()
+        self.cue_fix.draw()
+        self.instruction_flip()
+
+        self.textbox.text='image: look at the dot on top of the image'
+        imgpos=replace_img(self.img,'img_circle/winter.02.png',1,self.imgratsize)
+        self.textbox.draw()
+        self.crcl.pos=imgpos
+        self.crcl.draw()
+        self.instruction_flip()
+
+        self.textbox.text='wait: go back to center'
+        self.textbox.draw()
+        self.isi_fix.draw()
+        self.instruction_flip()
+
+        self.textbox.text='recall: look to where image was'
+        self.textbox.draw()
+        self.instruction_flip()
+
+        self.textbox.text='relax: wait for the red cross to signal a new round'
+        self.textbox.draw()
+        self.iti_fix.draw()
+        self.instruction_flip()
+        self.textbox.pos=(0,0)
+     

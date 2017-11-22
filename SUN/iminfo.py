@@ -32,9 +32,16 @@ def rgb_ratio(imgarr,pallete):
     bins = np.histogram(p, bins=range( len(pallete)+1)  ) [0]
     return(bins/np.sum(bins))
 
+
 def imginfo(imgf,pallete):
    try:
      img = imread(imgf)
+     return(imginfo_(img, pallete))
+   except Exception as e:
+     return(np.append([0,0,0], [0]*len(pallete)) )
+
+def imginfo_(img,pallete):
+   try:
      w,h,d = img.shape
      imgarr = np.reshape(img,(w*h,d))
      bins=rgb_ratio(imgarr,pallete)
@@ -44,35 +51,36 @@ def imginfo(imgf,pallete):
      print(e)
      return(np.append([0,0,0], [0]*len(pallete)) )
 
-l = pd.read_csv('./levels.txt',sep="\t")
-
-#rgbbw = np.array([ [1,0,0],[0,1,0],[0,0,1],[0,0,0],[1,1,1] ])*255
-rgb = np.array([ [1,0,0],[0,1,0],[0,0,1]])*255
-bw = np.array([ [0,0,0],[1,1,1]])*255
-
-#allimglist = glob('SUN397/*/*/*.jpg')
-
-d=[]
-for idx, row in l.iterrows():
- print(row['category'])
- allimglist = glob('SUN397/'+row['category']+'/*.jpg')
- c= row.values
- print('\t%d images'%len(allimglist))
- t0=time.time()
- for imgf in allimglist:
-   # make e.g. /j/jewelry_shop
-   i=imginfo(imgf,rgb)
-   row=np.append(imgf,np.append(c,i))
-   d.append(row)
- dur=(time.time()-t0)
- print("\ttook %f m, %f s/img"%( dur/60, dur/len(allimglist) ) )
-
-df = pd.DataFrame(d)
-df.columns = ['file','cat','specific','generic','w','h','pbright','r','g','b']
-df.to_csv("info.txt",header=True,doublequote="",sep="\t",index=False)
-
-#quant  = np.array([ rgbbw[i] for i in p ],dtype=np.uint8).reshape(w,h,d)
-#plt.imshow(quant)
-#plt.show()
-
-
+if __name__ == "__main__":
+    l = pd.read_csv('./levels.txt',sep="\t")
+    
+    #rgbbw = np.array([ [1,0,0],[0,1,0],[0,0,1],[0,0,0],[1,1,1] ])*255
+    rgb = np.array([ [1,0,0],[0,1,0],[0,0,1]])*255
+    bw = np.array([ [0,0,0],[1,1,1]])*255
+    
+    #allimglist = glob('SUN397/*/*/*.jpg')
+    
+    d=[]
+    for idx, row in l.iterrows():
+     print(row['category'])
+     allimglist = glob('SUN397/'+row['category']+'/*.jpg')
+     c= row.values
+     print('\t%d images'%len(allimglist))
+     t0=time.time()
+     for imgf in allimglist:
+       # make e.g. /j/jewelry_shop
+       i=imginfo(imgf,rgb)
+       row=np.append(imgf,np.append(c,i))
+       d.append(row)
+     dur=(time.time()-t0)
+     print("\ttook %f m, %f s/img"%( dur/60, dur/len(allimglist) ) )
+    
+    df = pd.DataFrame(d)
+    df.columns = ['file','cat','specific','generic','w','h','pbright','r','g','b']
+    df.to_csv("info.txt",header=True,doublequote="",sep="\t",index=False)
+    
+    #quant  = np.array([ rgbbw[i] for i in p ],dtype=np.uint8).reshape(w,h,d)
+    #plt.imshow(quant)
+    #plt.show()
+    
+    
