@@ -2,73 +2,84 @@
 # -*- py-which-shell: "python2"; -*-
 
 from __future__ import division
-import numpy, math, numpy.matlib, random, numpy.random
+import numpy
+import math
+import numpy.matlib
+import random
+import numpy.random
 from psychopy import visual, core,  event, logging
-import glob,re,os
+import glob
+import re
+import os
+
 
 # this causes some artifacts!?
-def take_screenshot(win,name):
-  if not os.path.exists('screenshots/'): os.mkdir('screenshots')
-  win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now.
-  win.saveMovieFrames('screenshots/' + name +'.png')
+def take_screenshot(win, name):
+    if not os.path.exists('screenshots/'): 
+        os.mkdir('screenshots')
+    win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now
+    win.saveMovieFrames('screenshots/' + name + '.png')
 
-"""
-generate example timing
-"""
 def make_timing():
-  tr=1.5
-  ITI=numpy.array([6,5,6,3,6,2,6,3,2,3,5,7,5,3,4,2,5,3,5,8]) *tr
-  delay= [4]*10 + [5] *7 + [6]*3
-  delay=numpy.array(delay)*tr
-  numpy.random.shuffle(delay)
-  curtime=1
-  tonsets=[]
-  sonsets=[]
-  for i in range(len(ITI)):
-    tonsets.append( curtime)
-    curtime += 1.5 + 1.5 + delay[i] # cue + target + delay
-    sonsets.append(curtime)
-    curtime += 1.5 + ITI[i] # MGS + ITI
-  # only one type of mgs
-  with open('stims/example_00002_02_mgs.1D','w') as f:
-    f.write(" ".join([ "%.02f"%x for x in sonsets ]))
+    """
+    generate example timing
+    """
+    tr = 1.5
+    ITI = numpy.array([6,5,6,3,6,2,6,3,2,3,5,7,5,3,4,2,5,3,5,8]) *tr
+    delay = [4]*10 + [5] * 7 + [6]*3
+    delay = numpy.array(delay)*tr
+    numpy.random.shuffle(delay)
+    curtime = 1
+    tonsets = []
+    sonsets = []
+    for i in range(len(ITI)):
+        tonsets.append(curtime)
+        curtime += 1.5 + 1.5 + delay[i]  # cue + target + delay
+        sonsets.append(curtime)
+        curtime += 1.5 + ITI[i]  # MGS + ITI
+        # only one type of mgs
+    with open('stims/example_00002_02_mgs.1D', 'w') as f:
+        f.write(" ".join(["%.02f" % x for x in sonsets]))
 
-  # write different types of cue
-  type_names=['A','B','C','none']
-  n_types=len(type_names)
-  n_on = len(tonsets)
-  idx = [x for x in range(0,n_on) ]
-  step = int(n_on/n_types)
-  numpy.random.shuffle(idx)
-  
-  for i,t in enumerate(type_names):
-      si = i*step
-      se = (i+1)*step
-      if i == n_types: se=n_on
-      with open('stims/example_00002_01_cue_cat'+t+'.1D','w') as f:
-        f.write(" ".join([ "%.02f"%x for x in tonsets[si:se] ]))
+    # write different types of cue
+    type_names = ['A', 'B', 'C', 'none']
+    n_types = len(type_names)
+    n_on = len(tonsets)
+    idx = [x for x in range(0, n_on)]
+    step = int(n_on/n_types)
+    numpy.random.shuffle(idx)
 
-  return( (tonsets,sonsets))
-  
-"""
-read onsets files given a pattern. will append *1D to pattern
-everything not in pattern is stripped from returned onset dict
-   # input looks like
-   with open('stims/example_0001_01_cue.1D','w') as f: f.write(" ".join([ "%.02f"%x for x in numpy.cumsum(.5+numpy.repeat(2,10) ) ]));
-"""
+    for i, t in enumerate(type_names):
+        si = i*step
+        se = (i+1)*step
+        if i == n_types:
+            se = n_on
+        with open('stims/example_00002_01_cue_cat'+t+'.1D', 'w') as f:
+            f.write(" ".join(["%.02f" % x for x in tonsets[si:se]]))
+
+    return((tonsets, sonsets))
+
+
 def read_timing(onsetprefix):
-  onsetdict = {}
-  onsetfiles = glob.glob(onsetprefix + '*1D')
-  if(len(onsetfiles)<=0):
-    print('no files in %s'%onsetprefix)
-    raise Exception('bad files')
-  for onset1D in onsetfiles:
-    # key name will be file name but 
-    # remove the last 3 chars (.1D) and the glob part
-    onsettype=onset1D[:-3].replace(onsetprefix,'')
-    with open(onset1D) as f:
-        onsetdict[onsettype] = [ float(x) for x in f.read().split() ]
-  return(onsetdict)
+    """
+    read onsets files given a pattern. will append *1D to pattern
+    everything not in pattern is stripped from returned onset dict
+       # input looks like
+       with open('stims/example_0001_01_cue.1D','w') as f: f.write(" ".join([ "%.02f"%x for x in numpy.cumsum(.5+numpy.repeat(2,10) ) ]));
+    """
+    onsetdict = {}
+    onsetfiles = glob.glob(onsetprefix + '*1D')
+    if(len(onsetfiles) <= 0):
+        print('no files in %s' % onsetprefix)
+        raise Exception('bad files')
+    for onset1D in onsetfiles:
+        # key name will be file name but
+        # remove the last 3 chars (.1D) and the glob part
+        onsettype = onset1D[:-3].replace(onsetprefix, '')
+        with open(onset1D) as f:
+            onsetdict[onsettype] = [float(x) for x in f.read().split()]
+    return(onsetdict)
+
 
 def image_sets():
   allimages=glob.glob('img_circle/*png')
