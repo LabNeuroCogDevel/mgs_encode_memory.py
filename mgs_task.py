@@ -16,7 +16,7 @@ import numpy
 
 # this causes some artifacts!?
 def take_screenshot(win, name):
-    if not os.path.exists('screenshots/'): 
+    if not os.path.exists('screenshots/'):
         os.mkdir('screenshots')
     win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now
     win.saveMovieFrames('screenshots/' + name + '.png')
@@ -65,7 +65,9 @@ def make_timing():
 def read_timing(onsetprefix):
     """
     read onsets files given a pattern. will append *1D to pattern
-    everything not in pattern is stripped from returned onset dict
+    #everything not in pattern is stripped from returned onset dict
+    only file name is used
+    use with parse_onsets()
        # input looks like
        with open('stims/example_0001_01_cue.1D','w') as f:
             f.write(" ".join(["%.02f:dur" % x
@@ -88,7 +90,8 @@ def read_timing(onsetprefix):
     for onset1D in onsetfiles:
         # key name will be file name but
         # remove the last 3 chars (.1D) and the glob part
-        onsettype = onset1D[:-3].replace(onsetprefix, '')
+        #onsettype = onset1D[:-3].replace(onsetprefix, '')
+        onsettype = os.path.basename(onset1D)[:-3]
         with open(onset1D) as f:
             onsetdict[onsettype] = [float(x.split(':')[0])
                                     for x in f.read().split()]
@@ -160,8 +163,11 @@ def ratio(screen,image,scale): return(float(screen) * scale/float(image))
  replace_img adjust the image and position of a psychopy.visual.ImageStim
 '''
 def replace_img(img,filename,horz,imgpercent=.04):
+
   # set image, get props
-  img.image=filename
+  if filename is not None:
+      img.image=filename
+
   (iw,ih) = img._origSize
   (sw,sh) = img.win.size
 
@@ -188,13 +194,24 @@ def replace_img(img,filename,horz,imgpercent=.04):
   # set
   img.pos=(horzpos,0)
 
-  ## draw
-  img.draw()
+  ## draw if we are not None
+  if filename is not None:
+      img.draw()
+
   return(img.pos)
 
 
 def parse_onsets(onsetsprefix):
+    """
+    read in all files matching a glob
+    return a by trial dataframe
+    """
     onsets = read_timing(onsetsprefix)
+    # first event is 'cue'. sort onsets dict by first onset time. pick first
+    firstevent = sorted([ (k, min(v)) for k,v in onsets.items() ],key=lambda x: x[1] )[0][0] 
+    if len(onsets) < 1:
+        raise Exception("nothing to do! No onsets parsed from %s" % onsetsprefix)
+    
     # make long format data frame
     d = pandas.DataFrame([[k, t] for k, v in onsets.items() for t in v])
     d.columns = ['event', 'onset']
@@ -202,14 +219,18 @@ def parse_onsets(onsetsprefix):
     # set trial numbers
     d = d.sort_values('onset')
     d['trial'] = numpy.nan
-    vgsrows = d.event.str.startswith('vgs')
-    tnums = [x + 1 for x in range(len(d[vgsrows]))]
-    d.loc[vgsrows, 'trial'] = tnums
+    startrows = d.event.str.startswith(firstevent)
+    tnums = [x + 1 for x in range(len(d[startrows]))]
+    d.loc[startrows, 'trial'] = tnums
 
     # merge with info about vgs
     vgssplit = [[x] + x.split('_')[1:]
                 for x in onsets.keys()
                 if re.match('vgs', x)]
+
+    if len(vgssplit) < 2:
+        raise Exception("bad vgs onsets from %s" % onsetsprefix)
+
     # merge vgs array split with timing, name columns,
     # fill forward (so dly and mgs get side, image type, number)
     # remove all but first 3 chars of the event name
@@ -219,24 +240,121 @@ def parse_onsets(onsetsprefix):
          sort_values(by='onset').\
          fillna(method='ffill').\
          assign(event=lambda x: [s[0:3] for s in x.event])
-    return(df)
 
+    # cue comes before vgs so is all messed up
+    # the previous forwardfill fillna didn't do good things.
+    # fix that with back fill
+    df.loc[df.event=='cue',['side','imgtype']]=numpy.NaN
+    df = df.fillna(method='bfill')
 
-def gen_stimlist_df(onsetsdf, imagedf):
-    """
-    given onset list (with image type and position)
-    return "stimlist" array of dicts describing each trial
-    """
     # trial wide format
-    by_trial = onsetsdf.\
+    trialdf = df.\
             set_index(['trial', 'event', 'side', 'imgtype']).\
             unstack('event').\
             reset_index()
+
     # reset columns
-    by_trial.columns = [i[1] if i[0] == 'onset' else i[0]
-                        for i in by_trial.columns]
+    trialdf.columns = [i[1] if i[0] == 'onset' else i[0]
+                        for i in trialdf.columns]
+
+    
+    return(trialdf)
 
 
+def gen_imagedf(path_dict):
+    """
+    find images and label to be merged with task 
+    input is dict {'label: ['path/to/globimgs','path2'],..}
+    - label matches vgs_ file names
+    output is "imgtype","image" dataframe
+    - imgtype names matches parse_onsets 
+    """
+    #path_dict={'Inside': ['SUN/circle_select/inside/*png'],
+    #           'Outside': ['SUN/circle_select/outside_man/*png',
+    #                       'SUN/circle_select/outside_nat/*png',
+    #                      ]
+    #           }
+    # go through each label and the files that match all
+    # patterns provided
+    labeled_image_list = []
+    for label, paths in path_dict.items():
+        for p in paths:
+            for img in glob.glob(p):
+                labeled_image_list.append([label, img])
+
+    df = pandas.DataFrame(labeled_image_list)
+    df.columns = ['imgtype','imgfile']
+    df['used'] = False
+    return(df)
+
+
+def gen(timingglob='stims/260403346897719153/*'):
+    """
+    this is here for example usage. probably not called by anthing
+    """
+    path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
+               'Outdoor': ['SUN/circle_select/outside_man/*png',
+                           'SUN/circle_select/outside_nat/*png',
+                          ]
+               }
+    imagedf = gen_imagedf(path_dict) 
+    trialdf = parse_onsets(timingglob)
+    (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
+
+
+def pick_n_from_group(x,cnts):
+    have_n = len(x)
+    imgtype = x.imgtype.iloc[0]
+    print('looking at %s' % imgtype)
+    want_n = cnts.get(imgtype, 0)
+    print('want %d' % want_n)
+    take_n = min([want_n,have_n])
+    return(x.sample(take_n))
+
+    
+def gen_stimlist_df(imagedf,trialdf):
+    """
+    given a trial df and an image df
+    return "stimlist" array of dicts describing each trial
+    """
+    
+    # dataframe gets a new colum for the image file
+    trialdf['imgfile'] = None
+    # go through each event type
+    eventtypes = pandas.unique(sorted(trialdf.imgtype))
+    for thisevent in eventtypes:
+        searchstr = 'imgtype == "%s"' % thisevent
+        idx = trialdf.query(searchstr).index
+        needn = len(idx)
+        if(needn <= 0):
+            print("WARNING: need 0 trials of %s?! how is that possible?" % thisevent )
+        img_aval = imagedf.query(searchstr + " & used == False")
+        if len(img_aval) < needn:
+            if thisevent == 'None':
+                continue
+            # TODO if len > 0 resample some
+            print("WARNING: %s: not enough images (need %d > have %d)" % (thisevent,needn,len(img_aval)) )
+        else: 
+            trialdf.loc[idx,'imgfile'] = list(img_aval.sample(needn).imgfile)
+
+    # set what we used in imagedf
+    for f in pandas.unique(trialdf.imgfile):
+        fileidx = imagedf.imgfile == f
+        if any(fileidx):
+            imagedf.loc[ fileidx ,'used'] = True
+        else:
+            if f is not None:
+                print("WARNING: %s is not in imagedf! Where did it come from!?" % f)
+
+
+    # set None to empty string
+    #nofileidx = [x is None for x in trialdf.imgfile]
+    #trialdf.loc[nofileidx,'imgfile'] = ''
+    
+    return(imagedf,trialdf)
+
+
+# DO NOT USE
 def gen_stimlist(allimages, possiblepos, onsetsprefix):
     """
     create stimlist for saccade trials.
@@ -288,7 +406,13 @@ class mgsTask:
     def __init__(self,win,accept_keys={'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }):
         # settings for eyetracking and parallel port ttl (eeg)
         self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
+        self.useArrington = False
+
+        # settings for parallel port
         self.pp_adress = 0x0378 # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
+        self.usePP = False
+
+        self.verbose = True
 
         # images relative to screen size
         self.imgratsize=.15
@@ -320,6 +444,16 @@ class mgsTask:
         self.known_key_text = [ (self.accept_keys['known']  , 'known           '),\
                                (self.accept_keys['unknown'], '         unknown') ]
 
+    def init_vpx(self):
+        if not hasattr(self,'vpx'):
+            #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
+            if not os.path.exists(self.vpxDll):
+                Exception('cannot find eyetracking dll @ ' + vpxDll)
+            self.vpx = CDLL( cdll.LoadLibrary(vpxDll) )
+            if self.vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
+                Exception('ViewPoint is not running!')
+
+                
     def send_code(self, ttlstr):
         """
         send a trigger on parallel port (eeg) or ethernet (eyetracker)
@@ -354,14 +488,8 @@ class mgsTask:
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
         if(self.useArrington):
           # initialze eyetracking
-          if not hasattr(send_code,'vpx'):
-            #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
-            if not os.access(self.vpxDll,os.F_OK):
-              Exception('cannot find eyetracking dll @ '+vpxDll)
-            vpx = CDLL( cdll.LoadLibrary(vpxDll) )
-            if vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
-              Exception('ViewPoint is not running!')
-          vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
+          self.init_vpx()
+          self.vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
           # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
         if(self.verbose):
           print("sent code %s"%ttlstr)
@@ -397,16 +525,34 @@ class mgsTask:
      globals:
       win, cue_fix, isi_fix
     """
-    def sacc_trial(self,imgfile,horz,starttime=0,mgson=0,takeshots=None): 
-        if(starttime==0): starttime=core.getTime()
-        cueon=starttime;
-        imgon=cueon+1.5
-        ision=imgon+1.5
+    def sacc_trial(self,t,starttime=0,takeshots=None,tr=2): 
+        if(starttime == 0):
+            starttime=core.getTime()
+        cueon = starttime + t['cue']
+        imgon = starttime + t['vgs']
+        ision = starttime + t['dly']
+        mgson = starttime + t['mgs']
+        mgsoff = mgson + tr
+        imgfile = t['imgfile']
+
+        # set horz postion from side (left,right). center if unknown
+        horz = {'Right':1, 'Left': -1}.get(t['side'],0)
 
         #if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
-        if(mgson ==0): mgson=ision+1.5
-        mgsoff=mgson+1.5
+        #print("")
+        #print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
+        print("%.02f\t%.02f\t%.02f\t%s\t%s\t%.02f\t%.02f" %
+              (t['cue'],
+               core.getTime(),
+               starttime + t['cue'],
+               t['side'],
+               t['imgtype'],
+               t['mgs'] - t['dly'],
+               starttime + t['cue'] - core.getTime()
+              )
+            )
+
     
         # get ready red target
         self.cue_fix.draw()
@@ -415,10 +561,10 @@ class mgsTask:
         self.win.flip()
         if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
     
-        # show an image
-        if not imgfile == None:
-          imgpos=replace_img(self.img,imgfile,horz,self.imgratsize)
-        self.crcl.pos=imgpos
+        # show an image if we have one to show
+        imgpos = replace_img(self.img,imgfile,horz,self.imgratsize)
+
+        self.crcl.pos = imgpos
         self.crcl.draw()
         wait_until(imgon);
         self.send_code('img')
@@ -525,38 +671,47 @@ class mgsTask:
 
         self.textbox.pos=(-.9,0)
         self.textbox.text = \
-           '1. When the image appears, look at it. Remember where you looked\n' + \
-           '2. Look at the + in the center when the image goes away\n' + \
-           '3. Look where the image was when the + goes away\n' + \
-           'Hint: The + will be red before an image appears.\n' + \
-           'Hint: The + will be yellow before you have to look where an image was'
+           'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
+           '1. Prep: Look at the red cross.\n' + \
+           '\t An image is about to appear.\n\n' + \
+           '2. Look: Look at the dot in the image\n' + \
+           '\t until it goes away.\n'+ \
+           '\t Remember where you looked.\n\n'+ \
+           '3. Wait: Look at the centered yellow cross.\n\n' + \
+           '4. Recall: When the yellow cross goes away.\n' + \
+           '\t Look where the image just was.\n\n' + \
+           '5. Relax: Look center at the white cross.' 
+           #'Color Hints: \n' + \
+           #'red = get ready\n' + \
+           #'yellow = remember\n' + \
+           #'white = relax'
             
         self.textbox.draw()
         self.instruction_flip()
 
         self.textbox.pos=(-.9,.9)
-        self.textbox.text='target: get ready to look at an image'
+        self.textbox.text='Prep: get ready to look at an image'
         self.textbox.draw()
         self.cue_fix.draw()
         self.instruction_flip()
 
-        self.textbox.text='image: look at the dot on top of the image'
-        imgpos=replace_img(self.img,'img_circle/winter.02.png',1,self.imgratsize)
+        self.textbox.text='Look: look at the dot on top of the image'
+        imgpos = replace_img(self.img,'img_circle/winter.02.png',1,self.imgratsize)
         self.textbox.draw()
         self.crcl.pos=imgpos
         self.crcl.draw()
         self.instruction_flip()
 
-        self.textbox.text='wait: go back to center'
+        self.textbox.text='Wait: go back to center'
         self.textbox.draw()
         self.isi_fix.draw()
         self.instruction_flip()
 
-        self.textbox.text='recall: look to where image was'
+        self.textbox.text='Recall: look to where image was'
         self.textbox.draw()
         self.instruction_flip()
 
-        self.textbox.text='relax: wait for the red cross to signal a new round'
+        self.textbox.text='Relax: wait for the red cross to signal a new round'
         self.textbox.draw()
         self.iti_fix.draw()
         self.instruction_flip()

@@ -30,7 +30,8 @@ seconds=datetime.datetime.strftime(datetime.datetime.now(),"%H%M%S")
 
 
 ## logging
-if not os.path.exists('log'): os.path.mkdir('log')
+if not os.path.exists('log'):
+    os.mkdir('log')
 logfile=os.path.join('log',"info_%s_%s.log"%(subjid,seconds))
 lastLog = logging.LogFile(logfile, level=logging.INFO, filemode='w')
 logging.log(level=logging.INFO, msg='starting at %s'%core.Clock())
@@ -41,34 +42,41 @@ blocktimer = core.Clock()
 
 ## settings
 # trials using trialHandler and list of dicts
-possiblepos=[-1, 1, -.75, .75, -.5, .5] # numpy.linspace(.5,1,3).reshape(-1,1) * (-1,1)
-(sacc_images,novel_images) = image_sets()
+#possiblepos=[-1, 1, -.75, .75, -.5, .5] # numpy.linspace(.5,1,3).reshape(-1,1) * (-1,1)
+#(sacc_images,novel_images) = image_sets()
 
 ## put together for saccade trials
 # C:\Users\Public\Desktop\Tasks\mgs_encode_memory.py\
-sacc_stimList= gen_stimlist(sacc_images,possiblepos,os.path.join('stims','example_00001_'))
-sacc_trials = data.TrialHandler2(sacc_stimList,1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
+#sacc_stimList= gen_stimlist(sacc_images,possiblepos,os.path.join('stims','example_00001_'))
 
-if( any(numpy.diff([x['01_cue'] for x in sacc_stimList ]) < 0 ) ):
-    raise Exception('target times are not monotonicly increasing! bad timing!')
+# TODO:
+# - read from file if we already generated
+# - write to file if we dont already have
+# - use different timing for each run
+path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
+           'Outdoor': ['SUN/circle_select/outside_man/*png',
+                       'SUN/circle_select/outside_nat/*png',
+                      ]
+          }
+imagedf = gen_imagedf(path_dict) 
+# TODO: repeat for all runs
+for run in [1]:
+    timingglob=os.path.join('stims','8344728414871514311','*')
+    trialdf = parse_onsets(timingglob)
+    (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
 
-## recall quiz setup
-# unique image position: for quiz later
-img_pos = set([ (x['imgfile'],x['horz']) for x in sacc_stimList ])
+# quick check
+#if( any(numpy.diff([x['vgs'] for x in trialdf ]) < 0 ) ):
+if( any(numpy.diff(trialdf.vgs) < 0 ) ):
+    raise Exception('times are not monotonicly increasing! bad timing!')
+# TODO: get df of this run
+print(trialdf.head()) # TODO: remove print
 
-nrecall=len(img_pos)
-nquiz=len(novel_images)
-novel_pos = set([ (x,float("nan")) for x in novel_images ] )
-img_pos_and_novel = list(novel_pos | img_pos) 
-numpy.random.shuffle(img_pos_and_novel)
-
+sacc_trials = data.TrialHandler2(trialdf.T.to_dict().values(),1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
 
 #accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }
 accept_keys = {'known':'2', 'unknown': '3', 'left':'2','right':'3', 'oops':'1' }
 
-
-recall_stim = [ { 'imgfile': img,'pos': pos,'corkeys': response_should_be(pos,accept_keys) } for img,pos in img_pos_and_novel ]
-recall_trials = data.TrialHandler2(recall_stim,1,extraInfo ={'subjid': subjid, 'epoch': seconds})
 
 
 ## screen setup
@@ -91,19 +99,13 @@ takeshots=None
 #blockstarttime=core.getTime()
 blockstarttime=task.wait_for_scanner(['asciicircum','equal','escape','6']) # ^, =, or esc
 for t in sacc_trials:
-    trialstarttime=blockstarttime + t['01_cue']
-    mgson=blockstarttime + t['02_mgs']
-    delaytime=mgson-trialstarttime-1.5*2
-
-    print("")
-    print("block idea,cur time, will launch @, diff(remaning iti)")
-    print("%f,%f,%f,%f"%(t['01_cue'],core.getTime(), trialstarttime, trialstarttime-core.getTime()))
-    print("delay time: %.2f"%(delaytime))
-
-    task.sacc_trial(t['imgfile'],t['horz'],trialstarttime,mgson,takeshots=takeshots)
-    sacc_trials.addData('startTime',trialstarttime)
-    sacc_trials.addData('mgson',mgson)
-    sacc_trials.addData('delaylen',delaytime)
+    task.sacc_trial(t,blockstarttime,takeshots=takeshots)
+    # this is unnecessary
+    sacc_trials.addData('startTime',t['cue'] + blockstarttime)
+    sacc_trials.addData('imgon',t['vgs'] + blockstarttime)
+    sacc_trials.addData('dlyon',t['dly'] + blockstarttime)
+    sacc_trials.addData('mgson',t['mgs'] + blockstarttime)
+    sacc_trials.addData('delaylen', t['mgs'] - t['dly'])
     task.run_iti() #.5)
     if takeshots:
         take_screenshot(win,takeshots+'_05_iti')
