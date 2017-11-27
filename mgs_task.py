@@ -293,17 +293,16 @@ def gen(timingglob='stims/260403346897719153/*'):
     """
     this is here for example usage. probably not called by anthing
     """
-    path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
-               'Outdoor': ['SUN/circle_select/outside_man/*png',
-                           'SUN/circle_select/outside_nat/*png',
-                          ]
-               }
-    imagedf = gen_imagedf(path_dict) 
+    path_dict = {'Indoor':  ['img/inside/*png'],
+                 'Outdoor': ['img/outside_man/*png',
+                             'img/outside_nat/*png',
+                             ]}
+    imagedf = gen_imagedf(path_dict)
     trialdf = parse_onsets(timingglob)
-    (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
+    (imagedf, trialdf) = gen_stimlist_df(imagedf, trialdf)
 
 
-def pick_n_from_group(x,cnts):
+def pick_n_from_group(x, cnts):
     have_n = len(x)
     imgtype = x.imgtype.iloc[0]
     print('looking at %s' % imgtype)
@@ -526,9 +525,9 @@ class mgsTask:
      globals:
       win, cue_fix, isi_fix
     """
-    def sacc_trial(self,t,starttime=0,takeshots=None,tr=2): 
+    def sacc_trial(self, t, starttime=0, takeshots=None, logh=None, tr=2):
         if(starttime == 0):
-            starttime=core.getTime()
+            starttime = core.getTime()
         cueon = starttime + t['cue']
         imgon = starttime + t['vgs']
         ision = starttime + t['dly']
@@ -537,12 +536,12 @@ class mgsTask:
         imgfile = t['imgfile']
 
         # set horz postion from side (left,right). center if unknown
-        horz = {'Right':1, 'Left': -1}.get(t['side'],0)
+        horz = {'Right': 1, 'Left': -1}.get(t['side'], 0)
 
-        #if takeshots: take_screenshot(self.win,takeshots+'_00_start')
+        # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
-        #print("")
-        #print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
+        # print("")
+        # print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
         print("%.02f\t%.02f\t%.02f\t%s\t%s\t%.02f\t%.02f" %
               (t['cue'],
                core.getTime(),
@@ -551,71 +550,82 @@ class mgsTask:
                t['imgtype'],
                t['mgs'] - t['dly'],
                starttime + t['cue'] - core.getTime()
-              )
-            )
+               ))
 
-    
         # get ready red target
         self.cue_fix.draw()
         wait_until(cueon)
         self.send_code('cue')
         self.win.flip()
-        if takeshots: take_screenshot(self.win,takeshots+'_01_cue')
-    
+        if logh is not None:
+            logh.log(level=logging.INFO, msg='cue')
+        if takeshots:
+            take_screenshot(self.win, takeshots+'_01_cue')
+
         # show an image if we have one to show
-        imgpos = replace_img(self.img,imgfile,horz,self.imgratsize)
+        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize)
 
         self.crcl.pos = imgpos
         self.crcl.draw()
-        wait_until(imgon);
+        wait_until(imgon)
         self.send_code('img')
         self.win.flip()
-        if takeshots: take_screenshot(self.win,takeshots+'_02_imgon')
-        
+        if logh is not None:
+            logh.log(level=logging.INFO, msg='img %s %s %s' %
+                     (t['side'], t['imgtype'], t['imgfile']))
+        if takeshots:
+            take_screenshot(self.win, takeshots+'_02_imgon')
+
         # back to fix
         self.isi_fix.draw()
-        wait_until(ision);
+        wait_until(ision)
         self.send_code('isi')
         self.win.flip()
-        if takeshots: take_screenshot(self.win,takeshots+'_03_isi')
-    
+        if logh is not None:
+            logh.log(level=logging.INFO, msg='isi')
+        if takeshots:
+            take_screenshot(self.win, takeshots+'_03_isi')
+
         # memory guided (recall)
         # -- empty screen nothing to draw
-        wait_until(mgson);
+        wait_until(mgson)
         self.send_code('mgs')
         self.win.flip()
-        if takeshots: take_screenshot(self.win,takeshots+'_04_mgs')
+        if logh is not None:
+            logh.log(level=logging.INFO, msg='mgs')
+        if takeshots:
+            take_screenshot(self.win, takeshots+'_04_mgs')
         wait_until(mgsoff)
-    
+
         # coded with wait instead of wait_until:
-        ## get ready
-        #cue_fix.draw(); win.flip(); core.wait(0.5)
-        ## visual guided
-        #replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5) 
-        ## back to fix
-        #isi_fix.draw(); win.flip(); core.wait(0.5)
-        ## memory guided
-        #win.flip(); core.wait(.5)
-    
-    """
-    record button response  and reaction time
-    display equally long for regardless of RT
-    provide feedback after push
-    globals:
-      win
-    """
-    def key_feedback(self,keys_text_tupple,feedback,timer,maxtime=1.5):
-        validkeys= [ x[0] for x in keys_text_tupple ]
-        origtext=feedback.text
-    
+        # # get ready
+        # cue_fix.draw(); win.flip(); core.wait(0.5)
+        # # visual guided
+        # replace_img(img,imgfile,horz,.05); win.flip(); core.wait(.5)
+        # # back to fix
+        # isi_fix.draw(); win.flip(); core.wait(0.5)
+        # # memory guided
+        # win.flip(); core.wait(.5)
+
+    def key_feedback(self, keys_text_tupple, feedback, timer, maxtime=1.5):
+        """
+        record button response  and reaction time
+        display equally long for regardless of RT
+        provide feedback after push
+        globals:
+          win
+        """
+        validkeys = [x[0] for x in keys_text_tupple]
+        origtext = feedback.text
+
         # get list of tuple (keypush,rt)
-        t=event.waitKeys(keyList=validkeys,maxWait=maxtime,timeStamped=timer )
+        t = event.waitKeys(keyList=validkeys, maxWait=maxtime, timeStamped=timer)
         # we're only going to look at single button pushes (already only accepting 2 or 3 keys)
-        if(t != None and len(t)==1):
-            (keypressed,rt)=t[0]
-            for (k,txt) in keys_text_tupple:
-                if(keypressed == k): # todo, allow multple keys?
-                    feedback.text=txt
+        if(t is not None and len(t) == 1):
+            (keypressed, rt) = t[0]
+            for (k, txt) in keys_text_tupple:
+                if(keypressed == k):  # TODO, allow multple keys?
+                    feedback.text = txt
                     break
     
             feedback.draw();
@@ -670,61 +680,62 @@ class mgsTask:
     """
     def sacc_instructions(self):
 
-        self.textbox.pos=(-.9,0)
+        self.textbox.pos = (-.9, 0)
         self.textbox.text = \
            'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
            '1. Prep: Look at the red cross.\n' + \
            '\t An image is about to appear.\n\n' + \
-           '2. Look: Look at the dot in the image\n' + \
-           '\t until it goes away.\n'+ \
-           '\t Remember where you looked.\n\n'+ \
+           '2. Look: Look at the dot inside the image\n' + \
+           '\t until it goes away.\n' + \
+           '\t Remember where you looked.\n\n' + \
            '3. Wait: Look at the centered yellow cross.\n\n' + \
            '4. Recall: When the yellow cross goes away.\n' + \
            '\t Look where the image just was.\n\n' + \
-           '5. Relax: Look center at the white cross.' 
-           #'Color Hints: \n' + \
-           #'red = get ready\n' + \
-           #'yellow = remember\n' + \
-           #'white = relax'
-            
+           '5. Relax: Look center at the white cross.'
+        # 'Color Hints: \n' + \
+        # 'red = get ready\n' + \
+        # 'yellow = remember\n' + \
+        # 'white = relax'
+
         self.textbox.draw()
         self.instruction_flip()
 
-        self.textbox.pos=(-.9,.9)
-        self.textbox.text='Prep: get ready to look at an image'
+        self.textbox.pos = (-.9,.9)
+        self.textbox.text = 'Prep: get ready to look at an image'
         self.textbox.draw()
         self.cue_fix.draw()
         self.instruction_flip()
 
-        self.textbox.text='Look: look at the dot on top of the image'
-        imgpos = replace_img(self.img,'img_circle/winter.02.png',1,self.imgratsize)
+        self.textbox.text = 'Look: look at the dot on top of the image'
+        imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize)
         self.textbox.draw()
-        self.crcl.pos=imgpos
+        self.crcl.pos = imgpos
         self.crcl.draw()
         self.instruction_flip()
 
-        self.textbox.text='Wait: go back to center'
+        self.textbox.text = 'Wait: go back to center'
         self.textbox.draw()
         self.isi_fix.draw()
         self.instruction_flip()
 
-        self.textbox.text='Recall: look to where image was'
+        self.textbox.text = 'Recall: look to where image was'
         self.textbox.draw()
         self.instruction_flip()
 
-        self.textbox.text='Relax: wait for the red cross to signal a new round'
+        self.textbox.text = 'Relax: wait for the red cross to signal a new round'
         self.textbox.draw()
         self.iti_fix.draw()
         self.instruction_flip()
-        self.textbox.pos=(0,0)
-     
-    def run_end(self,run,nruns):
-        self.textbox.pos=(-.2,0)
-        self.textbox.text = 'Finished %d/%d!' % (run,nruns)
+        self.textbox.pos = (0, 0)
+
+    def run_end(self, run, nruns):
+        self.textbox.pos = (-.2, 0)
+        self.textbox.text = 'Finished %d/%d!' % (run, nruns)
         self.textbox.draw()
         self.instruction_flip()
 
-def gen_run_info(nruns,datadir):
+
+def gen_run_info(nruns, datadir):
     """
     load or make and save
     timing for all blocks at once
@@ -732,43 +743,41 @@ def gen_run_info(nruns,datadir):
     - used images saved for recall
     """
     # where do we save this file?
-    runs_info_file = os.path.join(datadir,'runs_info.pkl')
+    runs_info_file = os.path.join(datadir, 'runs_info.pkl')
 
     # if we have it, just return it
     if os.path.exists(runs_info_file):
-        with open(runs_info_file,'r') as f:
+        with open(runs_info_file, 'r') as f:
             return(pickle.load(f))
-        
-
 
     # images
-    path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
-                'Outdoor': ['SUN/circle_select/outside_man/*png',
-                            'SUN/circle_select/outside_nat/*png',
-                           ]
-               }
-    imagedf = gen_imagedf(path_dict) 
+    path_dict = {'Indoor':  ['img/inside/*png'],
+                 'Outdoor': ['img/outside_man/*png',
+                             'img/outside_nat/*png',
+                             ]}
+    imagedf = gen_imagedf(path_dict)
 
     # get enough timing files for all runs
-    timingfolders = shuf_for_ntrials(glob.glob(os.path.join('stims','[0-9]*[0-9]')),nruns)
+    alltimingdirs = glob.glob(os.path.join('stims', '[0-9]*[0-9]'))
+    thistimings = shuf_for_ntrials(alltimingdirs, nruns)
     # allocate array
     run_timing = []
     for runi in range(nruns):
         # find all timing files in this directory
-        timingglob = os.path.join(timingfolders[runi],'*')
+        timingglob = os.path.join(thistimings[runi], '*')
         trialdf = parse_onsets(timingglob)
         # add images to trialdf, update imagedf with which are used
-        (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
+        (imagedf, trialdf) = gen_stimlist_df(imagedf, trialdf)
         # check
-        if( any(numpy.diff(trialdf.vgs) < 0 ) ):
+        if(any(numpy.diff(trialdf.vgs) < 0)):
             raise Exception('times are not monotonically increasing! bad timing!')
         run_timing.append(trialdf)
 
     # save to unified data structure
-    subj_runs_info = {'imagedf': imagedf, 'run_timing': run_timing }
+    subj_runs_info = {'imagedf': imagedf, 'run_timing': run_timing}
 
     # save what we have
-    with open(runs_info_file,'w') as f:
-        pickle.dump(subj_runs_info,f)
+    with open(runs_info_file, 'w') as f:
+        pickle.dump(subj_runs_info, f)
 
     return(subj_runs_info)
