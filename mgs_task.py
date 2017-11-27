@@ -12,6 +12,7 @@ import re
 import os
 import pandas
 import numpy
+import pickle
 
 
 # this causes some artifacts!?
@@ -717,3 +718,57 @@ class mgsTask:
         self.instruction_flip()
         self.textbox.pos=(0,0)
      
+    def run_end(self,run,nruns):
+        self.textbox.pos=(-.2,0)
+        self.textbox.text = 'Finished %d/%d!' % (run,nruns)
+        self.textbox.draw()
+        self.instruction_flip()
+
+def gen_run_info(nruns,datadir):
+    """
+    load or make and save
+    timing for all blocks at once
+    - useful to guaranty unique timing files and images
+    - used images saved for recall
+    """
+    # where do we save this file?
+    runs_info_file = os.path.join(datadir,'runs_info.pkl')
+
+    # if we have it, just return it
+    if os.path.exists(runs_info_file):
+        with open(runs_info_file,'r') as f:
+            return(pickle.load(f))
+        
+
+
+    # images
+    path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
+                'Outdoor': ['SUN/circle_select/outside_man/*png',
+                            'SUN/circle_select/outside_nat/*png',
+                           ]
+               }
+    imagedf = gen_imagedf(path_dict) 
+
+    # get enough timing files for all runs
+    timingfolders = shuf_for_ntrials(glob.glob(os.path.join('stims','[0-9]*[0-9]')),nruns)
+    # allocate array
+    run_timing = []
+    for runi in range(nruns):
+        # find all timing files in this directory
+        timingglob = os.path.join(timingfolders[runi],'*')
+        trialdf = parse_onsets(timingglob)
+        # add images to trialdf, update imagedf with which are used
+        (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
+        # check
+        if( any(numpy.diff(trialdf.vgs) < 0 ) ):
+            raise Exception('times are not monotonically increasing! bad timing!')
+        run_timing.append(trialdf)
+
+    # save to unified data structure
+    subj_runs_info = {'imagedf': imagedf, 'run_timing': run_timing }
+
+    # save what we have
+    with open(runs_info_file,'w') as f:
+        pickle.dump(subj_runs_info,f)
+
+    return(subj_runs_info)

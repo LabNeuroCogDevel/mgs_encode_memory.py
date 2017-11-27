@@ -19,28 +19,32 @@ os.chdir( os.path.dirname(os.path.realpath(__file__) ) )
 ## get subj info
 if (len(sys.argv)>1):
     subjnum=sys.argv[1]
+    start_runnum=1
+    show_instructions=True
 else:
     box = gui.Dlg()
     box.addField("Subject ID:")
-    box.show()
-    subjnum=box.data[0]
+    box.addField("Run number:",1)
+    box.addField("instructions?",True)
+    boxdata = box.show()
+    if box.OK:
+        subjnum=boxdata[0]
+        start_runnum=int(boxdata[1])
+        show_instructions=boxdata[2]
+    else:
+        sys.exit(1)
 
-subjid=subjnum + datetime.datetime.strftime(datetime.datetime.now(),"_%Y%m%d")
+subjid=subjnum #+ datetime.datetime.strftime(datetime.datetime.now(),"_%Y%m%d")
 seconds=datetime.datetime.strftime(datetime.datetime.now(),"%H%M%S")
 
 
-## logging
-if not os.path.exists('log'):
-    os.mkdir('log')
-logfile=os.path.join('log',"info_%s_%s.log"%(subjid,seconds))
-lastLog = logging.LogFile(logfile, level=logging.INFO, filemode='w')
-logging.log(level=logging.INFO, msg='starting at %s'%core.Clock())
-logging.flush() # when its okay to write
-# timing
-blocktimer = core.Clock()
 
 
 ## settings
+run_total_time = 420
+# TODO check against traildf max
+nruns = 4
+
 # trials using trialHandler and list of dicts
 #possiblepos=[-1, 1, -.75, .75, -.5, .5] # numpy.linspace(.5,1,3).reshape(-1,1) * (-1,1)
 #(sacc_images,novel_images) = image_sets()
@@ -49,35 +53,21 @@ blocktimer = core.Clock()
 # C:\Users\Public\Desktop\Tasks\mgs_encode_memory.py\
 #sacc_stimList= gen_stimlist(sacc_images,possiblepos,os.path.join('stims','example_00001_'))
 
-# TODO:
-# - read from file if we already generated
-# - write to file if we dont already have
-# - use different timing for each run
-path_dict={'Indoor': ['SUN/circle_select/inside/*png'],
-           'Outdoor': ['SUN/circle_select/outside_man/*png',
-                       'SUN/circle_select/outside_nat/*png',
-                      ]
-          }
-imagedf = gen_imagedf(path_dict) 
-# TODO: repeat for all runs
-for run in [1]:
-    timingglob=os.path.join('stims','8344728414871514311','*')
-    trialdf = parse_onsets(timingglob)
-    (imagedf, trialdf) = gen_stimlist_df(imagedf,trialdf)
 
-# quick check
-#if( any(numpy.diff([x['vgs'] for x in trialdf ]) < 0 ) ):
-if( any(numpy.diff(trialdf.vgs) < 0 ) ):
-    raise Exception('times are not monotonicly increasing! bad timing!')
-# TODO: get df of this run
-print(trialdf.head()) # TODO: remove print
+# # paths
+savepath = 'subj_info'
+datadir = os.path.join(savepath,subjid)
+logdir = os.path.join(datadir,'log')
+for thisoutdir in [savepath, datadir, logdir]:
+    if not os.path.exists(thisoutdir):
+        os.makedirs(thisoutdir)
 
-sacc_trials = data.TrialHandler2(trialdf.T.to_dict().values(),1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
+# # get all_runs_info
+# all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
+all_runs_info = gen_run_info(nruns,datadir)
 
 #accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }
 accept_keys = {'known':'2', 'unknown': '3', 'left':'2','right':'3', 'oops':'1' }
-
-
 
 ## screen setup
 #win = visual.Window([400,400],screen=0)
@@ -88,43 +78,59 @@ win.mouseVisible=False # and that we dont see the mouse
 
 task = mgsTask(win,accept_keys)
 
+
 ## instructions
-task.sacc_instructions()
+if show_instructions:
+    task.sacc_instructions()
+else:
+    # hack to have somthing in image incase we start with a 'None' null image trial
+    # instructions would do this 
+    replace_img(task.img,'img_circle/winter.02.png',1,task.imgratsize)
+    win.flip()
+    win.flip()
 
 # take screenshots:
 takeshots=None
 #takeshots="20171101"
 
-## run saccade trials
-#blockstarttime=core.getTime()
-blockstarttime=task.wait_for_scanner(['asciicircum','equal','escape','6']) # ^, =, or esc
-for t in sacc_trials:
-    task.sacc_trial(t,blockstarttime,takeshots=takeshots)
-    # this is unnecessary
-    sacc_trials.addData('startTime',t['cue'] + blockstarttime)
-    sacc_trials.addData('imgon',t['vgs'] + blockstarttime)
-    sacc_trials.addData('dlyon',t['dly'] + blockstarttime)
-    sacc_trials.addData('mgson',t['mgs'] + blockstarttime)
-    sacc_trials.addData('delaylen', t['mgs'] - t['dly'])
-    task.run_iti() #.5)
-    if takeshots:
-        take_screenshot(win,takeshots+'_05_iti')
-        break
+for runi in range(start_runnum-1,nruns):
+    run = runi + 1
+    print("### run %d" % run)
+    trialdf = all_runs_info['run_timing'][runi]
+    ## logging
+    logfile=os.path.join('log',"info_%s_%s.log"%(subjid,seconds))
+    lastLog = logging.LogFile(logfile, level=logging.INFO, filemode='w')
+    logging.log(level=logging.INFO, msg='starting at %s'%core.Clock())
+    logging.flush() # when its okay to write
+    
+    # timing
+    blocktimer = core.Clock()
+    sacc_trials = data.TrialHandler2(trialdf.T.to_dict().values(),1,method='sequential',extraInfo ={'subjid': subjid, 'epoch': seconds})
+    
+    ## run saccade trials
+    #blockstarttime=core.getTime()
+    blockstarttime=task.wait_for_scanner(['asciicircum','equal','escape','6']) # ^, =, or esc
+    for t in sacc_trials:
+        task.sacc_trial(t,blockstarttime,takeshots=takeshots)
+        task.run_iti() #.5)
+        if takeshots:
+            take_screenshot(win,takeshots+'_05_iti')
+            break
+    
+    # finish up
+    task.run_iti()
 
-#sacc_trials.saveAsText(subjid + '_view.txt')
-sacc_trials.data.to_csv(subjid + '_view.csv')
+    #sacc_trials.saveAsText(subjid + '_view.txt')
+    savefile_csv = '%s_%d_view.csv' % (subjid,run)
+    savefile_csv_path = os.path.join(datadir,savefile_csv)
+    print('saving %s' % savefile_csv_path )
+    sacc_trials.data.to_csv(savefile_csv_path)
+    
+    thisendtime = run_total_time + blockstarttime
+    print("running to end of time (%.02f, actual %.02f)" % (run_total_time, thisendtime))
+    wait_until(thisendtime)
+    task.run_end(run,nruns)
+    logging.flush()
 
-
-print("running 12 second iti")
-task.run_iti(12)
-
-## run recall quiz trials
-#blocktimer.reset()
-
-# this should work but does not!
-#recall_trails.data.to_csv(subjid + '_recall.csv')
-
-logging.flush()
-# TODO save recall_trials and sacc_trials
 win.close()
 
