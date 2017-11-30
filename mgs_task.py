@@ -284,12 +284,12 @@ def gen_imagedf(path_dict):
                 labeled_image_list.append([label, img])
 
     df = pandas.DataFrame(labeled_image_list)
-    df.columns = ['imgtype','imgfile']
+    df.columns = ['imgtype', 'imgfile']
     df['used'] = False
     return(df)
 
 
-def gen(timingglob='stims/260403346897719153/*'):
+def gen(timingglob='stims/mri/135154167238784597/*'):
     """
     this is here for example usage. probably not called by anthing
     """
@@ -354,77 +354,42 @@ def gen_stimlist_df(imagedf,trialdf):
     return(imagedf,trialdf)
 
 
-# DO NOT USE
-def gen_stimlist(allimages, possiblepos, onsetsprefix):
-    """
-    create stimlist for saccade trials.
-    expects allimages to be unique list (no repeats)
-    images will be repeated if needed (ntrial>nimags), but postion will be constant for each image
-    """
-    # read in onset times, curerntly just the start of the trial
-    # eg. read_timing('stims/3674871612691207147/')
-    # keys: vgs_Left_Outdoor, vgs_Left_None,
-    #       vgs_Left_Indoor, vgs_Right_None,
-    #       vgs_Right_Indoor, vgs_Right_Outdoor,
-    #       mgs, dly
-    onsets = read_timing(onsetsprefix)
-    print(onsetsprefix)
-    print(onsets)
-    # # generate positions and images order
-    # match positions to an image
-    ntrials = len(onsets['dly'])
-    nimages = len(allimages)
-    positions = shuf_for_ntrials(possiblepos, nimages)
-    imgpos = {allimages[i]: positions[i] for i in range(nimages)}
-    imgfiles = shuf_for_ntrials(allimages, ntrials)
-
-    # what types of cues do we have
-    cues = [x.replace('_01_cue_', '')
-            for x in onsets.keys()
-            if re.match('_01_cue', x)]
-    # cueon=[]
-    # for k in cues:
-    #   for x in onsets['_01_cue_'+k]:
-    #      cueon.append( (k,x) )
-    # same as above
-    [(k, x) for k in cues for x in onsets['_01_cue_'+k]]
-    cueon.sort(key=lambda x:  x[1])
-
-    stimList = [
-       {'imgfile': imgfiles[i],
-        'horz': imgpos[imgfiles[i]],
-        # '01_cue': onsets['01_cue'][i], # when it was just one cue type
-        'cuetype': cueon[i][0],
-        '01_cue': cueon[i][1],
-        '02_mgs': onsets['02_mgs'][i]
-        } for i in range(ntrials)]
-
-    return(stimList)
-
 class mgsTask:
     # initialize all the compoents we need
-    def __init__(self,win,accept_keys={'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o' }):
+    def __init__(self,
+                 win,
+                 accept_keys={'known':   'k',
+                              'unknown': 'd',
+                              'left':    'd',
+                              'right':   'k',
+                              'oops':    'o'},
+                 useArrington=False,
+                 usePP=False):
         # settings for eyetracking and parallel port ttl (eeg)
         self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
-        self.useArrington = False
+        self.useArrington = useArrington
+        # # eyetracking
+        if(self.useArrington):
+            self.init_vpx()
 
         # settings for parallel port
-        self.pp_adress = 0x0378 # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
-        self.usePP = False
+        # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
+        self.pp_adress = 0x0378
+        self.usePP = usePP
 
         self.verbose = True
 
         # images relative to screen size
-        self.imgratsize=.15
+        self.imgratsize = .15
 
         # window and keys
-        self.win=win
-        self.accept_keys=accept_keys
+        self.win = win
+        self.accept_keys = accept_keys
 
         # allocate screen parts 
         self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
         self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
-        self.crcl.units='pix'
+        self.crcl.units = 'pix'
 
         self.timer = core.Clock()
 
@@ -433,40 +398,45 @@ class mgsTask:
         self.isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
         self.cue_fix = visual.TextStim(win, text='+',name='cue_fixation',color='red')
         self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
-        
-        ## for quiz
+
+        # # for quiz
         self.text_KU = visual.TextStim(win, text='kown or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
         self.text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
-        
-        self.dir_key_text   = [ (self.accept_keys['left'] , 'left         '),\
-                                (self.accept_keys['right'], '        right'),\
-                                (self.accept_keys['oops'] , '    oops     ')]
-        self.known_key_text = [ (self.accept_keys['known']  , 'known           '),\
-                               (self.accept_keys['unknown'], '         unknown') ]
+
+        self.dir_key_text   = [(self.accept_keys['left'],   'left         '),
+                                (self.accept_keys['right'],  '        right'),
+                                (self.accept_keys['oops'],   '    oops     ')]
+        self.known_key_text = [(self.accept_keys['known'],   'known           '),
+                               (self.accept_keys['unknown'], '         unknown')]
+
+    def eyetracking_newfile(self, fname):
+        # start a new file and pause it
+        if(self.useArrington):
+            self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
+            self.vpx.VPX_SendCommand('dataFile_Pause 1')
+
+    def eyetracking_start(self):
+        if(self.useArrington):
+            self.vpx.VPX_SendCommand('dataFile_Pause 0')
 
     def init_vpx(self):
-        if not hasattr(self,'vpx'):
-            #vpxDll="C:/ARI/VP/VPX_InterApp.dll"
+        if not hasattr(self, 'vpx'):
+            from ctypes import CDLL, cdll
+            # vpxDll="C:/ARI/VP/VPX_InterApp.dll"
             if not os.path.exists(self.vpxDll):
-                Exception('cannot find eyetracking dll @ ' + vpxDll)
-            self.vpx = CDLL( cdll.LoadLibrary(vpxDll) )
-            if self.vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1:
+                Exception('cannot find eyetracking dll @ ' + self.vpxDll)
+            self.vpx = CDLL(cdll.LoadLibrary(self.vpxDll))
+            if self.vpx.VPX_GetStatus(1) < 1:
                 Exception('ViewPoint is not running!')
 
-                
-    def send_code(self, ttlstr):
-        """
-        send a trigger on parallel port (eeg) or ethernet (eyetracker)
-        in MR, we do eyetracking, and want to send a trigger to the tracker
-        in EEG, we dont have eye tracking, but want to annotate screen flips
-        """
+    def init_PP(self):
         # TODO: TEST SOMEWHERE
         if(self.usePP):
             # initialize parallel port
-            if not hasattr(send_code, 'port'):
+            if not hasattr(self, 'port'):
                 from psychopy import parallel
-                send_code.port = parallel.ParallelPort(address=self.ppaddress)
-                send_code.d = {
+                self.port = parallel.ParallelPort(address=self.ppaddress)
+                self.ppcodes = {
                   'iti': 255,
                   'cue': 1,
                   'img': 2,
@@ -476,56 +446,64 @@ class mgsTask:
                   'img_outside_none': 6,
                   'isi': 200,
                   'mgs': 10,
-                  'mgsLeftFar': 12,
-                  'mgsLeftCenter': 13,
-                  'mgsRightCenter': 14,
-                  'mgsRightFar': 15
+                  'mgsLeft': 12,
+                  'mgsNearLeft': 13,
+                  'mgsNearRight': 14,
+                  'mgsRight': 15
                 }
 
-            # send code, or 100 if cannot find
-            send_code.port.setData(send_code.d.get(ttlstr, 100))
-
+    def send_code(self, ttlstr):
+        """
+        send a trigger on parallel port (eeg) or ethernet (eyetracker)
+        in MR, we do eyetracking, and want to send a trigger to the tracker
+        in EEG, we dont have eye tracking, but want to annotate screen flips
+        """
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
-        if(self.useArrington):
-          # initialze eyetracking
-          self.init_vpx()
-          self.vpx.VPX_SendCommand('dataFile_InsertString "%s"'%ttlstr)
-          # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf 
-        if(self.verbose):
-          print("sent code %s"%ttlstr)
+        if self.useArrington:
+            # initialze eyetracking
+            self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
+            # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
+        if self.usePP:
+            # send code, or 100 if cannot find
+            self.port.setData(self.ppcodes.get(ttlstr, 100))
 
-    def wait_for_scanner(self,trigger):
+        if self.verbose:
+            print("sent code %s" % ttlstr)
+
+    def wait_for_scanner(self, trigger):
         """
         wait for scanner trigger press
         return time of keypush
         """
-        self.textbox.pos=(-1,0)
-        self.textbox.setText('Waiting for scanner (pulse trigger)'%trigger)
+        self.textbox.pos = (-1, 0)
+        self.textbox.setText('Waiting for scanner (pulse trigger)' % trigger)
         self.textbox.draw()
         self.win.flip()
         event.waitKeys(keyList=trigger)
-        starttime=core.getTime()
+        starttime = core.getTime()
+        self.eyetracking_start()
         self.run_iti()
         return(starttime)
 
-    """
-    simple iti. flush logs 
-    globals:
-      iti_fix visual.TextStim
-    """
-    def run_iti(self,iti=0):
-        self.iti_fix.draw();
+    def run_iti(self, iti=0):
+        """
+        simple iti. flush logs
+        globals:
+          iti_fix visual.TextStim
+        """
+        self.iti_fix.draw()
         self.send_code('iti')
-        self.win.flip(); 
-        logging.flush();
-        if(iti>0): core.wait(iti)
-    
-    """
-    saccade trial
-     globals:
-      win, cue_fix, isi_fix
-    """
+        self.win.flip()
+        logging.flush()
+        if(iti > 0):
+            core.wait(iti)
+
     def sacc_trial(self, t, starttime=0, takeshots=None, logh=None, tr=2):
+        """
+        saccade trial
+         globals:
+          win, cue_fix, isi_fix
+        """
         if(starttime == 0):
             starttime = core.getTime()
         cueon = starttime + t['cue']
@@ -536,7 +514,8 @@ class mgsTask:
         imgfile = t['imgfile']
 
         # set horz postion from side (left,right). center if unknown
-        horz = {'Right': 1, 'Left': -1}.get(t['side'], 0)
+        horz = {'Right': 1, 'Left': -1, 'NearLeft': -.5, 'NearRight': .5}.\
+            get(t['side'], 0)
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
@@ -558,7 +537,7 @@ class mgsTask:
         self.send_code('cue')
         self.win.flip()
         if logh is not None:
-            logh.log(level=logging.INFO, msg='cue')
+            logh.log(level=logging.INFO, msg='flipped cue')
         if takeshots:
             take_screenshot(self.win, takeshots+'_01_cue')
 
@@ -571,7 +550,7 @@ class mgsTask:
         self.send_code('img')
         self.win.flip()
         if logh is not None:
-            logh.log(level=logging.INFO, msg='img %s %s %s' %
+            logh.log(level=logging.INFO, msg='flipped img %s %s %s' %
                      (t['side'], t['imgtype'], t['imgfile']))
         if takeshots:
             take_screenshot(self.win, takeshots+'_02_imgon')
@@ -582,7 +561,7 @@ class mgsTask:
         self.send_code('isi')
         self.win.flip()
         if logh is not None:
-            logh.log(level=logging.INFO, msg='isi')
+            logh.log(level=logging.INFO, msg='flipped isi')
         if takeshots:
             take_screenshot(self.win, takeshots+'_03_isi')
 
@@ -592,7 +571,7 @@ class mgsTask:
         self.send_code('mgs')
         self.win.flip()
         if logh is not None:
-            logh.log(level=logging.INFO, msg='mgs')
+            logh.log(level=logging.INFO, msg='flipped mgs')
         if takeshots:
             take_screenshot(self.win, takeshots+'_04_mgs')
         wait_until(mgsoff)
@@ -758,7 +737,7 @@ def gen_run_info(nruns, datadir):
     imagedf = gen_imagedf(path_dict)
 
     # get enough timing files for all runs
-    alltimingdirs = glob.glob(os.path.join('stims', '[0-9]*[0-9]'))
+    alltimingdirs = glob.glob(os.path.join('stims', 'mri', '[0-9]*[0-9]'))
     thistimings = shuf_for_ntrials(alltimingdirs, nruns)
     # allocate array
     run_timing = []
