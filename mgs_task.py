@@ -350,8 +350,17 @@ def gen_stimlist_df(imagedf,trialdf):
     # set None to empty string
     #nofileidx = [x is None for x in trialdf.imgfile]
     #trialdf.loc[nofileidx,'imgfile'] = ''
-    
-    return(imagedf,trialdf)
+
+    return(imagedf, trialdf)
+
+
+def msg_screen(win, textbox, msg='no message given', pos=(0, 0)):
+    textbox.pos = pos
+    textbox.text = msg
+    textbox.draw()
+    win.flip()
+    core.wait(.4)
+    event.waitKeys()
 
 
 class mgsTask:
@@ -366,7 +375,9 @@ class mgsTask:
                  useArrington=False,
                  usePP=False):
         # settings for eyetracking and parallel port ttl (eeg)
-        self.vpxDll = "C:/ARI/VP/VPX_InterApp.dll"
+        thisscript=os.path.abspath( os.path.dirname(__file__) )
+        #self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")
+        self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
         self.useArrington = useArrington
         # # eyetracking
         if(self.useArrington):
@@ -421,13 +432,15 @@ class mgsTask:
 
     def init_vpx(self):
         if not hasattr(self, 'vpx'):
-            from ctypes import CDLL, cdll
+            from ctypes import cdll, CDLL
             # vpxDll="C:/ARI/VP/VPX_InterApp.dll"
             if not os.path.exists(self.vpxDll):
                 Exception('cannot find eyetracking dll @ ' + self.vpxDll)
-            self.vpx = CDLL(cdll.LoadLibrary(self.vpxDll))
+            cdll.LoadLibrary(self.vpxDll)
+            self.vpx = CDLL(self.vpxDll)
             if self.vpx.VPX_GetStatus(1) < 1:
                 Exception('ViewPoint is not running!')
+            self.vpx.VPX_SendCommand('say "mgs_task is connected"')
 
     def init_PP(self):
         # TODO: TEST SOMEWHERE
@@ -654,6 +667,7 @@ class mgsTask:
     """
     def instruction_flip(self): self.win.flip();core.wait(.4);event.waitKeys()
 
+        
     """
     saccade task instructions
     """

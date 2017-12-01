@@ -26,16 +26,27 @@ if (len(sys.argv) > 1):
     subjnum = sys.argv[1]
     start_runnum = 1
     show_instructions = True
+    isfullscreen = False
+    useArrington = False
+    useParallel = False
+    
 else:
     box = gui.Dlg()
     box.addField("Subject ID:")
     box.addField("Run number:", 1)
     box.addField("instructions?", True)
+    box.addField("fullscreen?", True)
+    box.addField("eyetracking (mr)?", True)
+    box.addField("ttl (eeg)?", False)
+
     boxdata = box.show()
     if box.OK:
         subjnum = boxdata[0]
         start_runnum = int(boxdata[1])
         show_instructions = boxdata[2]
+        isfullscreen = boxdata[3]
+        useArrington = boxdata[4]
+        useParallel = boxdata[5]
     else:
         sys.exit(1)
 
@@ -80,12 +91,15 @@ accept_keys = {'known': '2', 'unknown': '3',
 
 # # screen setup
 # win = visual.Window([400,400],screen=0)
-# win = visual.Window(fullscr=True)
-win = visual.Window([800, 600])
+if isfullscreen:
+    win = visual.Window(fullscr=True)
+else:
+    win = visual.Window([800, 600])
+
 win.winHandle.activate()  # make sure the display window has focus
 win.mouseVisible = False  # and that we don't see the mouse
 
-task = mgsTask(win, accept_keys)
+task = mgsTask(win, accept_keys,useArrington=useArrington, usePP=useParallel)
 
 
 # # instructions

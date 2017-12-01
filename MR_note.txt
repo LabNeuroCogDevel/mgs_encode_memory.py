@@ -1,0 +1,19 @@
+====== EYETRACKING ======
+
+must run ViewPointClient 
+ 192.168.1.2:5000
+from
+ Desktop\tasks\EyeTracking_ViewPointConnect 
+
+to confirm eyetracking, see Desktop shortcut
+ confirm_eyetrack.py
+and eyetracking pc
+
+====== DEBUGING ======
+
+1. open file in PsychoPy2
+  C:\Users\Public\Desktop\tasks\mgs_enc_mem\mgs_enc_mem.py
+
+2. click green run button
+
+3. see "Output" tab (lower left)
