@@ -29,6 +29,7 @@ if (len(sys.argv) > 1):
     isfullscreen = False
     useArrington = False
     useParallel = False
+    tasktype = 'mri'
     
 else:
     box = gui.Dlg()
@@ -38,6 +39,7 @@ else:
     box.addField("fullscreen?", True)
     box.addField("eyetracking (mr)?", True)
     box.addField("ttl (eeg)?", False)
+    box.addField("timing type", 'mri', choices=['mri','eeg'])
 
     boxdata = box.show()
     if box.OK:
@@ -47,6 +49,7 @@ else:
         isfullscreen = boxdata[3]
         useArrington = boxdata[4]
         useParallel = boxdata[5]
+        tasktype = boxdata[6]
     else:
         sys.exit(1)
 
@@ -81,7 +84,7 @@ for thisoutdir in [savepath, datadir, logdir]:
 
 # # get all_runs_info
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
-all_runs_info = gen_run_info(nruns, datadir)
+all_runs_info = gen_run_info(nruns, datadir, task=tasktype)
 
 # this is probably unecessary
 # accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o'}

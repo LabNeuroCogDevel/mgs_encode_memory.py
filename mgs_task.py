@@ -733,12 +733,14 @@ class mgsTask:
         self.instruction_flip()
 
 
-def gen_run_info(nruns, datadir):
+def gen_run_info(nruns, datadir,task='mri'):
     """
     load or make and save
     timing for all blocks at once
     - useful to guaranty unique timing files and images
     - used images saved for recall
+    
+    task is mri or eeg
     """
     # where do we save this file?
     runs_info_file = os.path.join(datadir, 'runs_info.pkl')
@@ -756,7 +758,9 @@ def gen_run_info(nruns, datadir):
     imagedf = gen_imagedf(path_dict)
 
     # get enough timing files for all runs
-    alltimingdirs = glob.glob(os.path.join('stims', 'mri', '[0-9]*[0-9]'))
+    alltimingdirs = glob.glob(os.path.join('stims', task, '[0-9]*[0-9]'))
+    print("loading task timing for %s: %s" % (task,alltimingdirs))
+
     thistimings = shuf_for_ntrials(alltimingdirs, nruns)
     # allocate array
     run_timing = []
