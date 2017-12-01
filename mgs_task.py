@@ -163,15 +163,17 @@ def ratio(screen,image,scale): return(float(screen) * scale/float(image))
 '''
  replace_img adjust the image and position of a psychopy.visual.ImageStim
 '''
-def replace_img(img,filename,horz,imgpercent=.04):
+def replace_img(img,filename,horz,imgpercent=.04,defsize=(225,255)):
 
   # set image, get props
   if filename is not None:
       img.image=filename
+      (iw,ih) = img._origSize
+  else:
+      (iw,ih) = defsize
 
-  (iw,ih) = img._origSize
+
   (sw,sh) = img.win.size
-
   img.units='pixels'
   
   # resize img
@@ -442,6 +444,21 @@ class mgsTask:
                 Exception('ViewPoint is not running!')
             self.vpx.VPX_SendCommand('say "mgs_task is connected"')
 
+    def eventToTTL(event,side,catagory):
+        if event == 'iti':
+            return(255)
+        # ttl codes are a composit of the event, and image side + catagory
+        # allow unspecified triggers as 0
+        # outside of 0, range is 61 (cue:None,Left) to 234 (mgs:Indoor,Right)
+        # cues are all < 100 (61 -> 84); img < 150 (111 -> 134); isi < 200 ( 161 -> 184); mgs < 250 (211->234) 
+        event_dict = {'bad': 0, 'cue': 50, 'img': 100, 'isi': 150, 'mgs': 200}
+        ctgry_dict = {'bad': 0, 'None': 10, 'Outdoor': 20, 'Indoor': 30}
+        side_dict = {'bad': 0, 'Left': 1, 'NearLeft': 2, 'NearRight': 3, 'Right': 4}
+        composite = even_dict.get(event,0) + side_dict.get(side,0) + ctrgy_dict.get(catagory,0)
+        return(composite)
+        
+
+
     def init_PP(self):
         # TODO: TEST SOMEWHERE
         if(self.usePP):
@@ -449,28 +466,23 @@ class mgsTask:
             if not hasattr(self, 'port'):
                 from psychopy import parallel
                 self.port = parallel.ParallelPort(address=self.ppaddress)
-                self.ppcodes = {
-                  'iti': 255,
-                  'cue': 1,
-                  'img': 2,
-                  'img_inside': 3,
-                  'img_outside_natural': 4,
-                  'img_outside_made': 5,
-                  'img_outside_none': 6,
-                  'isi': 200,
-                  'mgs': 10,
-                  'mgsLeft': 12,
-                  'mgsNearLeft': 13,
-                  'mgsNearRight': 14,
-                  'mgsRight': 15
-                }
 
-    def send_code(self, ttlstr):
+    def log_and_code(self,event,side,catagory,logh=None,takeshots=None,num=1):
+        self.send_code(event,side,catagory)
+        if logh is not None:
+            logh.log(level=logging.INFO, msg='flipped %s (%s,%s)' % (event, side, catagory))
+        if takeshots:
+            take_screenshot(self.win, takeshots + ('_%02d_%s' % (num, name) ))
+            
+        
+    def send_code(self, event, side, catagory):
         """
         send a trigger on parallel port (eeg) or ethernet (eyetracker)
         in MR, we do eyetracking, and want to send a trigger to the tracker
         in EEG, we dont have eye tracking, but want to annotate screen flips
         """
+
+        ttlstr = "_".join(map(lambda x: "%s" % x, [event,side,catagory]))
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
         if self.useArrington:
             # initialze eyetracking
@@ -478,7 +490,8 @@ class mgsTask:
             # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
         if self.usePP:
             # send code, or 100 if cannot find
-            self.port.setData(self.ppcodes.get(ttlstr, 100))
+            thistrigger = eventToTTL(event,side,catagory)
+            self.port.setData(thistrigger)
 
         if self.verbose:
             print("sent code %s" % ttlstr)
@@ -505,11 +518,30 @@ class mgsTask:
           iti_fix visual.TextStim
         """
         self.iti_fix.draw()
-        self.send_code('iti')
-        self.win.flip()
+        self.win.callOnFlip(self.log_and_code,'iti',None,None)
+        showtime = self.win.flip()
         logging.flush()
         if(iti > 0):
             core.wait(iti)
+        return(showtime)
+
+    def vgs_show(self, imgon, posstr, imgfile=None, imgtype=None, logh=None, takeshots=False):
+        """
+        run the vgs event: show an image with a dot over it in some postiion
+        """
+
+        # set horz postion from side (left,right). center if unknown
+        horz = {'Right': 1, 'Left': -1, 'NearLeft': -.5, 'NearRight': .5}.\
+            get(posstr, 0)
+
+        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize)
+
+        self.crcl.pos = imgpos
+        self.crcl.draw()
+        self.win.callOnFlip(self.log_and_code,'img',posstr,imgtype,logh,takeshots,num=2)
+        wait_until(imgon)
+        showtime = self.win.flip()
+        return(showtime)
 
     def sacc_trial(self, t, starttime=0, takeshots=None, logh=None, tr=2):
         """
@@ -525,10 +557,6 @@ class mgsTask:
         mgson = starttime + t['mgs']
         mgsoff = mgson + tr
         imgfile = t['imgfile']
-
-        # set horz postion from side (left,right). center if unknown
-        horz = {'Right': 1, 'Left': -1, 'NearLeft': -.5, 'NearRight': .5}.\
-            get(t['side'], 0)
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
@@ -547,46 +575,23 @@ class mgsTask:
         # get ready red target
         self.cue_fix.draw()
         wait_until(cueon)
-        self.send_code('cue')
-        self.win.flip()
-        if logh is not None:
-            logh.log(level=logging.INFO, msg='flipped cue')
-        if takeshots:
-            take_screenshot(self.win, takeshots+'_01_cue')
+        self.log_and_code('cue', t['side'], t['imgtype'], logh, takeshots, 1)
+        cueflipt = self.win.flip()
 
         # show an image if we have one to show
-        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize)
-
-        self.crcl.pos = imgpos
-        self.crcl.draw()
-        wait_until(imgon)
-        self.send_code('img')
-        self.win.flip()
-        if logh is not None:
-            logh.log(level=logging.INFO, msg='flipped img %s %s %s' %
-                     (t['side'], t['imgtype'], t['imgfile']))
-        if takeshots:
-            take_screenshot(self.win, takeshots+'_02_imgon')
+        vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'], logh, takeshots)
 
         # back to fix
         self.isi_fix.draw()
         wait_until(ision)
-        self.send_code('isi')
-        self.win.flip()
-        if logh is not None:
-            logh.log(level=logging.INFO, msg='flipped isi')
-        if takeshots:
-            take_screenshot(self.win, takeshots+'_03_isi')
+        self.win.callOnFlip(self.log_and_code, 'isi',t['side'], t['imgtype'], logh, takeshots, 3)
+        isiflipt = self.win.flip()
 
         # memory guided (recall)
         # -- empty screen nothing to draw
+        self.win.callOnFlip(self.log_and_code, 'mgs',t['side'], t['imgtype'], logh, takeshots, 4)
         wait_until(mgson)
-        self.send_code('mgs')
-        self.win.flip()
-        if logh is not None:
-            logh.log(level=logging.INFO, msg='flipped mgs')
-        if takeshots:
-            take_screenshot(self.win, takeshots+'_04_mgs')
+        mgsflipt = self.win.flip()
         wait_until(mgsoff)
 
         # coded with wait instead of wait_until:

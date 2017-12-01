@@ -109,9 +109,10 @@ task = mgsTask(win, accept_keys,useArrington=useArrington, usePP=useParallel)
 if show_instructions:
     task.sacc_instructions()
 else:
-    replace_img(task.img, 'img/example.png', 1, task.imgratsize)
-    win.flip()
-    win.flip()
+    pass
+    # not needed, we softcode the defsize (225,225)
+    # replace_img(task.img, 'img/example.png', 1, task.imgratsize)
+    # win.clearBuffer()
 
 # take screenshots:
 # takeshots="20171101"
