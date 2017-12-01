@@ -7,7 +7,7 @@ cd $(dirname 0)
 # calc efficiency score for all timings
 #
 tr=2
-ntrs=150 # 300/2
+ntrs=210 # 420/2
 
 
 [ ! -d txt ] && mkdir txt

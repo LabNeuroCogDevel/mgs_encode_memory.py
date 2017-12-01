@@ -42,9 +42,6 @@ def make_circle(imfile, radius=225):
 
 
 if __name__ == "__main__":
-    if not os.path.exists('img_circle'):
-        os.mkdir('img_circle')
-
     if len(sys.argv) < 2:
         # args = 'img/*png'
         print("give me an image or glob!")
