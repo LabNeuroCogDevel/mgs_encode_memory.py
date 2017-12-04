@@ -15,8 +15,9 @@ from mgs_task import mgsTask, gen_run_info, replace_img, take_screenshot, wait_u
 # from mgs_task import *
 
 # # settings
-run_total_time = 420
+run_total_time = {'mri': 420, 'eeg': 358, 'test': 15}
 nruns = 4
+mgsdur = 2
 # TODO check against traildf max
 
 # what key does the scanner send on the start of a TR?
@@ -29,6 +30,7 @@ scannerTriggerKeys = ['asciicircum', 'equal', 'escape', '6']
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # default settings
+subjnum=''
 show_instructions = True
 isfullscreen = True
 useArrington = False
@@ -37,7 +39,7 @@ tasktype = 'mri'
 getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
 # # different defaults for different computers
-hosts = {'EEG':[], 'MR': [], 'test': ['reese']}
+hosts = {'EEG':['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
 host = socket.gethostname()
 if host in hosts['EEG']:
     useParallel = True
@@ -51,8 +53,12 @@ elif host in hosts['MR']:
 elif host in hosts['test']:
     show_instructions = False
     isfullscreen = False
+    tasktype = 'test'
+    subjnum ='test'
+    scannerTriggerKeys = scannerTriggerKeys + ['space']
+    getReadyMsg='TESTING TESTING TESTING'
 else:
-    print("dont know aobut %s" % host)
+    print("dont know about %s, just doing whatever" % host)
 
 
 # # get subj info
@@ -64,13 +70,13 @@ if (len(sys.argv) > 1):
 
 else:
     box = gui.Dlg()
-    box.addField("Subject ID:")
+    box.addField("Subject ID:",subjnum)
     box.addField("Run number:", 1)
     box.addField("instructions?",show_instructions )
     box.addField("fullscreen?", isfullscreen)
     box.addField("eyetracking (mr)?", useArrington)
     box.addField("ttl (eeg)?", useParallel)
-    box.addField("timing type", tasktype, choices=['mri','eeg'])
+    box.addField("timing type", tasktype, choices=run_total_time.keys())
 
     boxdata = box.show()
     if box.OK:
@@ -99,7 +105,7 @@ subjid = subjnum
 
 # # paths
 savepath = 'subj_info'
-datadir = os.path.join(savepath, subjid)
+datadir = os.path.join(savepath, subjid,tasktype)
 logdir = os.path.join(datadir, 'log')
 for thisoutdir in [savepath, datadir, logdir]:
     if not os.path.exists(thisoutdir):
@@ -144,6 +150,11 @@ else:
 # takeshots="20171101"
 takeshots = None
 
+# this is kludgy. duration is included in timing files
+# maybe iti should be an included 1D
+if tasktype == 'test':
+    mgsdur = .25
+
 for runi in range(start_runnum-1, nruns):
     run = runi + 1
     print("### run %d" % run)
@@ -178,28 +189,36 @@ for runi in range(start_runnum-1, nruns):
     # for all trials in this run
     for t in sacc_trials:
         # run the trial
-        task.sacc_trial(t, blockstarttime, takeshots=takeshots, logh=logging)
+        fliptimes = task.sacc_trial(t, blockstarttime,
+                                    takeshots=takeshots, logh=logging, tr=mgsdur)
         # then put up the iti cross
-        task.run_iti()
+        fliptimes['iti'] = task.run_iti()
+
         # and take a screenshot if we want it
         if takeshots:
             take_screenshot(win, takeshots + '_05_iti')
             break
 
+        # add fliptimes
+        for k, v in fliptimes.items():
+            sacc_trials.addData(k +'_flip',v)
+            
+
     # finish up
     task.run_iti()
 
-    savefile_csv = '%s_%d_view.csv' % (subjid, run)
+    savefile_csv = '%s_%s_%d_view.csv' % (subjid, tasktype, run)
     savefile_csv_path = os.path.join(datadir, savefile_csv)
     print('saving %s' % savefile_csv_path)
     sacc_trials.data.to_csv(savefile_csv_path)
 
-    thisendtime = run_total_time + blockstarttime
+    thisendtime = run_total_time[tasktype] + blockstarttime
     print("running to end of time (%.02f, actual %.02f)" %
-          (run_total_time, thisendtime))
+          (run_total_time[tasktype], thisendtime))
     wait_until(thisendtime)
-    task.run_end(run, nruns)
+    task.run_end(run, nruns) # end ttl/close eyefile, show finsihed text
     logging.flush()
 
+#task.send_code('end')
 win.close()
 

@@ -12,6 +12,9 @@
 ## Eye tracking
 Eye tracking interfaces with ViewPoint EyeTracker software (via Arrington Research and Avotec). see `MR_note.txt`
 
+## TTL triggers
+`inpout32.dll` should be in directory where python runs `from psychopy import parallel`
+
 ## Images
 Selection made with `img_pick.py`:
 ```

@@ -15,6 +15,7 @@ import numpy
 import pickle
 
 
+
 # this causes some artifacts!?
 def take_screenshot(win, name):
     if not os.path.exists('screenshots/'):
@@ -22,6 +23,43 @@ def take_screenshot(win, name):
     win.getMovieFrame()   # Defaults to front buffer, I.e. what's on screen now
     win.saveMovieFrames('screenshots/' + name + '.png')
 
+
+def eventToTTL(event,side,catagory):
+    """
+    make trigger from event, side, and catagory
+    event inc in 50: (50-200: cue,img,isi,mgs)
+    catagory inc in 10 (10->30: None,Outdoor,Indoor)
+    side inc in 1 (1->4: Left -> Right)
+    61 == cue:None,Left
+    234 == mgs:Indoor,Right
+    
+    iti,start,end hardcoded => 245,128,129
+
+    """
+    if event == 'iti':
+        return(254)
+    if event == 'start':
+        return(128)
+    if event == 'end':
+        return(129)
+    # ttl codes are a composit of the event, and image side + catagory
+    # allow unspecified triggers as 0
+    # outside of 0, range is 61 (cue:None,Left) to 234 (mgs:Indoor,Right)
+    # cues are all < 100 (61 -> 84); img < 150 (111 -> 134); isi < 200 ( 161 -> 184); mgs < 250 (211->234) 
+    event_dict = {'bad': 0, 'cue': 50, 'img': 100, 'isi': 150, 'mgs': 200}
+    ctgry_dict = {'bad': 0, 'None': 10, 'Outdoor': 20, 'Indoor': 30}
+    side_dict = {'bad': 0, 'Left': 1, 'NearLeft': 2, 'NearRight': 3, 'Right': 4}
+    composite = event_dict.get(event,0) + side_dict.get(side,0) + ctgry_dict.get(catagory,0)
+    return(composite)
+        
+
+def center_textbox(textbox):
+    """
+    center textbox in 'norm' units
+    """
+    tw = textbox.boundingBox[0]
+    ww = float(textbox.win.size[0])
+    textbox.pos = (-tw/ww, 0)
 
 def make_timing():
     """
@@ -387,8 +425,13 @@ class mgsTask:
 
         # settings for parallel port
         # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
-        self.pp_adress = 0x0378
+        #self.pp_address = 0x0378
+        #self.pp_address = 0x0278
+        self.pp_address = 0xDFF8
+
         self.usePP = usePP
+        if usePP:
+            self.init_PP()
 
         self.verbose = True
 
@@ -428,9 +471,23 @@ class mgsTask:
             self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
 
-    def eyetracking_start(self):
+    def start_aux(self):
+        """
+        start eyetracking, send start ttl to parallel port
+        """
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Pause 0')
+        if(self.usePP):
+            self.send_code('start',None,None)
+
+    def stop_aux(self):
+        """
+        stop eyetracking file, send start ttl to parallel port
+        """
+        if(self.useArrington):
+            self.vpx.VPX_SendCommand('dataFile_Close 0')
+        if(self.usePP):
+            self.send_code('end',None,None)
 
     def init_vpx(self):
         if not hasattr(self, 'vpx'):
@@ -444,19 +501,6 @@ class mgsTask:
                 Exception('ViewPoint is not running!')
             self.vpx.VPX_SendCommand('say "mgs_task is connected"')
 
-    def eventToTTL(event,side,catagory):
-        if event == 'iti':
-            return(255)
-        # ttl codes are a composit of the event, and image side + catagory
-        # allow unspecified triggers as 0
-        # outside of 0, range is 61 (cue:None,Left) to 234 (mgs:Indoor,Right)
-        # cues are all < 100 (61 -> 84); img < 150 (111 -> 134); isi < 200 ( 161 -> 184); mgs < 250 (211->234) 
-        event_dict = {'bad': 0, 'cue': 50, 'img': 100, 'isi': 150, 'mgs': 200}
-        ctgry_dict = {'bad': 0, 'None': 10, 'Outdoor': 20, 'Indoor': 30}
-        side_dict = {'bad': 0, 'Left': 1, 'NearLeft': 2, 'NearRight': 3, 'Right': 4}
-        composite = even_dict.get(event,0) + side_dict.get(side,0) + ctrgy_dict.get(catagory,0)
-        return(composite)
-        
 
 
     def init_PP(self):
@@ -465,7 +509,7 @@ class mgsTask:
             # initialize parallel port
             if not hasattr(self, 'port'):
                 from psychopy import parallel
-                self.port = parallel.ParallelPort(address=self.ppaddress)
+                self.port = parallel.ParallelPort(address=self.pp_address)
 
     def log_and_code(self,event,side,catagory,logh=None,takeshots=None,num=1):
         self.send_code(event,side,catagory)
@@ -482,32 +526,36 @@ class mgsTask:
         in EEG, we dont have eye tracking, but want to annotate screen flips
         """
 
-        ttlstr = "_".join(map(lambda x: "%s" % x, [event,side,catagory]))
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
         if self.useArrington:
-            # initialze eyetracking
+            ttlstr = "_".join(map(lambda x: "%s" % x, [event,side,catagory]))
             self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
+            if self.verbose:
+                print("eye code %s" % ttlstr)
             # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
         if self.usePP:
             # send code, or 100 if cannot find
             thistrigger = eventToTTL(event,side,catagory)
             self.port.setData(thistrigger)
+            if self.verbose:
+                print("eeg code %s" % thistrigger)
+            core.wait(.01) # wait 10ms and send zero
+            self.port.setData(0)
 
-        if self.verbose:
-            print("sent code %s" % ttlstr)
 
     def wait_for_scanner(self, trigger,msg='Waiting for scanner (pulse trigger)'):
         """
         wait for scanner trigger press
+        start any auxilary things (eyetracking for mri, ttl for eeg)
         return time of keypush
         """
-        self.textbox.pos = (-1, 0)
         self.textbox.setText(msg % trigger)
+        center_textbox(self.textbox)
         self.textbox.draw()
         self.win.flip()
         event.waitKeys(keyList=trigger)
         starttime = core.getTime()
-        self.eyetracking_start()
+        self.start_aux() #eyetracking/parallel port
         self.run_iti()
         return(starttime)
 
@@ -560,8 +608,10 @@ class mgsTask:
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
-        # print("")
-        # print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
+        if t.thisN == 0:
+            print("")
+            print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
+
         print("%.02f\t%.02f\t%.02f\t%s\t%s\t%.02f\t%.02f" %
               (t['cue'],
                core.getTime(),
@@ -594,6 +644,9 @@ class mgsTask:
         mgsflipt = self.win.flip()
         # after this fil
         wait_until(mgsoff)
+
+        # send back all the flip times
+        return({'cue':cueflipt,'vgs': vgsflipt,'dly': isiflipt,'mgs': mgsflipt})
 
         # coded with wait instead of wait_until:
         # # get ready
@@ -728,6 +781,12 @@ class mgsTask:
         self.textbox.pos = (0, 0)
 
     def run_end(self, run, nruns):
+        """
+        show end of run screen
+        send stop codes for parallel port
+        close eyetracking file
+        """
+        self.stop_aux() # end ttl, close eye file
         self.textbox.pos = (-.2, 0)
         self.textbox.text = 'Finished %d/%d!' % (run, nruns)
         self.textbox.draw()
@@ -748,6 +807,7 @@ def gen_run_info(nruns, datadir,task='mri'):
 
     # if we have it, just return it
     if os.path.exists(runs_info_file):
+        print('reusing timing/image selection from %s' % runs_info_file)
         with open(runs_info_file, 'r') as f:
             return(pickle.load(f))
 
