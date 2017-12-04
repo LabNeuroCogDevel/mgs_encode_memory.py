@@ -496,13 +496,13 @@ class mgsTask:
         if self.verbose:
             print("sent code %s" % ttlstr)
 
-    def wait_for_scanner(self, trigger):
+    def wait_for_scanner(self, trigger,msg='Waiting for scanner (pulse trigger)'):
         """
         wait for scanner trigger press
         return time of keypush
         """
         self.textbox.pos = (-1, 0)
-        self.textbox.setText('Waiting for scanner (pulse trigger)' % trigger)
+        self.textbox.setText(msg % trigger)
         self.textbox.draw()
         self.win.flip()
         event.waitKeys(keyList=trigger)
@@ -592,6 +592,7 @@ class mgsTask:
         self.win.callOnFlip(self.log_and_code, 'mgs',t['side'], t['imgtype'], logh, takeshots, 4)
         wait_until(mgson)
         mgsflipt = self.win.flip()
+        # after this fil
         wait_until(mgsoff)
 
         # coded with wait instead of wait_until:

@@ -10,13 +10,49 @@ from psychopy import visual, core, data, logging, gui  # , event
 import datetime
 import sys
 import os
+import socket # gethostname
 from mgs_task import mgsTask, gen_run_info, replace_img, take_screenshot, wait_until
 # from mgs_task import *
+
+# # settings
+run_total_time = 420
+nruns = 4
+# TODO check against traildf max
+
+# what key does the scanner send on the start of a TR?
+# ^, =, or esc
+scannerTriggerKeys = ['asciicircum', 'equal', 'escape', '6']
 
 # subjnum='0'; win = visual.Window([800,600]); task = mgsTask(win)
 
 # paths are relative to this script
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+# default settings
+show_instructions = True
+isfullscreen = True
+useArrington = False
+useParallel = False
+tasktype = 'mri'
+getReadyMsg = 'Waiting for scanner (pulse trigger)'
+
+# # different defaults for different computers
+hosts = {'EEG':[], 'MR': [], 'test': ['reese']}
+host = socket.gethostname()
+if host in hosts['EEG']:
+    useParallel = True
+    tasktype = 'eeg'
+    scannerTriggerKeys = scannerTriggerKeys + ['space']
+    getReadyMsg='Ready?'
+
+elif host in hosts['MR']:
+    useArrington = True
+
+elif host in hosts['test']:
+    show_instructions = False
+    isfullscreen = False
+else:
+    print("dont know aobut %s" % host)
 
 
 # # get subj info
@@ -25,21 +61,16 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 if (len(sys.argv) > 1):
     subjnum = sys.argv[1]
     start_runnum = 1
-    show_instructions = True
-    isfullscreen = False
-    useArrington = False
-    useParallel = False
-    tasktype = 'mri'
-    
+
 else:
     box = gui.Dlg()
     box.addField("Subject ID:")
     box.addField("Run number:", 1)
-    box.addField("instructions?", True)
-    box.addField("fullscreen?", True)
-    box.addField("eyetracking (mr)?", True)
-    box.addField("ttl (eeg)?", False)
-    box.addField("timing type", 'mri', choices=['mri','eeg'])
+    box.addField("instructions?",show_instructions )
+    box.addField("fullscreen?", isfullscreen)
+    box.addField("eyetracking (mr)?", useArrington)
+    box.addField("ttl (eeg)?", useParallel)
+    box.addField("timing type", tasktype, choices=['mri','eeg'])
 
     boxdata = box.show()
     if box.OK:
@@ -57,14 +88,6 @@ subjid = subjnum
 # maybe we want to auto add date?
 # + datetime.datetime.strftime(datetime.datetime.now(),"_%Y%m%d")
 
-# # settings
-run_total_time = 420
-nruns = 4
-# TODO check against traildf max
-
-# what key does the scanner send on the start of a TR?
-# ^, =, or esc
-scannerTriggerKeys = ['asciicircum', 'equal', 'escape', '6']
 
 # # trials using trialHandler and list of dicts
 # possiblepos=[-1, 1, -.75, .75, -.5, .5]
@@ -148,7 +171,7 @@ for runi in range(start_runnum-1, nruns):
     # # run saccade trials
     # blockstarttime=core.getTime()
     task.eyetracking_newfile("%s_run%d_%s" % (subjid, run, seconds))
-    blockstarttime = task.wait_for_scanner(scannerTriggerKeys)
+    blockstarttime = task.wait_for_scanner(scannerTriggerKeys,getReadyMsg)
     logging.log(level=logging.INFO,
                 msg='scanner trigger recieved at %d' % blockstarttime)
 
