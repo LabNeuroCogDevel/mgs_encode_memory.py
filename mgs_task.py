@@ -536,12 +536,19 @@ class mgsTask:
         if self.usePP:
             # send code, or 100 if cannot find
             thistrigger = eventToTTL(event,side,catagory)
-            self.port.setData(thistrigger)
-            if self.verbose:
-                print("eeg code %s" % thistrigger)
-            core.wait(.01) # wait 10ms and send zero
-            self.port.setData(0)
+            self.send_ttl(thistrigger)
 
+
+    def send_ttl(self,thistrigger):
+        """
+        send ttl trigger to parallel port (setup by init_PP)
+        wait 10ms and send 0
+        """
+        self.port.setData(thistrigger)
+        if self.verbose:
+            print("eeg code %s" % thistrigger)
+        core.wait(.01) # wait 10ms and send zero
+        self.port.setData(0)
 
     def wait_for_scanner(self, trigger,msg='Waiting for scanner (pulse trigger)'):
         """
