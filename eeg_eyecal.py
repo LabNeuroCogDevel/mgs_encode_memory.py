@@ -28,18 +28,20 @@ task = mgsTask(win, usePP = usePP)
 # get 20 positions from 20% to 90% 
 pos = np.linspace(.2,.9,20)
 allpos =   np.concatenate( [pos, -1 * pos]) 
-#ridx = np.random.permutation(len(allpos))
-# fixed for all presentations
-ridx = [34, 10, 32, 17, 20, 21, 22, 37,  7, 36, 18, 23, 13, 14, 16, 39,  2,
-       25, 33, 35, 29, 27,  3, 24, 38,  6, 12,  9, 31, 11,  8, 26,  1, 30,
-       28,  4,  0,  5, 15, 19]
+ridx = np.random.permutation(len(allpos))
 
-ridx = [0,39,19,20,21]
+# fixed for all presentations
+# ridx = [34, 10, 32, 17, 20, 21, 22, 37,  7, 36, 18, 23, 13, 14, 16, 39,  2,
+#        25, 33, 35, 29, 27,  3, 24, 38,  6, 12,  9, 31, 11,  8, 26,  1, 30,
+#        28,  4,  0,  5, 15, 19]
+
+# for testing:
+# ridx=[0,39,19,20]
+
 def print_and_ttl(msg,ttl):
     print(msg)
     if usePP:
         task.send_ttl(ttl)
-
 
 task.wait_for_scanner(['space'],'Ready?')
 task.send_code('start',None,None)
@@ -55,15 +57,16 @@ for ri in range(len(ridx)):
     posttl = i + 1   # 1 - 40
     fixttl = i + 201 # 201 - 240
 
-
     # draw cricle
     task.crcl.pos = (p,0)
     task.crcl.draw()
     win.callOnFlip(print_and_ttl,"p at %.02fx (%.02fpx)" % (allpos[i], p), posttl)
     ft=win.flip()
-    # wait a big
+    # wait a bit
     wait_until(ft + dotdur)
-    event.waitKeys()
+
+    # for testing
+    # event.waitKeys()
 
     # draw cross
     task.iti_fix.draw()
@@ -73,5 +76,6 @@ for ri in range(len(ridx)):
     wait_until(ft + fixdur)
 
 
+# all done, wrap up
 task.send_code('end',None,None)
 win.close()
