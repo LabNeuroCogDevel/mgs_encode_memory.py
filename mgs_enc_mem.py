@@ -6,13 +6,13 @@
 # ^M-: (run-python "/usr/bin/python2")
 
 from __future__ import division
-from psychopy import visual, core, data, logging, gui  # , event
-import datetime
+from psychopy import visual, data, logging, gui  # , event
+import datetime  # set timepoint default, start time
 import sys
 import os
-import socket # gethostname
-import datetime # to set timepoint
-from mgs_task import mgsTask, gen_run_info, replace_img, take_screenshot, wait_until, getSubjectDataPath
+import socket  # gethostname
+from mgs_task import mgsTask, gen_run_info, \
+                     take_screenshot, wait_until, getSubjectDataPath
 # from mgs_task import *
 
 # # settings
@@ -31,25 +31,25 @@ scannerTriggerKeys = ['asciicircum', 'equal', 'escape', '6']
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # default settings
-subjnum=''
+subjnum = ''
 show_instructions = True
 isfullscreen = True
 useArrington = False
 useParallel = False
 tasktype = 'mri'
-imgset='A'
+imgset = 'A'
 # 2018 is tp1
-timepoint = datetime.datetime.now().year - 2017 
+timepoint = datetime.datetime.now().year - 2017
 getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
 # # different defaults for different computers
-hosts = {'EEG':['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
+hosts = {'EEG': ['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
 host = socket.gethostname()
 if host in hosts['EEG']:
     useParallel = True
     tasktype = 'eeg'
     scannerTriggerKeys = scannerTriggerKeys + ['space']
-    getReadyMsg='Ready?'
+    getReadyMsg = 'Ready?'
 
 elif host in hosts['MR']:
     useArrington = True
@@ -58,9 +58,9 @@ elif host in hosts['test']:
     show_instructions = False
     isfullscreen = False
     tasktype = 'test'
-    subjnum ='test'
+    subjnum = 'test'
     scannerTriggerKeys = scannerTriggerKeys + ['space']
-    getReadyMsg='TESTING TESTING TESTING'
+    getReadyMsg = 'TESTING TESTING TESTING'
 else:
     print("dont know about %s, not changing defaults" % host)
 
@@ -74,15 +74,15 @@ if (len(sys.argv) > 1):
 
 else:
     box = gui.Dlg()
-    box.addField("Subject ID:",subjnum)
+    box.addField("Subject ID:", subjnum)
     box.addField("Run number:", 1)
-    box.addField("instructions?",show_instructions )
+    box.addField("instructions?", show_instructions)
     box.addField("fullscreen?", isfullscreen)
     box.addField("eyetracking (mr)?", useArrington)
     box.addField("ttl (eeg)?", useParallel)
     box.addField("timing type", tasktype, choices=run_total_time.keys())
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
-    box.addField("Image Set", imgset, choices=['A','B'])
+    box.addField("Image Set", imgset, choices=['A', 'B'])
 
     boxdata = box.show()
     if box.OK:
@@ -113,14 +113,16 @@ subjid = subjnum
 
 # # paths
 # like: "subj_info/10931/01_eeg_A"
-(datadir,logdir) = getSubjectDataPath(subjid,tasktype,imgset,timepoint)
+(datadir, logdir) = getSubjectDataPath(subjid, tasktype, imgset, timepoint)
 
 # # get all_runs_info
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
 all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 
 # this is probably unecessary
-# accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o'}
+# accept_keys = {'known':'k', 'unknown': 'd',
+#                'left':'d','right':'k', 'oops':'o'}
+
 accept_keys = {'known': '2', 'unknown': '3',
                'left': '2', 'right': '3',
                'oops': '1'}
@@ -135,7 +137,7 @@ else:
 win.winHandle.activate()  # make sure the display window has focus
 win.mouseVisible = False  # and that we don't see the mouse
 
-task = mgsTask(win, accept_keys,useArrington=useArrington, usePP=useParallel)
+task = mgsTask(win, accept_keys, useArrington=useArrington, usePP=useParallel)
 
 
 # # instructions
@@ -186,15 +188,15 @@ for runi in range(start_runnum-1, nruns):
     # # run saccade trials
     # blockstarttime=core.getTime()
     task.eyetracking_newfile("%s_run%d_%s" % (subjid, run, seconds))
-    blockstarttime = task.wait_for_scanner(scannerTriggerKeys,getReadyMsg)
+    blockstarttime = task.wait_for_scanner(scannerTriggerKeys, getReadyMsg)
     logging.log(level=logging.INFO,
                 msg='scanner trigger recieved at %d' % blockstarttime)
 
     # for all trials in this run
     for t in sacc_trials:
         # run the trial
-        fliptimes = task.sacc_trial(t, blockstarttime,
-                                    takeshots=takeshots, logh=logging, tr=mgsdur)
+        fliptimes = task.sacc_trial(t, blockstarttime, takeshots=takeshots,
+                                    logh=logging, tr=mgsdur)
         # then put up the iti cross
         fliptimes['iti'] = task.run_iti()
 
@@ -205,8 +207,7 @@ for runi in range(start_runnum-1, nruns):
 
         # add fliptimes
         for k, v in fliptimes.items():
-            sacc_trials.addData(k +'_flip',v)
-            
+            sacc_trials.addData(k + '_flip', v)
 
     # finish up
     task.run_iti()
@@ -220,9 +221,8 @@ for runi in range(start_runnum-1, nruns):
     print("running to end of time (%.02f, actual %.02f)" %
           (run_total_time[tasktype], thisendtime))
     wait_until(thisendtime)
-    task.run_end(run, nruns) # end ttl/close eyefile, show finsihed text
+    task.run_end(run, nruns)  # end ttl/close eyefile, show finsihed text
     logging.flush()
 
-#task.send_code('end')
+# done will all runs
 win.close()
-
