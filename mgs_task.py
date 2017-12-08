@@ -31,6 +31,20 @@ def getSubjectDataPath(subjid, tasktype, imgset, timepoint):
     return((datadir, logdir))
 
 
+def getInfoFromDataPath(datadir):
+    """
+    get subject info from path
+    expects os.dirname(pkl_file)
+    from subj_info/someid/01_eeg_A
+    to ("someid", "eeg", "A", 1 ) 
+    """
+    justdir = re.sub(".*subj_info"+os.path.sep,"",datadir)
+    (subjid, taskinfo) = os.path.split(justdir)
+    (timepoint, imgset, tasktype) = taskinfo.split("_")
+    timepoint = int(timepoint)
+    return((subjid, tasktype, imgset, timepoint))
+
+
 # this causes some artifacts!?
 def take_screenshot(win, name):
     if not os.path.exists('screenshots/'):
@@ -680,6 +694,26 @@ class mgsTask:
             pass
         # give key and rt
         return(t[0])
+
+    def recall_instructions(self):
+        """
+        recall task instructions
+        """
+
+        self.textbox.pos = (-.9, 0)
+        self.textbox.text = \
+           'STEPS:\n\n'+ \
+           '1. push %s if you already saw the image.\n' % self.accept_keys['known'] + \
+           '   push %s if the image is new\n\n' %  self.accept_keys['unknown'] + \
+           '2. If you have seen the image:\n' + \
+           '   push %s if you saw it on the left OR\n' % self.accept_keys['left'] + \
+           '   push %s if you saw it on the right\n'  % self.accept_keys['right']+ \
+           '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] +\
+           'NOTE: you have 1.5 seconds to respond.\n' + \
+           'Responding faster does not make the task go faster.'
+
+        self.textbox.draw()
+        self.instruction_flip()
 
     def recall_trial(self, imgfile, rspmax=1.5):
         """

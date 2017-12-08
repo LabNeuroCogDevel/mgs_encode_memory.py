@@ -18,7 +18,7 @@ from mgs_task import mgsTask, gen_run_info, \
 # # settings
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15}
 nruns = 4
-mgsdur = 2
+mgsdur = 2  # this is tr locked for fmri
 # TODO check against traildf max
 
 # what key does the scanner send on the start of a TR?

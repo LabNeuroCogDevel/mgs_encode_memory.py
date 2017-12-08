@@ -11,22 +11,37 @@ import pickle
 import pandas as pd
 import glob
 import os
-from mgs_task import mgsTask, response_should_be
+import sys
+from mgs_task import mgsTask, response_should_be, getInfoFromDataPath
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# where do we store data?
+pkl_glb = os.path.join('subj_info', '*', '*', 'runs_info.pkl')
+# what keys do we use?
 accept_keys = {'known': '2', 'unknown': '3',
                'left': '2', 'right': '3',
                'oops': '1'}
 
-# where do we store data?
-pkl_glb = os.path.join('subj_info', '*', '*', 'runs_info.pkl')
-allsubjs = glob.glob(pkl_glb)
-pckl = allsubjs[2]
+# list all subject pickle files.
+# sort by modification date
+# used in dropdown dialog
+allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x) )
+settings = {'recall_from': allsubjs, 'fullscreen':True, 'instructions': True}
+box = gui.DlgFromDict(settings)
+
+# exit if we dont hit okay
+if not box.OK:
+    sys.exit(1)
+
+# read in and parse
+pckl = settings['recall_from']
+datadir = os.path.dirname(pckl)
+(subjid, tasktype, imgset, timepoint) = getInfoFromDataPath(datadir)
+
+# load run info
 with open(pckl, 'rb') as p:
     run_data = pickle.load(p)
 
-# TODO: pull from pckl or filename
-subjid = 'test_2'
 
 # pick some novel stims
 imdf = run_data['imagedf']
@@ -47,12 +62,12 @@ novelimg['pos'] = float("nan")
 # put all runs together
 seendf = pd.concat(run_data['run_timing'])
 # get just the images and their side
-seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile']]
+seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile','imgtype']]
 # convert side to position (-1 '*Left', 1 if '*Right')
 seendf['pos'] = [('Left' in x) * -1 + ('Right' in x)*1 for x in seendf['side']]
 # combine them
-trialdf = pd.concat([seendf[['imgfile', 'pos']],
-                     novelimg[['imgfile', 'pos']]]).\
+trialdf = pd.concat([seendf[['imgfile', 'pos','imgtype']],
+                     novelimg[['imgfile', 'pos','imgtype']]]).\
                      sample(frac=1)
 
 # set correct keys and format for trialhandler
@@ -62,14 +77,17 @@ trialdict = [
             {'corkeys': response_should_be(x['pos'], accept_keys)}.items())
         for x in trialdict]
 
-seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
+seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d%H%M%S")
 
 extraInfo = {'subjid': subjid, 'epoch': seconds}
 recall_trials = data.TrialHandler2(trialdict, 1, extraInfo=extraInfo)
 
 
 # # screen setup
-win = visual.Window([400, 400], screen=0)
+if settings['fullscreen']:
+    win = visual.Window(fullscr=True)
+else:
+    win = visual.Window([400, 400], screen=0)
 # win = visual.Window(fullscr=True)
 
 # win settings
@@ -78,6 +96,9 @@ win.mouseVisible = False  # and that we dont see the mouse
 
 # task class
 task = mgsTask(win, accept_keys)
+
+if settings['instructions']:
+    task.recall_instructions()
 
 # wait to start -- space or escape key
 blockstarttime = task.wait_for_scanner(['space', 'escape'], 'ready?')
@@ -96,5 +117,6 @@ for t in recall_trials:
     # finish with iti
     task.run_iti(.5)
 
-# this should work but does not!
-recall_trials.data.to_csv(subjid + '_recall.csv')
+# save results to recall.csv inside datadir
+saveas = os.path.join(datadir, 'recall_%s.csv' % seconds)
+recall_trials.data.to_csv(saveas)
