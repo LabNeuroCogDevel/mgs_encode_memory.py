@@ -708,7 +708,7 @@ class mgsTask:
            '2. If you have seen the image:\n' + \
            '   push %s if you saw it on the left OR\n' % self.accept_keys['left'] + \
            '   push %s if you saw it on the right\n'  % self.accept_keys['right']+ \
-           '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] +\
+           '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] + \
            'NOTE: you have 1.5 seconds to respond.\n' + \
            'Responding faster does not make the task go faster.'
 

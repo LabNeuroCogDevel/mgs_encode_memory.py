@@ -3,6 +3,7 @@
 ## Usage
 1. install [psychopy](http://www.psychopy.org/)
 2. run `mgs_enc_mem.py`
+3. run `mgs_recall.py`
 
 ## The task
 
@@ -23,8 +24,13 @@ q = d.query('abs(r-.33) < .1 and abs(g-.33) < .1 and abs(b-.33) <.1 and abs(p-11
 ```
 after `imgedit.py` (help from `SUN/iminfo.py`) converted images into 225x225 circle pngs.
 
+### More images
+2017-12-07: identified 635 more browesing in alphebetical order
+
 ### image source 
 Images are from [SUN](http://vision.princeton.edu/projects/2010/SUN) dataset. 
  * [all images](http://vision.princeton.edu/projects/2010/SUN/SUN397.tar.gz) (37Gb!, 38 uncompressed)
  * [3 level hierarchy annotation](http://vision.cs.princeton.edu/projects/2010/SUN/hierarchy_three_levels.zip) (<1Mb)
 
+## Data analysis
+are ttl triggers reporting resonable times? `eeg/read.py`
