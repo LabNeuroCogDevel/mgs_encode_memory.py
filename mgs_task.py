@@ -15,6 +15,21 @@ import numpy
 import pickle
 
 
+def getSubjectDataPath(subjid, tasktype, imgset, timepoint):
+    """
+    generate (and create) a path to save subjects visit data
+    directory for subject and task like "10931/01_eeg_A"
+    """
+    savepath = 'subj_info'
+    taskinfo = "%02d_%s_%s" % (timepoint, tasktype, imgset)
+    datadir = os.path.join(savepath, subjid, taskinfo)
+    logdir = os.path.join(datadir, 'log')
+    for thisoutdir in [savepath, datadir, logdir]:
+        if not os.path.exists(thisoutdir):
+            os.makedirs(thisoutdir)
+
+    return((datadir, logdir))
+
 
 # this causes some artifacts!?
 def take_screenshot(win, name):
@@ -24,7 +39,7 @@ def take_screenshot(win, name):
     win.saveMovieFrames('screenshots/' + name + '.png')
 
 
-def eventToTTL(event,side,catagory):
+def eventToTTL(event, side, catagory):
     """
     make trigger from event, side, and catagory
     event inc in 50: (50-200: cue,img,isi,mgs)
@@ -32,9 +47,8 @@ def eventToTTL(event,side,catagory):
     side inc in 1 (1->4: Left -> Right)
     61 == cue:None,Left
     234 == mgs:Indoor,Right
-    
-    iti,start,end hardcoded => 245,128,129
 
+    iti,start,end hardcoded => 245,128,129
     """
     if event == 'iti':
         return(254)
@@ -45,13 +59,17 @@ def eventToTTL(event,side,catagory):
     # ttl codes are a composit of the event, and image side + catagory
     # allow unspecified triggers as 0
     # outside of 0, range is 61 (cue:None,Left) to 234 (mgs:Indoor,Right)
-    # cues are all < 100 (61 -> 84); img < 150 (111 -> 134); isi < 200 ( 161 -> 184); mgs < 250 (211->234) 
+    # cues  < 100 (61 -> 84); img < 150 (111 -> 134);
+    # isi < 200 ( 161 -> 184); mgs < 250 (211->234)
     event_dict = {'bad': 0, 'cue': 50, 'img': 100, 'isi': 150, 'mgs': 200}
     ctgry_dict = {'bad': 0, 'None': 10, 'Outdoor': 20, 'Indoor': 30}
-    side_dict = {'bad': 0, 'Left': 1, 'NearLeft': 2, 'NearRight': 3, 'Right': 4}
-    composite = event_dict.get(event,0) + side_dict.get(side,0) + ctgry_dict.get(catagory,0)
+    side_dict = {'bad': 0, 'Left': 1,
+                 'NearLeft': 2, 'NearRight': 3, 'Right': 4}
+    composite = event_dict.get(event, 0) + \
+                side_dict.get(side, 0) + \
+                ctgry_dict.get(catagory, 0)
     return(composite)
-        
+
 
 def center_textbox(textbox):
     """
@@ -60,45 +78,6 @@ def center_textbox(textbox):
     tw = textbox.boundingBox[0]
     ww = float(textbox.win.size[0])
     textbox.pos = (-tw/ww, 0)
-
-def make_timing():
-    """
-    generate example timing
-    """
-    tr = 1.5
-    ITI = numpy.array([6,5,6,3,6,2,6,3,2,3,5,7,5,3,4,2,5,3,5,8]) *tr
-    delay = [4]*10 + [5] * 7 + [6]*3
-    delay = numpy.array(delay)*tr
-    numpy.random.shuffle(delay)
-    curtime = 1
-    tonsets = []
-    sonsets = []
-    for i in range(len(ITI)):
-        tonsets.append(curtime)
-        curtime += 1.5 + 1.5 + delay[i]  # cue + target + delay
-        sonsets.append(curtime)
-        curtime += 1.5 + ITI[i]  # MGS + ITI
-        # only one type of mgs
-    with open('stims/example_00002_02_mgs.1D', 'w') as f:
-        f.write(" ".join(["%.02f" % x for x in sonsets]))
-
-    # write different types of cue
-    type_names = ['A', 'B', 'C', 'none']
-    n_types = len(type_names)
-    n_on = len(tonsets)
-    idx = [x for x in range(0, n_on)]
-    step = int(n_on/n_types)
-    numpy.random.shuffle(idx)
-
-    for i, t in enumerate(type_names):
-        si = i*step
-        se = (i+1)*step
-        if i == n_types:
-            se = n_on
-        with open('stims/example_00002_01_cue_cat'+t+'.1D', 'w') as f:
-            f.write(" ".join(["%.02f" % x for x in tonsets[si:se]]))
-
-    return((tonsets, sonsets))
 
 
 def read_timing(onsetprefix):
@@ -129,7 +108,7 @@ def read_timing(onsetprefix):
     for onset1D in onsetfiles:
         # key name will be file name but
         # remove the last 3 chars (.1D) and the glob part
-        #onsettype = onset1D[:-3].replace(onsetprefix, '')
+        # onsettype = onset1D[:-3].replace(onsetprefix, '')
         onsettype = os.path.basename(onset1D)[:-3]
         with open(onset1D) as f:
             onsetdict[onsettype] = [float(x.split(':')[0])
@@ -137,16 +116,7 @@ def read_timing(onsetprefix):
     return(onsetdict)
 
 
-def image_sets():
-    allimages = glob.glob('img_circle/*png')
-    # # break images into saccade images and novel (for memory quiz)
-    novelfile = re.compile('.*\.01\..*')  # any .01. image
-    sacc_images = [x for x in allimages if not novelfile.match(x)]
-    novel_images = [x for x in allimages if novelfile.match(x)]
-    return((sacc_images, novel_images))
-
-
-def shuf_for_ntrials(vec,ntrials):
+def shuf_for_ntrials(vec, ntrials):
     '''
      shuf_for_ntrials creates a shuffled vector repeated to match the number of trials
     '''
@@ -171,75 +141,80 @@ def shuf_for_ntrials(vec,ntrials):
 
 
 def wait_until(stoptime, maxwait=30):
-  """
-  just like core.wait, but instead of waiting a duration
-  we wait until a stoptime.
-  optional maxwait will throw an error if we are wating too long 
-  so we dont get stuck. defaults to 30 seconds
-  """
-  if stoptime - core.getTime()  > maxwait:
-    raise ValueError("requiest to wait until stoptime is more than 30 seconds, secify maxwait to avoid this error")
-  # will hog cpu -- no pyglet.media.dispatch_events here
-  while core.getTime() < stoptime:
-    continue
-   
-def response_should_be(pos,accept_keys):
     """
-    evaluate known/unkown and left/right based on position and accept_keys
+    just like core.wait, but instead of waiting a duration
+    we wait until a stoptime.
+    optional maxwait will throw an error if we are wating too long 
+    so we dont get stuck. defaults to 30 seconds
+    """
+    if stoptime - core.getTime() > maxwait:
+        raise ValueError("requiest to wait until stoptime is more than 30 seconds, secify maxwait to avoid this error")
+    # will hog cpu -- no pyglet.media.dispatch_events here
+    while core.getTime() < stoptime:
+        continue
+
+
+def response_should_be(pos, accept_keys):
+    """
+    evaluate known/unknown and left/right based on position and accept_keys
     position==nan means it was never seen
     neg. position is left, positive position is right
     """
-    if(math.isnan(pos )): return( (accept_keys['unknown'],accept_keys['oops']) )
-    elif( pos < 0): return( (accept_keys['known'],accept_keys['left']) ) 
-    elif( pos > 0): return( (accept_keys['known'],accept_keys['left'])  )
-    else: raise ValueError('bad pos?! how!?')
-   
-   
+    if(math.isnan(pos)):
+        return((accept_keys['unknown'], accept_keys['oops']))
+    elif(pos < 0):
+        return((accept_keys['known'], accept_keys['left']))
+    elif(pos > 0):
+        return((accept_keys['known'], accept_keys['right']))
+    else:
+        raise ValueError('bad pos?! how!?')
+
+
 # we could  img.units='deg', but that might complicate testing on diff screens
-def ratio(screen,image,scale): return(float(screen) * scale/float(image))
-   
-'''
- replace_img adjust the image and position of a psychopy.visual.ImageStim
-'''
-def replace_img(img,filename,horz,imgpercent=.04,defsize=(225,255)):
-
-  # set image, get props
-  if filename is not None:
-      img.image=filename
-      (iw,ih) = img._origSize
-  else:
-      (iw,ih) = defsize
+def ratio(screen, image, scale):
+    return(float(screen) * scale/float(image))
 
 
-  (sw,sh) = img.win.size
-  img.units='pixels'
-  
-  # resize img
-  scalew= ratio(sw,iw,imgpercent)
-  #scaleh= ratio(sh,ih,imgpercent) 
-  # scale evenly in relation to x-axis
-  #img.size=(scalew*iw,scalew*sw/sh*ih) # if units were 'norm'
-  img.size=(scalew*iw,scalew*ih) # square pixels
-  # img._requestedSize => (80,80) if imgprecent=.1*sw=800
+def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255)):
+    '''
+    replace_img adjust the image and position of a psychopy.visual.ImageStim
+    '''
+    # set image, get props
+    if filename is not None:
+        img.image = filename
+        (iw, ih) = img._origSize
+    else:
+        (iw, ih) = defsize
 
-  ## position
-  winmax=sw/float(2)
-  # horz=-1 => -400 for 800 wide screen
-  horzpos=horz*winmax
-  halfimgsize=scalew*iw/2.0
-  # are we partially off the screen? max edges perfect
-  if   horzpos - halfimgsize < -winmax :
-      horzpos = halfimgsize - winmax
-  elif horzpos + halfimgsize > winmax:
-      horzpos = winmax - halfimgsize
-  # set
-  img.pos=(horzpos,0)
+    (sw, sh) = img.win.size
+    img.units = 'pixels'
 
-  ## draw if we are not None
-  if filename is not None:
-      img.draw()
+    # resize img
+    scalew = ratio(sw, iw, imgpercent)
+    # scaleh= ratio(sh,ih,imgpercent)
+    # scale evenly in relation to x-axis
+    # img.size=(scalew*iw,scalew*sw/sh*ih) # if units were 'norm'
+    img.size = (scalew*iw, scalew*ih)  # square pixels
+    # img._requestedSize => (80,80) if imgprecent=.1*sw=800
 
-  return(img.pos)
+    # # position
+    winmax = sw/float(2)
+    # horz=-1 => -400 for 800 wide screen
+    horzpos = horz*winmax
+    halfimgsize = scalew*iw/2.0
+    # are we partially off the screen? max edges perfect
+    if horzpos - halfimgsize < -winmax:
+        horzpos = halfimgsize - winmax
+    elif horzpos + halfimgsize > winmax:
+        horzpos = winmax - halfimgsize
+    # set
+    img.pos = (horzpos, 0)
+
+    # # draw if we are not None
+    if filename is not None:
+        img.draw()
+
+    return(img.pos)
 
 
 def parse_onsets(onsetsprefix):
@@ -249,7 +224,7 @@ def parse_onsets(onsetsprefix):
     """
     onsets = read_timing(onsetsprefix)
     # first event is 'cue'. sort onsets dict by first onset time. pick first
-    firstevent = sorted([ (k, min(v)) for k,v in onsets.items() ],key=lambda x: x[1] )[0][0] 
+    firstevent = sorted([(k, min(v)) for k, v in onsets.items()], key=lambda x: x[1])[0][0]
     if len(onsets) < 1:
         raise Exception("nothing to do! No onsets parsed from %s" % onsetsprefix)
     
@@ -285,7 +260,7 @@ def parse_onsets(onsetsprefix):
     # cue comes before vgs so is all messed up
     # the previous forwardfill fillna didn't do good things.
     # fix that with back fill
-    df.loc[df.event=='cue',['side','imgtype']]=numpy.NaN
+    df.loc[df.event == 'cue', ['side', 'imgtype']] = numpy.NaN
     df = df.fillna(method='bfill')
 
     # trial wide format
@@ -296,25 +271,24 @@ def parse_onsets(onsetsprefix):
 
     # reset columns
     trialdf.columns = [i[1] if i[0] == 'onset' else i[0]
-                        for i in trialdf.columns]
+                       for i in trialdf.columns]
 
-    
     return(trialdf)
 
 
 def gen_imagedf(path_dict):
     """
-    find images and label to be merged with task 
+    find images and label to be merged with task
     input is dict {'label: ['path/to/globimgs','path2'],..}
     - label matches vgs_ file names
     output is "imgtype","image" dataframe
-    - imgtype names matches parse_onsets 
+    - imgtype names matches parse_onsets
     """
-    #path_dict={'Inside': ['SUN/circle_select/inside/*png'],
-    #           'Outside': ['SUN/circle_select/outside_man/*png',
-    #                       'SUN/circle_select/outside_nat/*png',
-    #                      ]
-    #           }
+    # path_dict={'Inside': ['SUN/circle_select/inside/*png'],
+    #            'Outside': ['SUN/circle_select/outside_man/*png',
+    #                        'SUN/circle_select/outside_nat/*png',
+    #                       ]
+    #            }
     # go through each label and the files that match all
     # patterns provided
     labeled_image_list = []
@@ -323,19 +297,21 @@ def gen_imagedf(path_dict):
             for img in glob.glob(p):
                 labeled_image_list.append([label, img])
 
+    print(path_dict.items())
+    print(labeled_image_list)
     df = pandas.DataFrame(labeled_image_list)
     df.columns = ['imgtype', 'imgfile']
     df['used'] = False
     return(df)
 
 
-def gen(timingglob='stims/mri/135154167238784597/*'):
+def gen(imgset='A', timingglob='stims/mri/135154167238784597/*'):
     """
     this is here for example usage. probably not called by anthing
     """
-    path_dict = {'Indoor':  ['img/inside/*png'],
-                 'Outdoor': ['img/outside_man/*png',
-                             'img/outside_nat/*png',
+    path_dict = {'Indoor':  ['img/' + imgset + '/inside/*png'],
+                 'Outdoor': ['img/' + imgset + '/outside_man/*png',
+                             'img/' + imgset + '/outside_nat/*png',
                              ]}
     imagedf = gen_imagedf(path_dict)
     trialdf = parse_onsets(timingglob)
@@ -456,7 +432,7 @@ class mgsTask:
         self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
 
         # # for quiz
-        self.text_KU = visual.TextStim(win, text='kown or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
+        self.text_KU = visual.TextStim(win, text='known or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
         self.text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
 
         self.dir_key_text   = [(self.accept_keys['left'],   'left         '),
@@ -535,11 +511,11 @@ class mgsTask:
             # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
         if self.usePP:
             # send code, or 100 if cannot find
-            thistrigger = eventToTTL(event,side,catagory)
+            thistrigger = eventToTTL(event, side, catagory)
             self.send_ttl(thistrigger)
 
 
-    def send_ttl(self,thistrigger):
+    def send_ttl(self, thistrigger):
         """
         send ttl trigger to parallel port (setup by init_PP)
         wait 10ms and send 0
@@ -547,10 +523,10 @@ class mgsTask:
         self.port.setData(thistrigger)
         if self.verbose:
             print("eeg code %s" % thistrigger)
-        core.wait(.01) # wait 10ms and send zero
+        core.wait(.01)  # wait 10ms and send zero
         self.port.setData(0)
 
-    def wait_for_scanner(self, trigger,msg='Waiting for scanner (pulse trigger)'):
+    def wait_for_scanner(self, trigger, msg='Waiting for scanner (pulse trigger)'):
         """
         wait for scanner trigger press
         start any auxilary things (eyetracking for mri, ttl for eeg)
@@ -562,7 +538,7 @@ class mgsTask:
         self.win.flip()
         event.waitKeys(keyList=trigger)
         starttime = core.getTime()
-        self.start_aux() #eyetracking/parallel port
+        self.start_aux()  # eyetracking/parallel port
         self.run_iti()
         return(starttime)
 
@@ -573,7 +549,7 @@ class mgsTask:
           iti_fix visual.TextStim
         """
         self.iti_fix.draw()
-        self.win.callOnFlip(self.log_and_code,'iti',None,None)
+        self.win.callOnFlip(self.log_and_code, 'iti', None, None)
         showtime = self.win.flip()
         logging.flush()
         if(iti > 0):
@@ -593,7 +569,8 @@ class mgsTask:
 
         self.crcl.pos = imgpos
         self.crcl.draw()
-        self.win.callOnFlip(self.log_and_code,'img',posstr,imgtype,logh,takeshots,num=2)
+        self.win.callOnFlip(self.log_and_code, 'img', posstr, imgtype,
+                            logh, takeshots, num=2)
         wait_until(imgon)
         showtime = self.win.flip()
         return(showtime)
@@ -611,10 +588,10 @@ class mgsTask:
         ision = starttime + t['dly']
         mgson = starttime + t['mgs']
         mgsoff = mgson + tr
-        imgfile = t['imgfile']
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
+        # give header for output if this is the first trial
         if t.thisN == 0:
             print("")
             print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
@@ -636,24 +613,28 @@ class mgsTask:
         cueflipt = self.win.flip()
 
         # show an image if we have one to show
-        vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'], logh, takeshots)
+        vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'],
+                                 logh, takeshots)
 
         # back to fix
         self.isi_fix.draw()
         wait_until(ision)
-        self.win.callOnFlip(self.log_and_code, 'isi',t['side'], t['imgtype'], logh, takeshots, 3)
+        self.win.callOnFlip(self.log_and_code, 'isi', t['side'], t['imgtype'],
+                            logh, takeshots, 3)
         isiflipt = self.win.flip()
 
         # memory guided (recall)
         # -- empty screen nothing to draw
-        self.win.callOnFlip(self.log_and_code, 'mgs',t['side'], t['imgtype'], logh, takeshots, 4)
+        self.win.callOnFlip(self.log_and_code, 'mgs', t['side'], t['imgtype'],
+                            logh, takeshots, 4)
         wait_until(mgson)
         mgsflipt = self.win.flip()
         # after this fil
         wait_until(mgsoff)
 
         # send back all the flip times
-        return({'cue':cueflipt,'vgs': vgsflipt,'dly': isiflipt,'mgs': mgsflipt})
+        return({'cue': cueflipt, 'vgs': vgsflipt, 'dly': isiflipt,
+                'mgs': mgsflipt})
 
         # coded with wait instead of wait_until:
         # # get ready
@@ -677,67 +658,75 @@ class mgsTask:
         origtext = feedback.text
 
         # get list of tuple (keypush,rt)
-        t = event.waitKeys(keyList=validkeys, maxWait=maxtime, timeStamped=timer)
-        # we're only going to look at single button pushes (already only accepting 2 or 3 keys)
+        t = event.waitKeys(keyList=validkeys, maxWait=maxtime,
+                           timeStamped=timer)
+        # we're only going to look at single button pushes
+        # already only accepting 2 or 3 keys
         if(t is not None and len(t) == 1):
             (keypressed, rt) = t[0]
             for (k, txt) in keys_text_tupple:
                 if(keypressed == k):  # TODO, allow multple keys?
                     feedback.text = txt
                     break
-    
-            feedback.draw();
-            self.win.flip();
-            feedback.text=origtext
+
+            feedback.draw()
+            self.win.flip()
+            feedback.text = origtext
         # no response or too many responses means no keypress and no rt
         else:
-            t=[(None,None)]
+            t = [(None, None)]
         # wait to finish
-        while(timer.getTime() < maxtime ): pass
+        while(timer.getTime() < maxtime):
+            pass
         # give key and rt
         return(t[0])
-    
-        
-    """
-    run a recall trial. 
-    globals:
-     img, text_KU, text_LR, dir_key_text, known_key_text
-    """
-    def recall_trial(self,imgfile): 
+
+    def recall_trial(self, imgfile, rspmax=1.5):
+        """
+        run a recall trial.
+        globals:
+         img, text_KU, text_LR, dir_key_text, known_key_text
+        """
         # draw the image and the text (keep image on across flips)
-        replace_img(self.img,imgfile,0,.25)
+        replace_img(self.img, imgfile, 0, .25)
         self.img.setAutoDraw(True)
         self.text_KU.draw()
-        self.win.flip() 
-        
-        self.timer.reset();
+        self.win.flip()
+
+        self.timer.reset()
         # do we know this image?
-        (knowkey,knowrt) = self.key_feedback( self.known_key_text, self.text_KU, self.timer,1.5)
+        (knowkey, knowrt) = self.key_feedback(self.known_key_text,
+                                              self.text_KU, self.timer, rspmax)
 
         # end early if we have not seen this before
-        if( knowkey != self.accept_keys['known']):
-          self.img.setAutoDraw(False);
-          return( (knowkey,None), (knowrt,None) )
-    
+        if(knowkey != self.accept_keys['known']):
+            self.img.setAutoDraw(False)
+            # TODO: maybe wait so we are not incentivising unknown
+            return((knowkey, None), (knowrt, None))
+
         # we think we remember this image, do we remember where it was
-        self.text_LR.draw(); self.win.flip()
+        self.text_LR.draw()
+        self.win.flip()
 
-        self.timer.reset();
-        (dirkey,dirrt) = self.key_feedback( self.dir_key_text, self.text_LR, self.timer,1.5)
-    
-        self.img.setAutoDraw(False);
-        return( (knowkey,dirkey), (knowrt,dirrt) )
+        self.timer.reset()
+        (dirkey, dirrt) = self.key_feedback(self.dir_key_text,
+                                            self.text_LR, self.timer, rspmax)
 
-    """
-    quick def to flip, stall half a second, and wait for any key
-    """
-    def instruction_flip(self): self.win.flip();core.wait(.4);event.waitKeys()
+        self.img.setAutoDraw(False)
+        return((knowkey, dirkey), (knowrt, dirrt))
 
-        
-    """
-    saccade task instructions
-    """
+    def instruction_flip(self):
+        """
+        quick def to flip, stall half a second, and wait for any key
+        """
+        self.win.flip()
+        core.wait(.4)
+        event.waitKeys()
+
     def sacc_instructions(self):
+        """
+        saccade task instructions
+        """
 
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
@@ -759,7 +748,7 @@ class mgsTask:
         self.textbox.draw()
         self.instruction_flip()
 
-        self.textbox.pos = (-.9,.9)
+        self.textbox.pos = (-.9, .9)
         self.textbox.text = 'Prep: get ready to look at an image'
         self.textbox.draw()
         self.cue_fix.draw()
@@ -793,20 +782,19 @@ class mgsTask:
         send stop codes for parallel port
         close eyetracking file
         """
-        self.stop_aux() # end ttl, close eye file
+        self.stop_aux()  # end ttl, close eye file
         self.textbox.pos = (-.2, 0)
         self.textbox.text = 'Finished %d/%d!' % (run, nruns)
         self.textbox.draw()
         self.instruction_flip()
 
 
-def gen_run_info(nruns, datadir,task='mri'):
+def gen_run_info(nruns, datadir, imgset, task='mri'):
     """
     load or make and save
     timing for all blocks at once
     - useful to guaranty unique timing files and images
     - used images saved for recall
-    
     task is mri or eeg
     """
     # where do we save this file?
@@ -819,15 +807,15 @@ def gen_run_info(nruns, datadir,task='mri'):
             return(pickle.load(f))
 
     # images
-    path_dict = {'Indoor':  ['img/inside/*png'],
-                 'Outdoor': ['img/outside_man/*png',
-                             'img/outside_nat/*png',
+    path_dict = {'Indoor':  ['img/' + imgset + '/inside/*png'],
+                 'Outdoor': ['img/' + imgset + '/outside_man/*png',
+                             'img/' + imgset + '/outside_nat/*png',
                              ]}
     imagedf = gen_imagedf(path_dict)
 
     # get enough timing files for all runs
     alltimingdirs = glob.glob(os.path.join('stims', task, '[0-9]*[0-9]'))
-    print("loading task timing for %s: %s" % (task,alltimingdirs))
+    print("loading task timing for %s: %s" % (task, alltimingdirs))
 
     thistimings = shuf_for_ntrials(alltimingdirs, nruns)
     # allocate array

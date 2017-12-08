@@ -11,7 +11,8 @@ import datetime
 import sys
 import os
 import socket # gethostname
-from mgs_task import mgsTask, gen_run_info, replace_img, take_screenshot, wait_until
+import datetime # to set timepoint
+from mgs_task import mgsTask, gen_run_info, replace_img, take_screenshot, wait_until, getSubjectDataPath
 # from mgs_task import *
 
 # # settings
@@ -36,6 +37,9 @@ isfullscreen = True
 useArrington = False
 useParallel = False
 tasktype = 'mri'
+imgset='A'
+# 2018 is tp1
+timepoint = datetime.datetime.now().year - 2017 
 getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
 # # different defaults for different computers
@@ -58,7 +62,7 @@ elif host in hosts['test']:
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg='TESTING TESTING TESTING'
 else:
-    print("dont know about %s, just doing whatever" % host)
+    print("dont know about %s, not changing defaults" % host)
 
 
 # # get subj info
@@ -77,6 +81,8 @@ else:
     box.addField("eyetracking (mr)?", useArrington)
     box.addField("ttl (eeg)?", useParallel)
     box.addField("timing type", tasktype, choices=run_total_time.keys())
+    box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
+    box.addField("Image Set", imgset, choices=['A','B'])
 
     boxdata = box.show()
     if box.OK:
@@ -87,6 +93,8 @@ else:
         useArrington = boxdata[4]
         useParallel = boxdata[5]
         tasktype = boxdata[6]
+        timepoint = boxdata[7]
+        imgset = boxdata[8]
     else:
         sys.exit(1)
 
@@ -104,16 +112,12 @@ subjid = subjnum
 # C:\Users\Public\Desktop\Tasks\mgs_encode_memory.py\
 
 # # paths
-savepath = 'subj_info'
-datadir = os.path.join(savepath, subjid,tasktype)
-logdir = os.path.join(datadir, 'log')
-for thisoutdir in [savepath, datadir, logdir]:
-    if not os.path.exists(thisoutdir):
-        os.makedirs(thisoutdir)
+# like: "subj_info/10931/01_eeg_A"
+(datadir,logdir) = getSubjectDataPath(subjid,tasktype,imgset,timepoint)
 
 # # get all_runs_info
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
-all_runs_info = gen_run_info(nruns, datadir, task=tasktype)
+all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 
 # this is probably unecessary
 # accept_keys = {'known':'k', 'unknown': 'd', 'left':'d','right':'k', 'oops':'o'}
