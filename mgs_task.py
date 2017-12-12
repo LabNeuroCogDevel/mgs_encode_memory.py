@@ -393,6 +393,20 @@ def msg_screen(win, textbox, msg='no message given', pos=(0, 0)):
     event.waitKeys()
 
 
+def create_window(fullscr):
+    """ create window either fullscreen or 800,600
+    hide mouse cursor and make active
+    """
+    # setup screen
+    if fullscr:
+        win = visual.Window(fullscr=fullscr)
+    else:
+        win = visual.Window([800, 600])
+
+    win.winHandle.activate()  # make sure the display window has focus
+    win.mouseVisible = False  # and that we don't see the mouse
+    return(win)
+
 class mgsTask:
     # initialize all the compoents we need
     def __init__(self,
@@ -403,7 +417,13 @@ class mgsTask:
                               'right':   'k',
                               'oops':    'o'},
                  useArrington=False,
-                 usePP=False):
+                 usePP=False,
+                 fullscreen=True):
+        # were we given a window?
+        # make our own if not
+        if win is None:
+            win = create_window(fullscreen)
+
         # settings for eyetracking and parallel port ttl (eeg)
         thisscript=os.path.abspath( os.path.dirname(__file__) )
         #self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")

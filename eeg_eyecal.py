@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- elpy-use-ipython: "ipython"; -*-
 
-from psychopy import visual, core, data, event
 from mgs_task import mgsTask, wait_until
 import numpy as np
 
@@ -13,21 +12,12 @@ usePP = isfullscreen
 fixdur = 1
 dotdur = .5
 
-# setup screen
-if isfullscreen:
-    win = visual.Window(fullscr=True)
-else:
-    win = visual.Window([800, 600])
-
-win.winHandle.activate()  # make sure the display window has focus
-win.mouseVisible = False  # and that we don't see the mouse
-
 # setup task (get send_ttl, crcl, iti_fix)
-task = mgsTask(win, usePP = usePP)
+task = mgsTask(None, usePP=usePP, fullscreen=isfullscreen)
 
-# get 20 positions from 20% to 90% 
-pos = np.linspace(.2,.9,20)
-allpos =   np.concatenate( [pos, -1 * pos]) 
+# get 20 positions from 20% to 90%
+pos = np.linspace(.2, .9, 20)
+allpos = np.concatenate([pos, -1 * pos])
 ridx = np.random.permutation(len(allpos))
 
 # fixed for all presentations
@@ -38,13 +28,16 @@ ridx = np.random.permutation(len(allpos))
 # for testing:
 # ridx=[0,39,19,20]
 
-def print_and_ttl(msg,ttl):
+
+def print_and_ttl(msg, ttl):
     print(msg)
     if usePP:
         task.send_ttl(ttl)
 
-task.wait_for_scanner(['space'],'Ready?')
-task.send_code('start',None,None)
+
+task.wait_for_scanner(['space'], 'Ready?')
+# wait for scan sends start code
+# task.send_code('start', None, None)
 
 winwidth = task.win.size[0]/2
 print(winwidth)
@@ -54,14 +47,16 @@ for ri in range(len(ridx)):
     p = allpos[i] * winwidth
 
     # ttl -- avoid 128 and 129 (start and stop)
-    posttl = i + 1   # 1 - 40
-    fixttl = i + 201 # 201 - 240
+    posttl = i + 1    # 1 - 40
+    fixttl = i + 201  # 201 - 240
 
     # draw cricle
-    task.crcl.pos = (p,0)
+    task.crcl.pos = (p, 0)
     task.crcl.draw()
-    win.callOnFlip(print_and_ttl,"p at %.02fx (%.02fpx)" % (allpos[i], p), posttl)
-    ft=win.flip()
+    task.win.callOnFlip(print_and_ttl,
+                        "p at %.02fx (%.02fpx)" % (allpos[i], p),
+                        posttl)
+    ft = task.win.flip()
     # wait a bit
     wait_until(ft + dotdur)
 
@@ -70,12 +65,12 @@ for ri in range(len(ridx)):
 
     # draw cross
     task.iti_fix.draw()
-    win.callOnFlip(print_and_ttl,"back to fix", fixttl)
-    ft=win.flip()
+    task.win.callOnFlip(print_and_ttl, "back to fix", fixttl)
+    ft = task.win.flip()
     # wait a bit
     wait_until(ft + fixdur)
 
 
 # all done, wrap up
-task.send_code('end',None,None)
-win.close()
+task.send_code('end', None, None)
+task.win.close()
