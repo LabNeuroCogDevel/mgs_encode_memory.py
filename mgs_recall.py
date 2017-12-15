@@ -12,7 +12,7 @@ import pandas as pd
 import glob
 import os
 import sys
-from mgs_task import mgsTask, response_should_be, getInfoFromDataPath
+from mgs_task import mgsTask, response_should_be, getInfoFromDataPath, imagedf_to_novel
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -45,18 +45,7 @@ with open(pckl, 'rb') as p:
 
 # pick some novel stims
 imdf = run_data['imagedf']
-# TODO, subset natural and man made?
-nused = imdf[imdf.used].\
-        groupby('imgtype').\
-        aggregate({'used': lambda x: x.shape[0]})
-# resample from unused each type as needed
-novelimg = pd.concat([
-    imdf[(imdf.used == False) &
-         (imdf.imgtype == r[0])].
-    sample(r[1].used)
-    for r in nused.iterrows()])
-# add empty position
-novelimg['pos'] = float("nan")
+novelimg = imagedf_to_novel(imdf)
 
 # # select what we've seen
 # put all runs together
@@ -114,6 +103,7 @@ for t in recall_trials:
     recall_trials.addData('dir_key', keypresses[1])
     recall_trials.addData('know_rt', rts[0])
     recall_trials.addData('dir_rt', rts[1])
+    print("%s %s %s %s" % (t['imgtype'],keypresses, grade,t['imgfile'])  )
     # finish with iti
     task.run_iti(.5)
 

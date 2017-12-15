@@ -308,13 +308,13 @@ def gen_imagedf(path_dict):
     labeled_image_list = []
     for label, paths in path_dict.items():
         for p in paths:
+            subdir= os.path.basename(os.path.dirname(p))
             for img in glob.glob(p):
-                labeled_image_list.append([label, img])
+                labeled_image_list.append([label, img,subdir])
 
     print(path_dict.items())
-    print(labeled_image_list)
     df = pandas.DataFrame(labeled_image_list)
-    df.columns = ['imgtype', 'imgfile']
+    df.columns = ['imgtype', 'imgfile','subtype']
     df['used'] = False
     return(df)
 
@@ -341,11 +341,27 @@ def pick_n_from_group(x, cnts):
     take_n = min([want_n,have_n])
     return(x.sample(take_n))
 
+def dist_total_into_n(total,n):
+    """ 
+    @param: total - total to be distrubuted
+    @param: n - number of elements
+    @return: n length array that sums to total
+    """
+    if n == 0 or total == 0:
+        return([])
+    arr = [ float(total)/float(n) ]*n
+    arr[0] = int(numpy.ceil(arr[0]))
+    arr[1:] = [ int(numpy.floor(x)) for x in arr[1:] ]
+    if numpy.sum(arr) != total:
+        raise ValueError('total %d not matched in %s' %(total,arr))
+    numpy.random.shuffle(arr)
+    return(arr)
     
 def gen_stimlist_df(imagedf,trialdf):
     """
     given a trial df and an image df
     return "stimlist" array of dicts describing each trial
+    N.B. operations on imagedf are inplace as well as returned!
     """
     
     # dataframe gets a new colum for the image file
@@ -363,24 +379,47 @@ def gen_stimlist_df(imagedf,trialdf):
             if thisevent == 'None':
                 continue
             # TODO if len > 0 resample some
-            print("WARNING: %s: not enough images (need %d > have %d)" % (thisevent,needn,len(img_aval)) )
+            print("WARNING: %s: not enough images (need %d > have %d)" % (searchstr,needn,len(img_aval)) )
         else: 
-            trialdf.loc[idx,'imgfile'] = list(img_aval.sample(needn).imgfile)
-
-    # set what we used in imagedf
-    for f in pandas.unique(trialdf.imgfile):
-        fileidx = imagedf.imgfile == f
-        if any(fileidx):
-            imagedf.loc[ fileidx ,'used'] = True
-        else:
-            if f is not None:
-                print("WARNING: %s is not in imagedf! Where did it come from!?" % f)
-
-
-    # set None to empty string
-    #nofileidx = [x is None for x in trialdf.imgfile]
-    #trialdf.loc[nofileidx,'imgfile'] = ''
-
+            # within the trial type there maybe a subtype (outside_man, outside_nat)
+            subtypes = pandas.unique(img_aval.subtype)
+            if len(subtypes) <= 1:
+                # this condition is not needed. below would work fine for even n=1
+                # left for clarity 
+                this_samp = img_aval.sample(needn)
+                trialdf.loc[idx,'imgfile'] = this_samp.imgfile.values
+                #print('%s: setting %d to used' % (subtypes[0], len(this_samp.index)))
+                imagedf.loc[ this_samp.index, 'used' ] = True
+            else:
+                # if we have 10 trials and 2 types
+                # needns will be [5, 5]
+                needns = dist_total_into_n(needn,len(subtypes))
+                # shuffle the index of trial df that need this imagetype
+                # so we can assing images to random trials (within imagetype)
+                idx_shuf=list(idx)
+                numpy.random.shuffle(idx_shuf)
+                starti=0
+                # print('dist subtypes: %s for %s' % (needns,subtypes))
+                for i in range(len(subtypes)):
+                    # use index to get values
+                    # starti-endi is what indexes to pull from trialdf idx
+                    thissubtype = subtypes[i]
+                    num=needns[i]
+                    endi=starti+num
+                    # narrow what images we take
+                    img_aval = imagedf.query(searchstr + " & subtype == @thissubtype & used == False")
+                    intoidx = idx_shuf[starti:endi]
+                    # what if we dont have enough images!?
+                    if len(img_aval) < num:
+                        print("WARNING: %s+%s: not enough images (need %d > have %d)"
+                              % (thisevent, thissubtype, needn,len(img_aval)))
+                    # sample the avaible images, mark as used 
+                    this_samp = img_aval.sample(num)
+                    usethese = this_samp.imgfile.values
+                    trialdf.loc[intoidx,'imgfile'] = usethese
+                    imagedf.loc[ this_samp.index, 'used' ] = True
+                    # update the new starti for trialdf idx
+                    starti=endi
     return(imagedf, trialdf)
 
 
@@ -880,6 +919,7 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
         trialdf = parse_onsets(timingglob)
         # add images to trialdf, update imagedf with which are used
         (imagedf, trialdf) = gen_stimlist_df(imagedf, trialdf)
+        #print("nused = %d for %d" % (imagedf[imagedf.used].shape[0], trialdf.shape[0]))
         # check
         if(any(numpy.diff(trialdf.vgs) < 0)):
             raise Exception('times are not monotonically increasing! bad timing!')
@@ -893,3 +933,31 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
         pickle.dump(subj_runs_info, f)
 
     return(subj_runs_info)
+
+
+def imagedf_to_novel(imdf):
+    """
+    take an imagedf with imgtype,subtype and used column
+    return shuffled df with just the unused images matched on number of used
+    """
+    nused = imdf[imdf.used].\
+            groupby(['imgtype','subtype']).\
+            aggregate({'used': lambda x: x.shape[0]})
+    nused['aval'] = imdf[~imdf.used].\
+            groupby(['imgtype','subtype'])['used'].\
+            apply(lambda x: x.shape[0])
+    print(nused)
+    if(any(nused.used > nused.aval)):
+        print("WARNING: will see more repeats than novel images!")
+    
+    # use as many as we can
+    # might not be balanced!
+    novelimg = pandas.concat([
+        imdf[(imdf.used == False) &
+             (imdf.imgtype == r[0][0]) &
+             (imdf.subtype == r[0][1]) ].
+        sample(min(r[1].aval,r[1].used))
+        for r in nused.iterrows()])
+    # add empty position
+    novelimg['pos'] = float("nan")
+    return(novelimg)
