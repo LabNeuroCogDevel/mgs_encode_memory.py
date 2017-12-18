@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-# 
+#
 # vgs or anti (color of cross, value of trigger code)
 #
 
@@ -15,19 +15,20 @@ import sys
 # ---------- TASK CONFIG ----------------------
 # how long to wait at each event
 # iti is only variable, num trials set on lenght of iti vec
-dur = {'iti': [.5]*8 + [1]*4 + [1.5]*2 + [2] + [2.5],
+dur = {'iti': [1]*20 + [1.5]*10 + [2]*5 + [2.5]*3 + [3]*2,
        'cue': .5,
-       'dot': .5
-      }
+       'dot': 1
+       }
 positions = [-1, -.5, .5, 1]
 
 cue_colors = {'anti': 'red', 'vgs': 'green'}
-cue_instrs = {'anti': 'away from', 'vgs': 'to' }
+cue_instrs = {'anti': 'away from', 'vgs': 'to'}
 
 
 # ---------- RUN SETTINGS --------------------
 # get settings with gui prompt
-settings = {'tasktype': ['vgs','anti'], 'fullscreen':True, 'instructions': True,'usePP': True}
+settings = {'tasktype': ['vgs', 'anti'], 'fullscreen': True,
+            'instructions': True, 'usePP': True}
 box = gui.DlgFromDict(settings)
 if not box.OK:
     sys.exit(1)
@@ -43,8 +44,8 @@ cue_instr = cue_instrs[settings['tasktype']]
 # ANTI
 #  cue: 101 103 104 105
 #  dot: 151 153 154 155
-eventTTLlookup = {'cue': 0, 'dot': 50} # iti = 254 | start = 128 | end = 129
-def print_and_ttl(event,pos,tasktype=settings['tasktype']):
+eventTTLlookup = {'cue': 0, 'dot': 50}  # iti = 254 | start = 128 | end = 129
+def print_and_ttl(event, pos, tasktype=settings['tasktype']):
     # left to right 1 to 5 from -1 -.5 .5 1 | no 0 (center), never see 3
     pos_code = pos*2 + 3  
     ttl = pos_code + \
@@ -66,7 +67,7 @@ pos = shuf_for_ntrials(positions,ntrials)
     
 # ---------- GO --------------------------
 # setup task (get send_ttl, crcl, iti_fix)
-task = mgsTask(None, usePP = settings['usePP'], fullscreen=settings['fullscreen'])
+task = mgsTask(None, usePP=settings['usePP'], fullscreen=settings['fullscreen'])
 
 # instructions
 if settings['instructions']:
@@ -125,11 +126,9 @@ for ri in range(ntrials):
     timing.append(flip)
 
 
-
 # ---------- WRAP UP --------------------------
 # all done, wrap up
 wait_until(nextonset + .5)
-task.send_code('end',None,None)
-
-task.wait_for_scanner(['space'],'Finished!')
+task.send_ttl(129)  # end task
+task.wait_for_scanner(['space'], 'Finished!')
 task.win.close()

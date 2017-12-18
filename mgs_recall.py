@@ -12,7 +12,8 @@ import pandas as pd
 import glob
 import os
 import sys
-from mgs_task import mgsTask, response_should_be, getInfoFromDataPath, imagedf_to_novel
+from mgs_task import mgsTask, response_should_be, \
+                     getInfoFromDataPath, imagedf_to_novel
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -31,8 +32,8 @@ accept_keys = {'known': '1',
 # list all subject pickle files.
 # sort by modification date
 # used in dropdown dialog
-allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x) )
-settings = {'recall_from': allsubjs, 'fullscreen':True, 'instructions': True}
+allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
+settings = {'recall_from': allsubjs, 'fullscreen': True, 'instructions': True}
 box = gui.DlgFromDict(settings)
 
 # exit if we dont hit okay
@@ -45,7 +46,9 @@ datadir = os.path.dirname(pckl)
 (subjid, tasktype, imgset, timepoint) = getInfoFromDataPath(datadir)
 
 # load run info
-with open(pckl, 'rb') as p:
+#with open(pckl, 'rb') as p:
+with open(pckl) as p:
+    print(pckl)
     run_data = pickle.load(p)
 
 
@@ -57,19 +60,19 @@ novelimg = imagedf_to_novel(imdf)
 # put all runs together
 seendf = pd.concat(run_data['run_timing'])
 # get just the images and their side
-seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile','imgtype']]
+seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile', 'imgtype']]
 # convert side to position (-1 '*Left', 1 if '*Right')
 seendf['pos'] = [('Left' in x) * -1 + ('Right' in x)*1 for x in seendf['side']]
 # combine them
-trialdf = pd.concat([seendf[['imgfile', 'pos','imgtype']],
-                     novelimg[['imgfile', 'pos','imgtype']]]).\
+trialdf = pd.concat([seendf[['imgfile', 'pos', 'imgtype']],
+                     novelimg[['imgfile', 'pos', 'imgtype']]]).\
                      sample(frac=1)
 
 # set correct keys and format for trialhandler
 trialdict = trialdf.T.to_dict().values()
 trialdict = [
         dict(x.items() +
-            {'corkeys': response_should_be(x['pos'], accept_keys)}.items())
+             {'corkeys': response_should_be(x['pos'], accept_keys)}.items())
         for x in trialdict]
 
 seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d%H%M%S")
@@ -91,6 +94,7 @@ win.mouseVisible = False  # and that we dont see the mouse
 
 # task class
 task = mgsTask(win, accept_keys)
+task.init_recall_side()
 
 if settings['instructions']:
     task.recall_instructions()
@@ -110,10 +114,12 @@ for t in recall_trials:
     recall_trials.addData('dir_key', keypresses[1])
     recall_trials.addData('know_rt', rts[0])
     recall_trials.addData('dir_rt', rts[1])
-    print("%s %s %s %s" % (t['imgtype'],keypresses, grade,t['imgfile'])  )
+    print("%s %s %s %s" % (t['imgtype'], keypresses, grade, t['imgfile']))
     # finish with iti
     task.run_iti(.5)
 
 # save results to recall.csv inside datadir
 saveas = os.path.join(datadir, 'recall_%s.csv' % seconds)
 recall_trials.data.to_csv(saveas)
+task.wait_for_scanner(['space'], 'Finished!')
+task.win.close()

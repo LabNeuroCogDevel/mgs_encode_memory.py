@@ -38,6 +38,7 @@ def getInfoFromDataPath(datadir):
     from subj_info/someid/01_eeg_A
     to ("someid", "eeg", "A", 1 ) 
     """
+    print(datadir)
     justdir = re.sub(".*subj_info"+os.path.sep,"",datadir)
     (subjid, taskinfo) = os.path.split(justdir)
     (timepoint, imgset, tasktype) = taskinfo.split("_")
@@ -506,20 +507,44 @@ class mgsTask:
         self.timer = core.Clock()
 
         # could have just one and change the color
-        self.iti_fix = visual.TextStim(win, text='+',name='iti_fixation',color='white')
-        self.isi_fix = visual.TextStim(win, text='+',name='isi_fixation',color='yellow')
-        self.cue_fix = visual.TextStim(win, text='+',name='cue_fixation',color='red')
-        self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
+        self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation', color='white')
+        self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation', color='yellow')
+        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='red')
+        self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
+                                       alignHoriz='left', color='white',
+                                       wrapWidth=2)
 
         # # for quiz
         self.text_KU = visual.TextStim(win, text='seen, maybe seen | maybe unseen, unseen',name='KnownUnknown',color='white',pos=(0,-.75))
         self.text_LR = visual.TextStim(win, text='far left, near left | near right, far right',name='LeftRight',color='white',pos=(0,-.75))
 
-        self.dir_key_text   = [(self.accept_keys['left'],   'left         '),
-                                (self.accept_keys['right'],  '        right'),
-                                (self.accept_keys['oops'],   '    oops     ')]
-        self.known_key_text = [(self.accept_keys['known'],   'known           '),
-                               (self.accept_keys['unknown'], '         unknown')]
+        # for recall only:
+        # tuplet of keys and text: like ('1', 'text after pushed')
+        self.dir_key_text = [
+                             (self.accept_keys['left'],   'left'),
+                             (self.accept_keys['nearleft'],  '   left'),
+                             (self.accept_keys['nearright'],  'right    '),
+                             (self.accept_keys['right'],  '        right'),
+                             (self.accept_keys['oops'],   '    oops     ')
+                             ]
+        self.known_key_text = [
+                               (self.accept_keys['known'], 'known'),
+                               (self.accept_keys['maybeknown'], 'known'),
+                               (self.accept_keys['maybeunknown'], 'unkown'),
+                               (self.accept_keys['unknown'], 'unknown')
+                               ]
+
+        # show side
+        self.recall_sides = [visual.Circle(win, radius=10, lineColor=None,
+                                           fillColor='yellow',
+                                           units='pix',
+                                           name="recall_dot%d" % x)
+                             for x in range(4)]
+        self.recall_txt = [visual.TextStim(win, text=str(x),
+                                           color='black',
+                                           units='pix',
+                                           name='recall_%d' % x)
+                           for x in range(4)]
 
     def eyetracking_newfile(self, fname):
         # start a new file and pause it
@@ -534,7 +559,7 @@ class mgsTask:
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Pause 0')
         if(self.usePP):
-            self.send_code('start',None,None)
+            self.send_code('start', None, None)
 
     def stop_aux(self):
         """
@@ -543,7 +568,7 @@ class mgsTask:
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Close 0')
         if(self.usePP):
-            self.send_code('end',None,None)
+            self.send_code('end', None, None)
 
     def init_vpx(self):
         if not hasattr(self, 'vpx'):
@@ -556,8 +581,6 @@ class mgsTask:
             if self.vpx.VPX_GetStatus(1) < 1:
                 Exception('ViewPoint is not running!')
             self.vpx.VPX_SendCommand('say "mgs_task is connected"')
-
-
 
     def init_PP(self):
         # TODO: TEST SOMEWHERE
@@ -600,6 +623,7 @@ class mgsTask:
         send ttl trigger to parallel port (setup by init_PP)
         wait 10ms and send 0
         """
+        thistrigger = int(thistrigger)
         self.port.setData(thistrigger)
         if self.verbose:
             print("eeg code %s" % thistrigger)
@@ -735,6 +759,7 @@ class mgsTask:
           win
         """
         validkeys = [x[0] for x in keys_text_tupple]
+        #validkeys = ['1','2','3','4']
         origtext = feedback.text
 
         # get list of tuple (keypush,rt)
@@ -756,7 +781,7 @@ class mgsTask:
         else:
             t = [(None, None)]
         # wait to finish
-        while(timer.getTime() < maxtime):
+        while(maxtime != numpy.Inf and timer.getTime() < maxtime):
             pass
         # give key and rt
         return(t[0])
@@ -785,7 +810,17 @@ class mgsTask:
         self.textbox.draw()
         self.instruction_flip()
 
-    def recall_trial(self, imgfile, rspmax=1.5):
+    def init_recall_side(self):
+        pos = [-1, -.5, .5, 1]
+        keys = [self.accept_keys[x]
+                for x in ['left', 'nearleft', 'nearright', 'right']]
+        for i in range(len(pos)):
+            self.recall_sides[i].pos = \
+                    replace_img(self.img, None, pos[i], self.imgratsize)
+            self.recall_txt[i].pos = self.recall_sides[i].pos
+            self.recall_txt[i].text = str(keys[i])
+
+    def recall_trial(self, imgfile, rspmax=numpy.Inf):
         """
         run a recall trial.
         globals:
@@ -800,21 +835,27 @@ class mgsTask:
         self.timer.reset()
         # do we know this image?
         (knowkey, knowrt) = self.key_feedback(self.known_key_text,
-                                              self.text_KU, self.timer, rspmax)
+                                              self.text_KU, self.timer,
+                                              rspmax)
 
         # end early if we have not seen this before
-        if(knowkey != self.accept_keys['known']):
+        knownkeys = [self.accept_keys['maybeknown'], self.accept_keys['known']]
+        if(knowkey not in knownkeys):
             self.img.setAutoDraw(False)
             # TODO: maybe wait so we are not incentivising unknown
             return((knowkey, None), (knowrt, None))
 
         # we think we remember this image, do we remember where it was
         self.text_LR.draw()
+        for i in range(4):
+            self.recall_sides[i].draw()
+            self.recall_txt[i].draw()
         self.win.flip()
 
         self.timer.reset()
         (dirkey, dirrt) = self.key_feedback(self.dir_key_text,
-                                            self.text_LR, self.timer, rspmax)
+                                            self.text_LR, self.timer,
+                                            rspmax)
 
         self.img.setAutoDraw(False)
         return((knowkey, dirkey), (knowrt, dirrt))

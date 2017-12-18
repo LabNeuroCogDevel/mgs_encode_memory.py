@@ -4,7 +4,7 @@
 from mgs_task import mgsTask, wait_until
 import numpy as np
 
-isfullscreen = False
+isfullscreen = True
 # if we are fullscreen, we're at eeg and want to send ttl too
 usePP = isfullscreen
 
