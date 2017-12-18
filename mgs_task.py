@@ -174,12 +174,19 @@ def response_should_be(pos, accept_keys):
     position==nan means it was never seen
     neg. position is left, positive position is right
     """
+
+    # are we "near" left or right
+    if( pos != round(pos,0) ):
+        near_str =' near'
+    else:
+        near_str = ''
+
     if(math.isnan(pos)):
         return((accept_keys['unknown'], accept_keys['oops']))
     elif(pos < 0):
-        return((accept_keys['known'], accept_keys['left']))
+        return((accept_keys['known'], accept_keys[near_str + 'left']))
     elif(pos > 0):
-        return((accept_keys['known'], accept_keys['right']))
+        return((accept_keys['known'], accept_keys[near_str + 'right']))
     else:
         raise ValueError('bad pos?! how!?')
 
@@ -505,8 +512,8 @@ class mgsTask:
         self.textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
 
         # # for quiz
-        self.text_KU = visual.TextStim(win, text='known or unknown',name='KnownUnknown',color='white',pos=(0,-.75))
-        self.text_LR = visual.TextStim(win, text='left or right',name='LeftRight',color='white',pos=(0,-.75))
+        self.text_KU = visual.TextStim(win, text='seen, maybe seen | maybe unseen, unseen',name='KnownUnknown',color='white',pos=(0,-.75))
+        self.text_LR = visual.TextStim(win, text='far left, near left | near right, far right',name='LeftRight',color='white',pos=(0,-.75))
 
         self.dir_key_text   = [(self.accept_keys['left'],   'left         '),
                                 (self.accept_keys['right'],  '        right'),
@@ -763,10 +770,14 @@ class mgsTask:
         self.textbox.text = \
            'STEPS:\n\n'+ \
            '1. push %s if you already saw the image.\n' % self.accept_keys['known'] + \
+           '   push %s if you saw the image, but are uncertian\n' %  self.accept_keys['maybeknown'] + \
+           '   push %s if the image is new, but are uncertian\n' %  self.accept_keys['maybeunknown'] + \
            '   push %s if the image is new\n\n' %  self.accept_keys['unknown'] + \
            '2. If you have seen the image:\n' + \
-           '   push %s if you saw it on the left OR\n' % self.accept_keys['left'] + \
-           '   push %s if you saw it on the right\n'  % self.accept_keys['right']+ \
+           '   push %s if you saw it on the far left\n' % self.accept_keys['left'] + \
+           '   push %s if you saw it on the near left\n' % self.accept_keys['nearleft'] + \
+           '   push %s if you saw it on the near right\n'  % self.accept_keys['nearright']+ \
+           '   push %s if you saw it on the far right\n'  % self.accept_keys['right']+ \
            '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] + \
            'NOTE: you have 1.5 seconds to respond.\n' + \
            'Responding faster does not make the task go faster.'

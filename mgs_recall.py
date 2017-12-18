@@ -18,9 +18,15 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # where do we store data?
 pkl_glb = os.path.join('subj_info', '*', '*', 'runs_info.pkl')
 # what keys do we use?
-accept_keys = {'known': '2', 'unknown': '3',
-               'left': '2', 'right': '3',
-               'oops': '1'}
+accept_keys = {'known': '1',
+               'maybeknown': '2',
+               'maybeunknown': '3',
+               'unknown': '4',
+               'left': '1',
+               'nearleft': '2',
+               'nearright': '3',
+               'right': '4',
+               'oops': '5'}
 
 # list all subject pickle files.
 # sort by modification date
@@ -95,6 +101,7 @@ blockstarttime = task.wait_for_scanner(['space', 'escape'], 'ready?')
 # # run recall quiz trials
 # blocktimer.reset()
 for t in recall_trials:
+    print(t['corkeys'])
     (keypresses, rts) = task.recall_trial(t['imgfile'])
     grade = [expect == given
              for expect, given in zip(t['corkeys'], keypresses)]
