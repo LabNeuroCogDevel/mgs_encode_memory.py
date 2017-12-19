@@ -47,7 +47,7 @@ datadir = os.path.dirname(pckl)
 
 # load run info
 #with open(pckl, 'rb') as p:
-with open(pckl) as p:
+with open(pckl, 'rU') as p:
     print(pckl)
     run_data = pickle.load(p)
 

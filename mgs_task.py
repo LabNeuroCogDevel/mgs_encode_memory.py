@@ -793,20 +793,20 @@ class mgsTask:
 
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
-           'STEPS:\n\n'+ \
+           'STEPS:\n\n' + \
            '1. push %s if you already saw the image.\n' % self.accept_keys['known'] + \
-           '   push %s if you saw the image, but are uncertian\n' %  self.accept_keys['maybeknown'] + \
-           '   push %s if the image is new, but are uncertian\n' %  self.accept_keys['maybeunknown'] + \
-           '   push %s if the image is new\n\n' %  self.accept_keys['unknown'] + \
+           '   push %s if you saw the image, but are uncertian\n' % self.accept_keys['maybeknown'] + \
+           '   push %s if the image is new, but are uncertian\n' % self.accept_keys['maybeunknown'] + \
+           '   push %s if the image is new\n\n' % self.accept_keys['unknown'] + \
            '2. If you have seen the image:\n' + \
            '   push %s if you saw it on the far left\n' % self.accept_keys['left'] + \
            '   push %s if you saw it on the near left\n' % self.accept_keys['nearleft'] + \
-           '   push %s if you saw it on the near right\n'  % self.accept_keys['nearright']+ \
-           '   push %s if you saw it on the far right\n'  % self.accept_keys['right']+ \
-           '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] + \
+           '   push %s if you saw it on the near right\n' % self.accept_keys['nearright'] + \
+           '   push %s if you saw it on the far right\n' % self.accept_keys['right'] + \
            'NOTE: you have 1.5 seconds to respond.\n' + \
            'Responding faster does not make the task go faster.'
 
+        # '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] + \
         self.textbox.draw()
         self.instruction_flip()
 
@@ -948,7 +948,7 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
     # if we have it, just return it
     if os.path.exists(runs_info_file):
         print('reusing timing/image selection from %s' % runs_info_file)
-        with open(runs_info_file, 'r') as f:
+        with open(runs_info_file, 'rU') as f:
             return(pickle.load(f))
 
     # images
@@ -981,7 +981,7 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
     subj_runs_info = {'imagedf': imagedf, 'run_timing': run_timing}
 
     # save what we have
-    with open(runs_info_file, 'w') as f:
+    with open(runs_info_file, 'wb') as f:
         pickle.dump(subj_runs_info, f)
 
     return(subj_runs_info)
