@@ -23,10 +23,10 @@ accept_keys = {'known': '1',
                'maybeknown': '2',
                'maybeunknown': '3',
                'unknown': '4',
-               'left': '1',
-               'nearleft': '2',
-               'nearright': '3',
-               'right': '4',
+               'Left': '1',
+               'NearLeft': '2',
+               'NearRight': '3',
+               'Right': '4',
                'oops': '5'}
 
 # list all subject pickle files.
