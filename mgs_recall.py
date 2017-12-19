@@ -34,11 +34,26 @@ accept_keys = {'known': '1',
 # used in dropdown dialog
 allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
 settings = {'recall_from': allsubjs, 'fullscreen': True, 'instructions': True}
-box = gui.DlgFromDict(settings)
 
-# exit if we dont hit okay
-if not box.OK:
-    sys.exit(1)
+# --- test vs actual settings
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    iscodetest = True
+    from psychopy.hardware.emulator import ResponseEmulator
+    import random
+    import gc
+    # no instructions, pick first (in time) data file
+    settings = {'recall_from': allsubjs[-1],
+                'fullscreen': False,
+                'instructions': False}
+    # clear the get ready screen
+    r = ResponseEmulator([(5, 'space')])
+    r.start()
+else:
+    iscodetest = False
+    box = gui.DlgFromDict(settings)
+    # exit if we dont hit okay
+    if not box.OK:
+        sys.exit(1)
 
 # read in and parse
 pckl = settings['recall_from']
@@ -46,7 +61,6 @@ datadir = os.path.dirname(pckl)
 (subjid, tasktype, imgset, timepoint) = getInfoFromDataPath(datadir)
 
 # load run info
-#with open(pckl, 'rb') as p:
 with open(pckl, 'rU') as p:
     print(pckl)
     run_data = pickle.load(p)
@@ -105,8 +119,20 @@ blockstarttime = task.wait_for_scanner(['space', 'escape'], 'ready?')
 # # run recall quiz trials
 # blocktimer.reset()
 for t in recall_trials:
-    print(t['corkeys'])
+    print("correct keys: %s" % list(t['corkeys']))
+    if iscodetest:
+        resp = random.randint(1, 4)
+        if resp <= 2:
+            resparr = [(.5, resp),
+                       (.75, random.randint(1, 4))]
+        else:
+            resparr = [(1, resp)]
+        gc.collect()
+        print("responding: %s" % resparr)
+        r = ResponseEmulator(resparr)
+        r.start()
     (keypresses, rts) = task.recall_trial(t['imgfile'])
+
     grade = [expect == given
              for expect, given in zip(t['corkeys'], keypresses)]
     # add key and rt
@@ -121,5 +147,6 @@ for t in recall_trials:
 # save results to recall.csv inside datadir
 saveas = os.path.join(datadir, 'recall_%s.csv' % seconds)
 recall_trials.data.to_csv(saveas)
+print('saved %s' % saveas)
 task.wait_for_scanner(['space'], 'Finished!')
 task.win.close()
