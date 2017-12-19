@@ -177,17 +177,17 @@ def response_should_be(pos, accept_keys):
     """
 
     # are we "near" left or right
-    if( pos != round(pos,0) ):
-        near_str =' near'
+    if(pos != round(pos, 0)):
+        near_str = 'Near'
     else:
         near_str = ''
 
     if(math.isnan(pos)):
         return((accept_keys['unknown'], accept_keys['oops']))
     elif(pos < 0):
-        return((accept_keys['known'], accept_keys[near_str + 'left']))
+        return((accept_keys['known'], accept_keys[near_str + 'Left']))
     elif(pos > 0):
-        return((accept_keys['known'], accept_keys[near_str + 'right']))
+        return((accept_keys['known'], accept_keys[near_str + 'Right']))
     else:
         raise ValueError('bad pos?! how!?')
 
@@ -454,15 +454,20 @@ def create_window(fullscr):
     win.mouseVisible = False  # and that we don't see the mouse
     return(win)
 
+
 class mgsTask:
     # initialize all the compoents we need
     def __init__(self,
                  win,
-                 accept_keys={'known':   'k',
-                              'unknown': 'd',
-                              'left':    'd',
-                              'right':   'k',
-                              'oops':    'o'},
+                 accept_keys={'known':        '4',
+                              'maybeunknown': '3',
+                              'maybeknown':   '2',
+                              'unknown':      '1',
+                              'Left':         '1',
+                              'NearLeft':     '2',
+                              'NearRight':    '3',
+                              'Right':        '4',
+                              'oops':         '5'},
                  useArrington=False,
                  usePP=False,
                  fullscreen=True):
@@ -509,7 +514,7 @@ class mgsTask:
         # could have just one and change the color
         self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation', color='white')
         self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation', color='yellow')
-        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='red')
+        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='lightblue')
         self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
                                        alignHoriz='left', color='white',
                                        wrapWidth=2)
@@ -521,10 +526,10 @@ class mgsTask:
         # for recall only:
         # tuplet of keys and text: like ('1', 'text after pushed')
         self.dir_key_text = [
-                             (self.accept_keys['left'],   'left'),
-                             (self.accept_keys['nearleft'],  '   left'),
-                             (self.accept_keys['nearright'],  'right    '),
-                             (self.accept_keys['right'],  '        right'),
+                             (self.accept_keys['Left'],   'left'),
+                             (self.accept_keys['NearLeft'],  '   left'),
+                             (self.accept_keys['NearRight'],  'right    '),
+                             (self.accept_keys['Right'],  '        right'),
                              (self.accept_keys['oops'],   '    oops     ')
                              ]
         self.known_key_text = [
@@ -799,10 +804,10 @@ class mgsTask:
            '   push %s if the image is new, but are uncertian\n' % self.accept_keys['maybeunknown'] + \
            '   push %s if the image is new\n\n' % self.accept_keys['unknown'] + \
            '2. If you have seen the image:\n' + \
-           '   push %s if you saw it on the far left\n' % self.accept_keys['left'] + \
-           '   push %s if you saw it on the near left\n' % self.accept_keys['nearleft'] + \
-           '   push %s if you saw it on the near right\n' % self.accept_keys['nearright'] + \
-           '   push %s if you saw it on the far right\n' % self.accept_keys['right'] + \
+           '   push %s if you saw it on the far left\n' % self.accept_keys['Left'] + \
+           '   push %s if you saw it on the near left\n' % self.accept_keys['NearLeft'] + \
+           '   push %s if you saw it on the near right\n' % self.accept_keys['NearRight'] + \
+           '   push %s if you saw it on the far right\n' % self.accept_keys['Right'] + \
            'NOTE: you have 1.5 seconds to respond.\n' + \
            'Responding faster does not make the task go faster.'
 
@@ -813,7 +818,7 @@ class mgsTask:
     def init_recall_side(self):
         pos = [-1, -.5, .5, 1]
         keys = [self.accept_keys[x]
-                for x in ['left', 'nearleft', 'nearright', 'right']]
+                for x in ['Left', 'NearLeft', 'NearRight', 'Right']]
         for i in range(len(pos)):
             self.recall_sides[i].pos = \
                     replace_img(self.img, None, pos[i], self.imgratsize)

@@ -119,13 +119,6 @@ subjid = subjnum
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
 all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 
-# this is probably unecessary
-# accept_keys = {'known':'k', 'unknown': 'd',
-#                'left':'d','right':'k', 'oops':'o'}
-
-accept_keys = {'known': '2', 'unknown': '3',
-               'left': '2', 'right': '3',
-               'oops': '1'}
 
 # # screen setup
 # win = visual.Window([400,400],screen=0)
@@ -137,7 +130,7 @@ else:
 win.winHandle.activate()  # make sure the display window has focus
 win.mouseVisible = False  # and that we don't see the mouse
 
-task = mgsTask(win, accept_keys, useArrington=useArrington, usePP=useParallel)
+task = mgsTask(win, useArrington=useArrington, usePP=useParallel)
 
 
 # # instructions
