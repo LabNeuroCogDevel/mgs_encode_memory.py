@@ -36,14 +36,14 @@ def getInfoFromDataPath(datadir):
     get subject info from path
     expects os.dirname(pkl_file)
     from subj_info/someid/01_eeg_A
-    to ("someid", "eeg", "A", 1 ) 
+    to ("someid", "eeg", "A", 1 )
     """
     print(datadir)
-	# match to subj_info directory with 
-	# dir delimiter like linux (/) or windows (\, escaped as \\\)
+    # match to subj_info directory with
+    # dir delimiter like linux (/) or windows (\, escaped as \\\)
     rm_str = ".*subj_info[/\\\\]"
     print(rm_str)
-    justdir = re.sub(rm_str,"",datadir)
+    justdir = re.sub(rm_str, "", datadir)
     (subjid, taskinfo) = os.path.split(justdir)
     (timepoint, imgset, tasktype) = taskinfo.split("_")
     timepoint = int(timepoint)
@@ -137,7 +137,8 @@ def read_timing(onsetprefix):
 
 def shuf_for_ntrials(vec, ntrials):
     '''
-     shuf_for_ntrials creates a shuffled vector repeated to match the number of trials
+     shuf_for_ntrials creates a shuffled vector
+     repeated to match the number of trials
     '''
     nitems = len(vec)
     if nitems == 0 or ntrials == 0:
@@ -163,11 +164,12 @@ def wait_until(stoptime, maxwait=30):
     """
     just like core.wait, but instead of waiting a duration
     we wait until a stoptime.
-    optional maxwait will throw an error if we are wating too long 
+    optional maxwait will throw an error if we are wating too long
     so we dont get stuck. defaults to 30 seconds
     """
     if stoptime - core.getTime() > maxwait:
-        raise ValueError("requiest to wait until stoptime is more than 30 seconds, secify maxwait to avoid this error")
+        raise ValueError("request to wait until stoptime is more than " +
+                         "30 seconds, secify maxwait to avoid this error")
     # will hog cpu -- no pyglet.media.dispatch_events here
     while core.getTime() < stoptime:
         continue
@@ -250,10 +252,12 @@ def parse_onsets(onsetsprefix):
     """
     onsets = read_timing(onsetsprefix)
     # first event is 'cue'. sort onsets dict by first onset time. pick first
-    firstevent = sorted([(k, min(v)) for k, v in onsets.items()], key=lambda x: x[1])[0][0]
+    firstevent = sorted([(k, min(v)) for k, v in onsets.items()],
+                        key=lambda x: x[1])[0][0]
     if len(onsets) < 1:
-        raise Exception("nothing to do! No onsets parsed from %s" % onsetsprefix)
-    
+        raise Exception("nothing to do! No onsets parsed from %s" %
+                        onsetsprefix)
+
     # make long format data frame
     d = pandas.DataFrame([[k, t] for k, v in onsets.items() for t in v])
     d.columns = ['event', 'onset']
@@ -320,13 +324,13 @@ def gen_imagedf(path_dict):
     labeled_image_list = []
     for label, paths in path_dict.items():
         for p in paths:
-            subdir= os.path.basename(os.path.dirname(p))
+            subdir = os.path.basename(os.path.dirname(p))
             for img in glob.glob(p):
-                labeled_image_list.append([label, img,subdir])
+                labeled_image_list.append([label, img, subdir])
 
     print(path_dict.items())
     df = pandas.DataFrame(labeled_image_list)
-    df.columns = ['imgtype', 'imgfile','subtype']
+    df.columns = ['imgtype', 'imgfile', 'subtype']
     df['used'] = False
     return(df)
 
@@ -350,32 +354,34 @@ def pick_n_from_group(x, cnts):
     print('looking at %s' % imgtype)
     want_n = cnts.get(imgtype, 0)
     print('want %d' % want_n)
-    take_n = min([want_n,have_n])
+    take_n = min([want_n, have_n])
     return(x.sample(take_n))
 
-def dist_total_into_n(total,n):
-    """ 
+
+def dist_total_into_n(total, n):
+    """
     @param: total - total to be distrubuted
     @param: n - number of elements
     @return: n length array that sums to total
     """
     if n == 0 or total == 0:
         return([])
-    arr = [ float(total)/float(n) ]*n
+    arr = [float(total)/float(n)]*n
     arr[0] = int(numpy.ceil(arr[0]))
-    arr[1:] = [ int(numpy.floor(x)) for x in arr[1:] ]
+    arr[1:] = [int(numpy.floor(x)) for x in arr[1:]]
     if numpy.sum(arr) != total:
-        raise ValueError('total %d not matched in %s' %(total,arr))
+        raise ValueError('total %d not matched in %s' % (total, arr))
     numpy.random.shuffle(arr)
     return(arr)
-    
-def gen_stimlist_df(imagedf,trialdf):
+
+
+def gen_stimlist_df(imagedf, trialdf):
     """
     given a trial df and an image df
     return "stimlist" array of dicts describing each trial
     N.B. operations on imagedf are inplace as well as returned!
     """
-    
+
     # dataframe gets a new colum for the image file
     trialdf['imgfile'] = None
     # go through each event type
@@ -385,53 +391,55 @@ def gen_stimlist_df(imagedf,trialdf):
         idx = trialdf.query(searchstr).index
         needn = len(idx)
         if(needn <= 0):
-            print("WARNING: need 0 trials of %s?! how is that possible?" % thisevent )
+            print("WARNING: need 0 trials of %s?! how is that possible?" %
+                  thisevent)
         img_aval = imagedf.query(searchstr + " & used == False")
         if len(img_aval) < needn:
             if thisevent == 'None':
                 continue
             # TODO if len > 0 resample some
-            print("WARNING: %s: not enough images (need %d > have %d)" % (searchstr,needn,len(img_aval)) )
-        else: 
+            print("WARNING: %s: not enough images (need %d > have %d)" %
+                  (searchstr, needn, len(img_aval)))
+        else:
             # within the trial type there maybe a subtype (outside_man, outside_nat)
             subtypes = pandas.unique(img_aval.subtype)
             if len(subtypes) <= 1:
                 # this condition is not needed. below would work fine for even n=1
-                # left for clarity 
+                # left for clarity
                 this_samp = img_aval.sample(needn)
-                trialdf.loc[idx,'imgfile'] = this_samp.imgfile.values
-                #print('%s: setting %d to used' % (subtypes[0], len(this_samp.index)))
-                imagedf.loc[ this_samp.index, 'used' ] = True
+                trialdf.loc[idx, 'imgfile'] = this_samp.imgfile.values
+                # print('%s: setting %d to used' % (subtypes[0], len(this_samp.index)))
+                imagedf.loc[this_samp.index, 'used'] = True
             else:
                 # if we have 10 trials and 2 types
                 # needns will be [5, 5]
-                needns = dist_total_into_n(needn,len(subtypes))
+                needns = dist_total_into_n(needn, len(subtypes))
                 # shuffle the index of trial df that need this imagetype
                 # so we can assing images to random trials (within imagetype)
-                idx_shuf=list(idx)
+                idx_shuf = list(idx)
                 numpy.random.shuffle(idx_shuf)
-                starti=0
+                starti = 0
                 # print('dist subtypes: %s for %s' % (needns,subtypes))
                 for i in range(len(subtypes)):
                     # use index to get values
                     # starti-endi is what indexes to pull from trialdf idx
                     thissubtype = subtypes[i]
-                    num=needns[i]
-                    endi=starti+num
+                    num = needns[i]
+                    endi = starti+num
                     # narrow what images we take
                     img_aval = imagedf.query(searchstr + " & subtype == @thissubtype & used == False")
                     intoidx = idx_shuf[starti:endi]
                     # what if we dont have enough images!?
                     if len(img_aval) < num:
                         print("WARNING: %s+%s: not enough images (need %d > have %d)"
-                              % (thisevent, thissubtype, needn,len(img_aval)))
-                    # sample the avaible images, mark as used 
+                              % (thisevent, thissubtype, needn, len(img_aval)))
+                    # sample the avaible images, mark as used
                     this_samp = img_aval.sample(num)
                     usethese = this_samp.imgfile.values
-                    trialdf.loc[intoidx,'imgfile'] = usethese
-                    imagedf.loc[ this_samp.index, 'used' ] = True
+                    trialdf.loc[intoidx, 'imgfile'] = usethese
+                    imagedf.loc[this_samp.index, 'used'] = True
                     # update the new starti for trialdf idx
-                    starti=endi
+                    starti = endi
     return(imagedf, trialdf)
 
 
@@ -481,8 +489,8 @@ class mgsTask:
             win = create_window(fullscreen)
 
         # settings for eyetracking and parallel port ttl (eeg)
-        thisscript=os.path.abspath( os.path.dirname(__file__) )
-        #self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")
+        # thisscript=os.path.abspath(os.path.dirname(__file__))
+        # self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")
         self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
         self.useArrington = useArrington
         # # eyetracking
@@ -508,9 +516,11 @@ class mgsTask:
         self.win = win
         self.accept_keys = accept_keys
 
-        # allocate screen parts 
-        self.img = visual.ImageStim(win,name="imgdot") #,AutoDraw=False)
-        self.crcl = visual.Circle(win,radius=10,lineColor=None,fillColor='yellow',name="circledot") #,AutoDraw=False)
+        # allocate screen parts
+        self.img = visual.ImageStim(win, name="imgdot")
+        self.crcl = visual.Circle(win, radius=10, lineColor=None,
+                                  fillColor='yellow', name="circledot")
+        #  ,AutoDraw=False)
         self.crcl.units = 'pix'
 
         self.timer = core.Clock()
@@ -688,7 +698,7 @@ class mgsTask:
         showtime = self.win.flip()
         return(showtime)
 
-    def sacc_trial(self, t, starttime=0, takeshots=None, logh=None, tr=2):
+    def sacc_trial(self, t, starttime=0, takeshots=None, logh=None):
         """
         saccade trial
          globals:
@@ -700,7 +710,6 @@ class mgsTask:
         imgon = starttime + t['vgs']
         ision = starttime + t['dly']
         mgson = starttime + t['mgs']
-        mgsoff = mgson + tr
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
@@ -721,19 +730,22 @@ class mgsTask:
 
         # get ready red target
         self.cue_fix.draw()
+        self.win.callOnFlip(self.log_and_code, 'cue', t['side'], t['imgtype'],
+                            logh, takeshots, 1)
+
         wait_until(cueon)
-        self.log_and_code('cue', t['side'], t['imgtype'], logh, takeshots, 1)
         cueflipt = self.win.flip()
 
         # show an image if we have one to show
         vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'],
-                                 logh, takeshots)
+                                 logh, takeshots, 2)
 
         # back to fix
         self.isi_fix.draw()
-        wait_until(ision)
         self.win.callOnFlip(self.log_and_code, 'isi', t['side'], t['imgtype'],
                             logh, takeshots, 3)
+
+        wait_until(ision)
         isiflipt = self.win.flip()
 
         # memory guided (recall)
@@ -742,8 +754,10 @@ class mgsTask:
                             logh, takeshots, 4)
         wait_until(mgson)
         mgsflipt = self.win.flip()
-        # after this fil
-        wait_until(mgsoff)
+
+        # ----
+        # N.B. after this filp we still need to wait MGS wait time
+        # ---
 
         # send back all the flip times
         return({'cue': cueflipt, 'vgs': vgsflipt, 'dly': isiflipt,
@@ -768,7 +782,7 @@ class mgsTask:
           win
         """
         validkeys = [x[0] for x in keys_text_tupple]
-        #validkeys = ['1','2','3','4']
+        # validkeys = ['1','2','3','4']
         origtext = feedback.text
 
         # get list of tuple (keypush,rt)
