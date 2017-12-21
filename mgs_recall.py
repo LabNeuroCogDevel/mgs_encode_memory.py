@@ -33,7 +33,7 @@ accept_keys = {'known': '1',
 # sort by modification date
 # used in dropdown dialog
 allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
-settings = {'recall_from': allsubjs, 'fullscreen': True, 'instructions': True}
+settings = {'recall_from': allsubjs, 'fullscreen': True, 'instructions': True, 'lastrun': 4}
 
 # --- test vs actual settings
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
@@ -44,7 +44,8 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     # no instructions, pick first (in time) data file
     settings = {'recall_from': allsubjs[-1],
                 'fullscreen': False,
-                'instructions': False}
+                'instructions': False,
+				'lastrun': 4}
     # clear the get ready screen
     r = ResponseEmulator([(5, 'space')])
     r.start()
@@ -65,14 +66,24 @@ with open(pckl, 'rU') as p:
     print(pckl)
     run_data = pickle.load(p)
 
-
-# pick some novel stims
+# select what we've seen 
+# put all runs together
+lastrunidx = settings['lastrun']
+seendf = pd.concat(run_data['run_timing'][0:lastrunidx])
+	
+# --- pick some novel stims --
 imdf = run_data['imagedf']
+# but remove images we haven't seen (but should have)
+if(settings['lastrun'] < len(run_data['run_timing']) ):
+	actuallysaw = pd.unique(seendf['imgfile'])
+	unsee = [x not in actuallysaw for x in imdf['imgfile'] ]
+	imdf.loc[unsee,'used'] = False
+
+# from that, make a novelimg dataset
+# with columns that match 
 novelimg = imagedf_to_novel(imdf)
 
-# # select what we've seen
-# put all runs together
-seendf = pd.concat(run_data['run_timing'])
+
 # get just the images and their side
 seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile', 'imgtype']]
 # convert side to position (-1 '*Left', 1 if '*Right')

@@ -2,6 +2,9 @@
 from psychopy import visual, core,  event, logging
 from mgs_task import mgsTask, msg_screen
 
+# todo test if eyetracking streamer is open
+[ psutil.Process(p).name() for p in psutil.pids() ]
+
 win = visual.Window([400, 300])
 textbox = visual.TextStim(win, text='**',name='generic_textbox',alignHoriz='left',color='white',wrapWidth=2)
 

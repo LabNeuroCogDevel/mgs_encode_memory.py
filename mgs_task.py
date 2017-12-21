@@ -39,7 +39,11 @@ def getInfoFromDataPath(datadir):
     to ("someid", "eeg", "A", 1 ) 
     """
     print(datadir)
-    justdir = re.sub(".*subj_info"+os.path.sep,"",datadir)
+	# match to subj_info directory with 
+	# dir delimiter like linux (/) or windows (\, escaped as \\\)
+    rm_str = ".*subj_info[/\\\\]"
+    print(rm_str)
+    justdir = re.sub(rm_str,"",datadir)
     (subjid, taskinfo) = os.path.split(justdir)
     (timepoint, imgset, tasktype) = taskinfo.split("_")
     timepoint = int(timepoint)
