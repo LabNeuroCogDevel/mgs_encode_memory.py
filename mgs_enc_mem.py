@@ -157,10 +157,11 @@ if tasktype == 'test':
 for runi in range(start_runnum-1, nruns):
     run = runi + 1
     print("### run %d" % run)
+    
     trialdf = all_runs_info['run_timing'][runi]
 
     seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
-
+    
     # # logging
     logfilename = "info_%s_%d_%s.log" % (subjid, run, seconds)
     logfile = os.path.join(logdir, logfilename)

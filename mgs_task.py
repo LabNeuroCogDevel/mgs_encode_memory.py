@@ -568,6 +568,8 @@ class mgsTask:
     def eyetracking_newfile(self, fname):
         # start a new file and pause it
         if(self.useArrington):
+            if self.verbose:
+                print("opening eyetracking file %s" % fname)
             self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
 
@@ -738,7 +740,7 @@ class mgsTask:
 
         # show an image if we have one to show
         vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'],
-                                 logh, takeshots, 2)
+                                 logh, takeshots)
 
         # back to fix
         self.isi_fix.draw()
