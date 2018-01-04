@@ -1,0 +1,160 @@
+#+TITLE: TTL trigger time
+* COMMENT doc setup
+# Local Variables:
+# org-babel-python-command: "python3"
+#+BEGIN_SRC elisp
+(setq org-babel-python-command "python3")
+#+END_SRC
+
+
+* get trigger times
+** finding and formating the trigger channel
+   #+BEGIN_SRC python :session :exports none :results none
+ import mne
+ # -- plotting --
+ # ipython
+ # %matplotlib inline
+ # python
+ import matplotlib
+ matplotlib.use('Agg')
+ import matplotlib.pyplot as plt
+
+ import numpy as np
+ import pandas as pd
+ from scipy import stats
+
+ # directory we'll write too
+ if not os.path.exists('imgs'):
+     os.makedirs('imgs')
+
+ testfile = 'Orma-MGS.bdf'
+ #+END_SRC
+ We'll read in from a pilot file src_python[:session]{testfile} {{{results(=Orma-MGS.bdf=)}}}
+
+ The ~Status~ channel contains triggers. It the 143rd channel.
+   #+BEGIN_SRC python :session :exports none :results none
+ # reading in allthe data tkes some time
+ d = mne.io.read_raw_edf(testfile)
+ #d.ch_names:  Status == 143
+ ttlidx = np.where(np.array(d.ch_names) == 'Status')
+
+ # get "Status" channel
+ # initial values
+ #remove min to get actual values sent
+ #start, stop = d.time_as_index([100,200])
+ data, times = d[ttlidx,:]
+   #+END_SRC
+
+
+ The channel values are scaled unexpectedly --- 
+ src_python[:session]{"%.1f to %.1f" % (data.min(),data.max())} {{{results(=-6800384.0 to -6734848.0=)}}}. 
+ If we remove the min, we get mostly reasonable values. And if we remove anything above 260 (max should be 255),
+ we get the values we expect
+
+   #+BEGIN_SRC python :session :results file
+     # remove mode (0) -- b/c we set a trigger than go back to zero
+     nomode = lambda v:v[v != stats.mode(v)[0]]
+     # data as 1D vector
+     data1 = data[0,:]
+     # plotting and recovering 
+     # data as a 1D vector
+     f,ax = plt.subplots(3)
+
+     ax[0].set_title('raw ttl channel')
+     ax[0].hist(nomode(data1))
+
+     # remove min
+     data1 = data1 - data1.min()
+     ax[1].set_title('remove the min value')
+     ax[1].hist(nomode(data1))
+
+     # remove way to hight start values 
+     data1[data1 > 260 ] = 0
+     ax[2].set_title('only valid trigger values')
+     ax[2].hist(nomode(data1))
+
+     ttl_histname = 'imgs/ttl_hist.png'
+     plt.subplots_adjust(hspace=1)
+     f.savefig(ttl_histname)
+     f.close()
+     plt.close()
+     # last value is image file location, for org mode to export
+     ttl_histname
+
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:imgs/ttl_hist.png]]
+
+** extracting events
+mne python has a tool for this. But we need to muck with the values to get a rasonable ttl. 
+We can create a mock raw data object with our modified data and use the provided ~find_events~ function.
+  #+BEGIN_SRC python :session :results none
+  
+  # hacky: make a raw array to use find_events
+  # instead of doing our own 
+  toadd_info = mne.create_info(['stim'],d.info['sfreq'])
+  toadd_info['lowpass'] = d.info['lowpass']
+  toadd = mne.io.RawArray(data1.reshape((1,data1.shape[0])),toadd_info)
+  e = mne.find_events(toadd,stim_channel='stim')
+
+  # # -- durations --
+  # alldurs = sorted(np.diff(e[:,0])/toadd_info['sfreq'])
+  # # -- trigger counts --
+  # trigg_counts = [ (k,len(list(v))) for k,v in itertools.groupby(sorted(e[:,2])) ]
+ #+END_SRC
+**  between event durations
+With event onset times known, we can see how long events are between triggers.
+ #+BEGIN_SRC python :session :results file
+ # more exact compare 
+ def hist_dur(d, e1='cue', e2='vgs',phndl=plt):
+     a=edf_wide[e2] - edf_wide[e1]
+     a=a[np.isfinite(a)] 
+     phndl.hist(abs(a))
+     phndl.set_title('%s - %s' % (e2,e1) )
+     return(a)
+     # phndl.savefig('imgs/%s_%s.png' % (e2,e1) )
+     # phndl.gcf().clear()
+
+ # get a dataframe, identify the event  and pivot to long for diffs 
+ edf = pd.DataFrame({'ttl': e[:,2],'onset': e[:,0]/d.info['sfreq']})
+ edf['trial'] = np.cumsum(edf.ttl == 254 )
+ edf['event'] = pd.cut(edf.ttl,(0,100,150,200,250,300),labels=['cue','vgs','isi','mgs','iti'])
+ edf_wide =  edf.pivot(index='trial',columns='event',values='onset')
+ 
+ mkdict = lambda i,v: pd.DataFrame({'intv': i, 'vals': v})
+
+ f,ax = plt.subplots(4)
+ d=[mkdict('iti_cue', hist_dur(edf_wide, 'iti', 'cue',ax[0]))]
+ d.append(mkdict('cue_vgs',hist_dur(edf_wide, 'cue', 'vgs',ax[1])))
+ d.append(mkdict('vgs_isi',hist_dur(edf_wide, 'vgs', 'isi',ax[2])))
+ d.append(mkdict('isi_mgs',hist_dur(edf_wide, 'isi', 'mgs',ax[3])))
+ 
+ plt.subplots_adjust(hspace=1)
+ plt.suptitle('time between events')
+ f.savefig('imgs/between_itervals.png')
+ 'imgs/between_itervals.png'
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:imgs/between_itervals.png]]
+** onset variablity
+Durations fit what we expect. But for events with a fixed duration (2s between cue and vgs, and vgs and isi),
+we can see there is something like =20ms= of varaiblity. Maybe this matches screen flips?
+Lets look at the onset variablity by getting the time between an onset and the closest half second ---
+every onset should be locked to a multiple of .5 seconds.
+#+BEGIN_SRC python :session :results file
+import seaborn as sns
+plt.close('all')
+df = pd.concat(d)
+df['offset'] = [ abs(x*2 - round(x*2))/2 for x in df['vals'] ]
+#sns.boxplot(x="intv",y="offset",data=df)
+sns.swarmplot(x="intv",y="offset",data=df)
+plt.title('all durations - closest .5')
+plt.savefig('imgs/allintrv_from_integer.png')
+'imgs/allintrv_from_integer.png'
+#+END_SRC
+
+#+RESULTS:
+[[file:imgs/allintrv_from_integer.png]]
+
