@@ -17,7 +17,7 @@ from mgs_task import mgsTask, gen_run_info, \
 
 # # settings
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15}
-nruns = 4
+nruns = 3
 mgsdur = 2  # this is tr locked for fmri
 # TODO check against traildf max
 
