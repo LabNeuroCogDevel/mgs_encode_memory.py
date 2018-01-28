@@ -26,8 +26,10 @@
  # directory we'll write too
  if not os.path.exists('imgs'):
      os.makedirs('imgs')
-
+#+END_SRC
+#+BEGIN_SRC python :session :exports none :results none
  testfile = 'Orma-MGS.bdf'
+ testfile = '/Volumes/Phillips/Raw/EEG/BrainMechR01/Pilot/Kevin/Kevin-saccadetasks.bdf'
  #+END_SRC
  We'll read in from a pilot file src_python[:session]{testfile} {{{results(=Orma-MGS.bdf=)}}}
 

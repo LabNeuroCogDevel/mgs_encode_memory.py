@@ -6,13 +6,23 @@ cd $(dirname 0)
 #
 # calc efficiency score for all timings
 #
+mritimingroot=$(pwd)/mri/$1/ 
+[ -z "$1" -o ! -r $mritimingroot ] && echo "USAGE: $0 version (matches $(pwd)/mri_\$version)" && exit 1
+version=$1
+
 tr=2
-ntrs=210 # 420/2
+
+# ntrs varries by version
+if [[ $version =~ short ]]; then
+  ntrs=169 # 338/2
+else
+  ntrs=210 # 420/2
+fi
 
 
-outdir=$(pwd)/decon_txtout
+outdir=$(pwd)/mri_decon/txtout/$version
 [ ! -d $outdir ] && mkdir $outdir
-for d in $(pwd)/mri/*/; do
+for d in $mritimingroot/*/; do
    cd $d
    pwd
    saveprefix=$outdir/$(basename $d)_
@@ -46,8 +56,11 @@ for d in $(pwd)/mri/*/; do
 
    1d_tool.py -cormat_cutoff 0.1 -show_cormat_warnings -infile X.xmat.1D | 
    tee ${saveprefix}timing.txt
+   cd -
 
 done
 
+[ ! -r mri_decon/ ] && mkdir mri_decon
+
 # collect all conv files into one file
-perl -MFile::Basename -lne '$key=$2 if /(Gen|Stim).*: ([^ ]*)/; $h{basename($ARGV,"_convolve.txt")}{"${key}_$1"}=$2 if /^\W+(LC|h).*=.*?([0-9.]+)/;END{@vals=(keys %{$h{(keys %h)[0]}}); print join("\t","file",@vals); for my $f (keys %h){%_h = %{$h{$f}}; print join("\t",$f, @_h{@vals} )  } }'  decon_txtout/*_convolve.txt > mri_decon.txt
+perl -MFile::Basename -lne '$key=$2 if /(Gen|Stim).*: ([^ ]*)/; $h{basename($ARGV,"_convolve.txt")}{"${key}_$1"}=$2 if /^\W+(LC|h).*=.*?([0-9.]+)/;END{@vals=(keys %{$h{(keys %h)[0]}}); print join("\t","file",@vals); for my $f (keys %h){%_h = %{$h{$f}}; print join("\t",$f, @_h{@vals} )  } }'  $outdir/*_convolve.txt > mri_decon/$version.txt
