@@ -181,7 +181,8 @@ for runi in range(start_runnum-1, nruns):
 
     # # run saccade trials
     # blockstarttime=core.getTime()
-    task.eyetracking_newfile("%s_run%d_%s" % (subjid, run, seconds))
+    eyetrackingfile = '%s_run%d_%s.txt' % (subjid, run, seconds)
+    task.eyetracking_newfile('%s' % eyetrackingfile)
     blockstarttime = task.wait_for_scanner(scannerTriggerKeys, getReadyMsg)
     logging.log(level=logging.INFO,
                 msg='scanner trigger recieved at %d' % blockstarttime)

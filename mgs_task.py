@@ -568,10 +568,12 @@ class mgsTask:
     def eyetracking_newfile(self, fname):
         # start a new file and pause it
         if(self.useArrington):
-            if self.verbose:
-                print("opening eyetracking file %s" % fname)
-            self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
+            fname=str(fname)
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
+            self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
+            if self.verbose:
+                print("tried to open eyetracking file %s" % fname)
+                self.vpx.VPX_SendCommand('say "newfile %s"' % fname)
 
     def start_aux(self):
         """
@@ -632,6 +634,7 @@ class mgsTask:
             self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
             if self.verbose:
                 print("eye code %s" % ttlstr)
+                self.vpx.VPX_SendCommand('say "sent %s"'% ttlstr)
             # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
         if self.usePP:
             # send code, or 100 if cannot find
