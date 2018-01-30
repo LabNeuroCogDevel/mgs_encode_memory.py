@@ -33,7 +33,8 @@ accept_keys = {'known': '1',
 # sort by modification date
 # used in dropdown dialog
 allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
-settings = {'recall_from': allsubjs, 'fullscreen': True, 'instructions': True, 'lastrun': 4}
+settings = {'recall_from': allsubjs, 'fullscreen': True,
+            'instructions': True, 'lastrun': 3}
 
 # --- test vs actual settings
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
@@ -45,7 +46,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     settings = {'recall_from': allsubjs[-1],
                 'fullscreen': False,
                 'instructions': False,
-				'lastrun': 4}
+                'lastrun': 3}
     # clear the get ready screen
     r = ResponseEmulator([(5, 'space')])
     r.start()
