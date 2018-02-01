@@ -13,7 +13,8 @@ import glob
 import os
 import sys
 from mgs_task import mgsTask, response_should_be, \
-                     getInfoFromDataPath, imagedf_to_novel
+                     getInfoFromDataPath, imagedf_to_novel, \
+                     recallFromPickle
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -21,12 +22,12 @@ pkl_glb = os.path.join('subj_info', '*', '*', 'runs_info.pkl')
 # what keys do we use?
 accept_keys = {'known': '1',
                'maybeknown': '2',
-               'maybeunknown': '3',
-               'unknown': '4',
+               'maybeunknown': '9',
+               'unknown': '0',
                'Left': '1',
                'NearLeft': '2',
-               'NearRight': '3',
-               'Right': '4',
+               'NearRight': '9',
+               'Right': '0',
                'oops': '5'}
 
 # list all subject pickle files.
@@ -62,37 +63,7 @@ pckl = settings['recall_from']
 datadir = os.path.dirname(pckl)
 (subjid, tasktype, imgset, timepoint) = getInfoFromDataPath(datadir)
 
-# load run info
-with open(pckl, 'rU') as p:
-    print(pckl)
-    run_data = pickle.load(p)
-
-# select what we've seen 
-# put all runs together
-lastrunidx = settings['lastrun']
-seendf = pd.concat(run_data['run_timing'][0:lastrunidx])
-	
-# --- pick some novel stims --
-imdf = run_data['imagedf']
-# but remove images we haven't seen (but should have)
-if(settings['lastrun'] < len(run_data['run_timing']) ):
-	actuallysaw = pd.unique(seendf['imgfile'])
-	unsee = [x not in actuallysaw for x in imdf['imgfile'] ]
-	imdf.loc[unsee,'used'] = False
-
-# from that, make a novelimg dataset
-# with columns that match 
-novelimg = imagedf_to_novel(imdf)
-
-
-# get just the images and their side
-seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile', 'imgtype']]
-# convert side to position (-1 '*Left', 1 if '*Right')
-seendf['pos'] = [('Left' in x) * -1 + ('Right' in x)*1 for x in seendf['side']]
-# combine them
-trialdf = pd.concat([seendf[['imgfile', 'pos', 'imgtype']],
-                     novelimg[['imgfile', 'pos', 'imgtype']]]).\
-                     sample(frac=1)
+trialdf = recallFromPickle(pckl, settings['lastrun'])
 
 # set correct keys and format for trialhandler
 trialdict = trialdf.T.to_dict().values()

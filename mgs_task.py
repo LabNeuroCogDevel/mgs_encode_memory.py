@@ -534,8 +534,26 @@ class mgsTask:
                                        wrapWidth=2)
 
         # # for quiz
-        self.text_KU = visual.TextStim(win, text='seen, maybe seen | maybe unseen, unseen',name='KnownUnknown',color='white',pos=(0,-.75))
-        self.text_LR = visual.TextStim(win, text='far left, near left | near right, far right',name='LeftRight',color='white',pos=(0,-.75))
+        self.text_KU = visual.TextStim(win,
+                                       text='seen:\nyes, maybe yes | maybe no, no',
+                                       name='KnownUnknown',
+                                       alignHoriz='center',
+                                       color='white',
+                                       height=.07,
+                                       wrapWidth=2,
+                                       pos=(-0.2, -.75))
+        # self.text_KU.units = 'pixels'
+        # self.text_KU.size = 8
+        self.text_LR = visual.TextStim(win,
+                                       text='side:\nfar left, mid left | mid right, far right',
+                                       name='LeftRight',
+                                       alignHoriz='center',
+                                       color='white',
+                                       height=0.07,
+                                       wrapWidth=2,
+                                       pos=(-0.2, -.75))
+        # self.text_LR.units = 'pixels'
+        # self.text_LR.size = 8
 
         # for recall only:
         # tuplet of keys and text: like ('1', 'text after pushed')
@@ -1041,3 +1059,41 @@ def imagedf_to_novel(imdf):
     # add empty position
     novelimg['pos'] = float("nan")
     return(novelimg)
+
+
+def recallFromPickle(pckl, lastrunidx=3):
+    """
+    use a pckl file to define a trial list for recall
+    """
+    # load run info
+    with open(pckl, 'rU') as p:
+        print(pckl)
+        run_data = pickle.load(p)
+
+    # select what we've seen
+    # put all runs together
+    seendf = pandas.concat(run_data['run_timing'][0:lastrunidx])
+    # --- pick some novel stims --
+    imdf = run_data['imagedf']
+    # but remove images we haven't seen (but should have)
+    if(lastrunidx < len(run_data['run_timing'])):
+        actuallysaw = pandas.unique(seendf['imgfile'])
+        unsee = [x not in actuallysaw for x in imdf['imgfile']]
+        imdf.loc[unsee, 'used'] = False
+
+    # from that, make a novelimg dataset
+    # with columns that match
+    novelimg = imagedf_to_novel(imdf)
+
+    # get just the images and their side
+    seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile', 'imgtype']]
+    # convert side to position (-1 '*Left', 1 if '*Right')
+    seendf['pos'] = [
+            ('Left' in x) * -1 + ('Right' in x)*1
+            for x in seendf['side']]
+    # combine them
+    trialdf = pandas.concat([seendf[['imgfile', 'pos', 'imgtype']],
+                         novelimg[['imgfile', 'pos', 'imgtype']]]).\
+                         sample(frac=1)
+
+    return(trialdf)
