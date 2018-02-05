@@ -13,6 +13,22 @@ import os
 import pandas
 import numpy
 import pickle
+import winmute
+import socket
+
+
+def host_tasktype():
+    hosts = {'EEG': ['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
+    host = socket.gethostname()
+    if host in hosts['EEG']:
+        return('eeg')
+    elif host in hosts['MR']:
+        return('mri')
+    elif host in hosts['test']:
+        return('test')
+    else:
+        print("dont know about host '%s', task type is unknown" % host)
+        return('unknown')
 
 
 def getSubjectDataPath(subjid, tasktype, imgset, timepoint):
@@ -507,6 +523,10 @@ class mgsTask:
         if usePP:
             self.init_PP()
 
+        # want to mute windows computer
+        # so monitor switching doesn't beep
+        self.winvolume = winmute.winmute()
+
         self.verbose = True
 
         # images relative to screen size
@@ -586,7 +606,7 @@ class mgsTask:
     def eyetracking_newfile(self, fname):
         # start a new file and pause it
         if(self.useArrington):
-            fname=str(fname)
+            fname = str(fname)
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
             self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
             if self.verbose:
@@ -597,6 +617,7 @@ class mgsTask:
         """
         start eyetracking, send start ttl to parallel port
         """
+        self.winvolume.mute_all()
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Pause 0')
         if(self.usePP):
@@ -610,6 +631,7 @@ class mgsTask:
             self.vpx.VPX_SendCommand('dataFile_Close 0')
         if(self.usePP):
             self.send_code('end', None, None)
+        self.winvolume.undo_mute()
 
     def init_vpx(self):
         if not hasattr(self, 'vpx'):

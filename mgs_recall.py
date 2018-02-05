@@ -14,7 +14,7 @@ import os
 import sys
 from mgs_task import mgsTask, response_should_be, \
                      getInfoFromDataPath, imagedf_to_novel, \
-                     recallFromPickle
+                     recallFromPickle, host_tasktype
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -33,9 +33,14 @@ accept_keys = {'known': '1',
 # list all subject pickle files.
 # sort by modification date
 # used in dropdown dialog
+
+nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3}
+
 allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
-settings = {'recall_from': allsubjs, 'fullscreen': True,
-            'instructions': True, 'lastrun': 3}
+settings = {'recall_from': allsubjs,
+            'fullscreen': True,
+            'instructions': True,
+            'lastrun': nruns_opt[host_tasktype()]}
 
 # --- test vs actual settings
 if len(sys.argv) > 1 and sys.argv[1] == 'test':

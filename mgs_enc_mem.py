@@ -10,14 +10,19 @@ from psychopy import visual, data, logging, gui  # , event
 import datetime  # set timepoint default, start time
 import sys
 import os
-import socket  # gethostname
 from mgs_task import mgsTask, gen_run_info, \
-                     take_screenshot, wait_until, getSubjectDataPath
+                     take_screenshot, wait_until, getSubjectDataPath, \
+                     host_tasktype
 # from mgs_task import *
 
-# # settings
+# ---- settings -----
+# -- host specific --
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15}
-nruns = 3
+nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3}
+parallel_opt = {'mri': False, 'eeg': False, 'test': False, 'unkown': False}
+arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unkown': True}
+
+# -- general settings --
 mgsdur = 2  # this is tr locked for fmri
 # TODO check against traildf max
 
@@ -25,45 +30,47 @@ mgsdur = 2  # this is tr locked for fmri
 # ^, =, or esc
 scannerTriggerKeys = ['asciicircum', 'equal', 'escape', '6']
 
-# subjnum='0'; win = visual.Window([800,600]); task = mgsTask(win)
-
 # paths are relative to this script
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # default settings
-subjnum = ''
 show_instructions = True
 isfullscreen = True
-useArrington = False
-useParallel = False
-tasktype = 'mri'
+subjnum = ''
 imgset = 'A'
 # 2018 is tp1
 timepoint = datetime.datetime.now().year - 2017
 getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
+# settings based on tasktype
+tasktype = host_tasktype()
+if tasktype == 'unkown':
+    print('unkown host, defaulting to mri')
+    tasktype = 'mri'
+
+nruns = nruns_opt[tasktype]
+useArrington = arrington_opt[tasktype]
+useParallel = parallel_opt[tasktype]
+
+
 # # different defaults for different computers
-hosts = {'EEG': ['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
-host = socket.gethostname()
-if host in hosts['EEG']:
-    useParallel = True
-    tasktype = 'eeg'
+if tasktype == 'eeg':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Ready?'
-
-elif host in hosts['MR']:
-    useArrington = True
-
-elif host in hosts['test']:
-    show_instructions = False
-    isfullscreen = False
+elif tasktype == 'test':
     tasktype = 'test'
     subjnum = 'test'
+    show_instructions = False
+    isfullscreen = False
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'TESTING TESTING TESTING'
+elif tasktype == 'mri':
+    pass
 else:
-    print("dont know about %s, not changing defaults" % host)
+    print('tasktype is "%s"! This should never happen' % tasktype)
 
+# compute date compenent of id
+subjdateid = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d")
 
 # # get subj info
 # we can use the command line
@@ -75,6 +82,8 @@ if (len(sys.argv) > 1):
 else:
     box = gui.Dlg()
     box.addField("Subject ID:", subjnum)
+    box.addField("Image Set", imgset, choices=['A', 'B'])
+    box.addField("Date ID:", subjdateid)
     box.addField("Run number:", 1)
     box.addField("instructions?", show_instructions)
     box.addField("fullscreen?", isfullscreen)
@@ -82,23 +91,25 @@ else:
     box.addField("ttl (eeg)?", useParallel)
     box.addField("timing type", tasktype, choices=run_total_time.keys())
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
-    box.addField("Image Set", imgset, choices=['A', 'B'])
+    box.addField("total # runs", nruns)
 
     boxdata = box.show()
     if box.OK:
         subjnum = boxdata[0]
-        start_runnum = int(boxdata[1])
-        show_instructions = boxdata[2]
-        isfullscreen = boxdata[3]
-        useArrington = boxdata[4]
-        useParallel = boxdata[5]
-        tasktype = boxdata[6]
-        timepoint = boxdata[7]
-        imgset = boxdata[8]
+        imgset = boxdata[1]
+        subjdateid = boxdata[2]
+        start_runnum = int(boxdata[3])
+        show_instructions = boxdata[4]
+        isfullscreen = boxdata[5]
+        useArrington = boxdata[6]
+        useParallel = boxdata[7]
+        tasktype = boxdata[8]
+        timepoint = boxdata[9]
+        nruns = int(boxdata[10])
     else:
         sys.exit(1)
 
-subjid = subjnum
+subjid = subjnum + '_' + subjdateid
 # maybe we want to auto add date?
 # + datetime.datetime.strftime(datetime.datetime.now(),"_%Y%m%d")
 

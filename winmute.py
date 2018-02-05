@@ -7,14 +7,14 @@ adapted from pycaw example documentation:
     https://github.com/AndreMiras/pycaw/blob/develop/examples/simple_audio_volume_example.py
 """
 from __future__ import print_function
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import os
 
 
 class winmute():
     def __init__(self):
-        sessions = AudioUtilities.GetAllSessions()
         if os.name in ['nt']:
+            from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+            sessions = AudioUtilities.GetAllSessions()
             self.volumes = [session._ctl.QueryInterface(ISimpleAudioVolume)
                             for session in sessions]
             # is already muted?
