@@ -5,6 +5,9 @@
 2. run `mgs_enc_mem.py`
 3. run `mgs_recall.py`
 
+## Windows install
+python -m pip --user install https://github.com/AndreMiras/pycaw/archive/master.zip
+
 ## The task
 
 ## Timing

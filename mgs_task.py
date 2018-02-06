@@ -631,7 +631,8 @@ class mgsTask:
             self.vpx.VPX_SendCommand('dataFile_Close 0')
         if(self.usePP):
             self.send_code('end', None, None)
-        self.winvolume.undo_mute()
+        #self.winvolume.undo_mute() #  causes error
+        self.winvolume.unmute_all()
 
     def init_vpx(self):
         if not hasattr(self, 'vpx'):

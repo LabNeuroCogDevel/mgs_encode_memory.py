@@ -12,15 +12,18 @@ import os
 
 class winmute():
     def __init__(self):
-        if os.name in ['nt']:
+        try:
             from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
             sessions = AudioUtilities.GetAllSessions()
             self.volumes = [session._ctl.QueryInterface(ISimpleAudioVolume)
                             for session in sessions]
             # is already muted?
             self.origMute = [v.GetMute() for v in self.volumes]
-        else:
-            # set no volumes ore origMutes, nothing will be done by funcs below
+        except ImportError:
+            # set no volumes and no origMutes, nothing will be done by funcs below
+            if os.name in ['nt']:
+                print("WARNING: no volume control; install pycaw")
+                print("\tpython -m pip --user install https://github.com/AndreMiras/pycaw/archive/master.zip")
             self.volumes = []
             self.origMute = []
 

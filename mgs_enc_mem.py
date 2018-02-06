@@ -17,10 +17,10 @@ from mgs_task import mgsTask, gen_run_info, \
 
 # ---- settings -----
 # -- host specific --
-run_total_time = {'mri': 420, 'eeg': 358, 'test': 15}
-nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3}
-parallel_opt = {'mri': False, 'eeg': False, 'test': False, 'unkown': False}
-arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unkown': True}
+run_total_time = {'mri': 420, 'eeg': 358, 'test': 15, 'unknown': 420}
+nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unknown': 3}
+parallel_opt = {'mri': False, 'eeg': False, 'test': False, 'unknown': False}
+arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unknown': True}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -44,7 +44,7 @@ getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
 # settings based on tasktype
 tasktype = host_tasktype()
-if tasktype == 'unkown':
+if tasktype == 'unknown':
     print('unkown host, defaulting to mri')
     tasktype = 'mri'
 
