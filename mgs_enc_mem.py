@@ -70,7 +70,7 @@ else:
     print('tasktype is "%s"! This should never happen' % tasktype)
 
 # compute date compenent of id
-subjdateid = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d")
+subjdateid = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
 
 # # get subj info
 # we can use the command line

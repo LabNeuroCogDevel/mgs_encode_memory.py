@@ -71,13 +71,13 @@ datadir = os.path.dirname(pckl)
 trialdf = recallFromPickle(pckl, settings['lastrun'])
 
 # set correct keys and format for trialhandler
-trialdict = trialdf.T.to_dict().values()
+trialdict = trialdf.reset_index().T.to_dict().values()
 trialdict = [
         dict(x.items() +
              {'corkeys': response_should_be(x['pos'], accept_keys)}.items())
         for x in trialdict]
 
-seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d%H%M%S")
+seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d%H%M%S")
 
 extraInfo = {'subjid': subjid, 'epoch': seconds}
 recall_trials = data.TrialHandler2(trialdict, 1, extraInfo=extraInfo)

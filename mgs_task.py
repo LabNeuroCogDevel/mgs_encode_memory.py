@@ -18,7 +18,9 @@ import socket
 
 
 def host_tasktype():
-    hosts = {'EEG': ['Oaco14Datapb1'], 'MR': [], 'test': ['reese']}
+    hosts = {'EEG': ['Oaco14Datapb1'],
+             'MR': ['7T-EPRIME-PC'],
+             'test': ['reese']}
     host = socket.gethostname()
     if host in hosts['EEG']:
         return('eeg')
@@ -487,14 +489,14 @@ class mgsTask:
     # initialize all the compoents we need
     def __init__(self,
                  win,
-                 accept_keys={'known':        '4',
-                              'maybeunknown': '3',
+                 accept_keys={'known':        '1',
                               'maybeknown':   '2',
-                              'unknown':      '1',
+                              'maybeunknown': '9',
+                              'unknown':      '0',
                               'Left':         '1',
                               'NearLeft':     '2',
-                              'NearRight':    '3',
-                              'Right':        '4',
+                              'NearRight':    '9',
+                              'Right':        '9',
                               'oops':         '5'},
                  useArrington=False,
                  usePP=False,
@@ -871,10 +873,8 @@ class mgsTask:
            '   push %s if you saw it on the far left\n' % self.accept_keys['Left'] + \
            '   push %s if you saw it on the near left\n' % self.accept_keys['NearLeft'] + \
            '   push %s if you saw it on the near right\n' % self.accept_keys['NearRight'] + \
-           '   push %s if you saw it on the far right\n' % self.accept_keys['Right'] + \
-           'NOTE: you have 1.5 seconds to respond.\n' + \
-           'Responding faster does not make the task go faster.'
-
+           '   push %s if you saw it on the far right\n' % self.accept_keys['Right'] 
+           
         # '   push %s if you did not actually see it\n\n' % self.accept_keys['oops'] + \
         self.textbox.draw()
         self.instruction_flip()
@@ -1114,9 +1114,12 @@ def recallFromPickle(pckl, lastrunidx=3):
     seendf['pos'] = [
             ('Left' in x) * -1 + ('Right' in x)*1
             for x in seendf['side']]
+
     # combine them
     trialdf = pandas.concat([seendf[['imgfile', 'pos', 'imgtype']],
                          novelimg[['imgfile', 'pos', 'imgtype']]]).\
-                         sample(frac=1)
+                         sample(frac = 1, replace = False)
 
+    # set(trialdf.imgfile[pandas.notnull(df.pos)]) == \
+    # set(seendf.imgfile[pandas.notnull(seendf.imgfile)])
     return(trialdf)
