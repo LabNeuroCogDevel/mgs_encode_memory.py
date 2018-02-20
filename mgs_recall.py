@@ -123,12 +123,40 @@ for t in recall_trials:
 
     grade = [expect == given
              for expect, given in zip(t['corkeys'], keypresses)]
+
+    # did we get the correct known/unknown
+    trialscore = 0
+    if pd.notna(t['pos']):
+        if keypresses[0] == accept_keys['known']:
+            trialscore += 200
+        elif keypresses[0] == accept_keys['maybeknown']:
+            trialscore += 100
+
+        leftkeys = [accept_keys['Left'], accept_keys['NearLeft']]
+        rightkeys = [accept_keys['Right'], accept_keys['NearRight']] 
+        if keypresses[1] in leftkeys and t['corkeys'][1] in leftkeys:
+            trialscore += 5
+        if keypresses[1] in rightkeys and t['corkeys'][1] in rightkeys:
+            trialscore += 5
+
+        # up to 15 if correct key
+        if keypresses[1] == t['corkeys'][1]:
+            trialscore += 10
+    else:
+        if keypresses[0] == accept_keys['unknown']:
+            trialscore += 201
+        elif keypresses[0] == accept_keys['maybeunknown']:
+            trialscore += 101
+
     # add key and rt
+    recall_trials.addData('score', trialscore)
     recall_trials.addData('know_key', keypresses[0])
     recall_trials.addData('dir_key', keypresses[1])
     recall_trials.addData('know_rt', rts[0])
     recall_trials.addData('dir_rt', rts[1])
-    print("%s %s %s %s" % (t['imgtype'], keypresses, grade, t['imgfile']))
+    print("%s %s %s %s %s %s" %
+          (t['imgtype'], keypresses, grade, trialscore,
+           t['pos'], t['imgfile']))
     # finish with iti
     task.run_iti(.5)
 
