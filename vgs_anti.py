@@ -31,8 +31,10 @@ cue_instrs = {'anti': 'away from', 'vgs': 'to'}
 
 
 # ---------- RUN SETTINGS --------------------
+datestr = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
 # get settings with gui prompt
-settings = {'subjid': '',
+settings = {'_subjid': '',
+            'dateid': datestr,
             'tasktype': ['vgs', 'anti'],
             'timepoint': datetime.datetime.now().year - 2017,
             'fullscreen': True,
@@ -44,7 +46,8 @@ if not box.OK:
 
 # # paths
 # like: "subj_info/10931/01_eeg_anti"
-(datadir, logdir) = getSubjectDataPath(settings['subjid'],
+subjid = settings['_subjid'] + '_' + settings['dateid']
+(datadir, logdir) = getSubjectDataPath(subjid,
                                        'eeg',
                                        settings['tasktype'],
                                        settings['timepoint'])
@@ -153,5 +156,6 @@ pd.DataFrame(timing).to_csv(saveas)
 # end task: send code and put up end screen
 if settings['usePP']:
     task.send_ttl(129) 
-task.wait_for_scanner(['space'], 'Finished!')
+#task.wait_for_scanner(['space'], 'Finished!')
+task.run_end()
 task.win.close()

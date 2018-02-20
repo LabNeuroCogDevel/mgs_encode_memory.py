@@ -941,24 +941,8 @@ class mgsTask:
         """
         saccade task instructions
         """
-
-        self.textbox.pos = (-.9, 0)
-        self.textbox.text = \
-           'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
-           '1. Prep: Look at the red cross.\n' + \
-           '\t An image is about to appear.\n\n' + \
-           '2. Look: Look at the dot inside the image\n' + \
-           '\t until it goes away.\n' + \
-           '\t Remember where you looked.\n\n' + \
-           '3. Wait: Look at the centered yellow cross.\n\n' + \
-           '4. Recall: When the yellow cross goes away.\n' + \
-           '\t Look where the image just was.\n\n' + \
-           '5. Relax: Look center at the white cross.'
-        # 'Color Hints: \n' + \
-        # 'red = get ready\n' + \
-        # 'yellow = remember\n' + \
-        # 'white = relax'
-
+        self.textbox.pos = (-.5, 0)
+        self.textbox.text = 'MGS Encode Task\n\nReady for a walk through?'
         self.textbox.draw()
         self.instruction_flip()
 
@@ -988,9 +972,29 @@ class mgsTask:
         self.textbox.draw()
         self.iti_fix.draw()
         self.instruction_flip()
+
+        self.textbox.pos = (-.9, 0)
+        self.textbox.text = \
+           'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
+           '1. Prep: Look at the red cross.\n' + \
+           '\t An image is about to appear.\n\n' + \
+           '2. Look: Look at the dot inside the image\n' + \
+           '\t until it goes away.\n' + \
+           '\t Remember where you looked.\n\n' + \
+           '3. Wait: Look at the centered yellow cross.\n\n' + \
+           '4. Recall: When the yellow cross goes away.\n' + \
+           '\t Look where the image just was.\n\n' + \
+           '5. Relax: Look center at the white cross.'
+        # 'Color Hints: \n' + \
+        # 'red = get ready\n' + \
+        # 'yellow = remember\n' + \
+        # 'white = relax'
+
+        self.textbox.draw()
+        self.instruction_flip()
         self.textbox.pos = (0, 0)
 
-    def run_end(self, run, nruns):
+    def run_end(self, run=1, nruns=1):
         """
         show end of run screen
         send stop codes for parallel port
@@ -998,7 +1002,10 @@ class mgsTask:
         """
         self.stop_aux()  # end ttl, close eye file
         self.textbox.pos = (-.2, 0)
-        self.textbox.text = 'Finished %d/%d!' % (run, nruns)
+        runstr = ""
+        if nruns > 1:
+            runstr = '%d/%d!' % (run, nruns)
+        self.textbox.text = 'Finished ' + runstr
         self.textbox.draw()
         self.instruction_flip()
 

@@ -35,6 +35,17 @@ def print_and_ttl(msg, ttl):
         task.send_ttl(ttl)
 
 
+# -- instructions
+task.textbox.pos = (-.9, 0)
+task.textbox.text = \
+       'EOG Callibration\n\n' + \
+       '1. look at center cross\n\n' +\
+       '2. look at the dot\n\n' + \
+       '3. return to cross'
+task.textbox.draw()
+task.instruction_flip()
+
+# -- start
 task.wait_for_scanner(['space'], 'Ready?')
 # wait for scan sends start code
 # task.send_code('start', None, None)
@@ -72,5 +83,6 @@ for ri in range(len(ridx)):
 
 
 # all done, wrap up
-task.send_code('end', None, None)
+#task.send_code('end', None, None)
+task.run_end()
 task.win.close()
