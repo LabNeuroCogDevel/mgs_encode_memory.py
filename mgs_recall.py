@@ -126,7 +126,7 @@ for t in recall_trials:
 
     # did we get the correct known/unknown
     trialscore = 0
-    if pd.notna(t['pos']):
+    if t['pos'] in [-1, -.5, .5, 1]:
         if keypresses[0] == accept_keys['known']:
             trialscore += 200
         elif keypresses[0] == accept_keys['maybeknown']:

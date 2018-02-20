@@ -1112,7 +1112,8 @@ def recallFromPickle(pckl, lastrunidx=3):
     seendf = seendf[seendf.imgtype != "None"][['side', 'imgfile', 'imgtype']]
     # convert side to position (-1 '*Left', 1 if '*Right')
     seendf['pos'] = [
-            ('Left' in x) * -1 + ('Right' in x)*1
+            ('Left' == x) * -1 + ('Right' == x) * 1 +
+            ('NearLeft' == x) * -.5 + ('NearRight' == x) * .5
             for x in seendf['side']]
 
     # combine them

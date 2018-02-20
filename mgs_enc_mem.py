@@ -19,7 +19,7 @@ from mgs_task import mgsTask, gen_run_info, \
 # -- host specific --
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15, 'unknown': 420}
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unknown': 3}
-parallel_opt = {'mri': False, 'eeg': False, 'test': False, 'unknown': False}
+parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False}
 arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unknown': True}
 
 # -- general settings --
