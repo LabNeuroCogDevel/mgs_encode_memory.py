@@ -64,6 +64,8 @@ cue_instr = cue_instrs[settings['tasktype']]
 #  cue: 101 103 104 105
 #  dot: 151 153 154 155
 eventTTLlookup = {'cue': 0, 'dot': 50}  # iti = 254 | start = 128 | end = 129
+
+
 def print_and_ttl(event, pos, tasktype=settings['tasktype']):
     # left to right 1 to 5 from -1 -.5 .5 1 | no 0 (center), never see 3
     pos_code = pos*2 + 3

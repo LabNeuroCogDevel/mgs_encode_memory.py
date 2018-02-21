@@ -545,6 +545,12 @@ class mgsTask:
         #  ,AutoDraw=False)
         self.crcl.units = 'pix'
 
+        # instruction eyes image
+        # for draw_instruction_eyes(self,
+        self.eyeimg = visual.ImageStim(win, name="eye_img_instructions")
+        self.eyeimg.image = 'img/instruction/eyes_center.png'
+        self.eyeimg.pos = (0, -.9)
+
         self.timer = core.Clock()
 
         # could have just one and change the color
@@ -937,6 +943,11 @@ class mgsTask:
         core.wait(.4)
         event.waitKeys()
 
+    def draw_instruction_eyes(self, where='center'):
+        self.eyeimg.image = 'img/instruction/eyes_%s.png' % where
+        self.eyeimg.draw()
+
+
     def sacc_instructions(self):
         """
         saccade task instructions
@@ -950,41 +961,49 @@ class mgsTask:
         self.textbox.text = 'Prep: get ready to look at an image'
         self.textbox.draw()
         self.cue_fix.draw()
+        self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Look: look at the dot on top of the image'
+        self.textbox.text = \
+            'Look: look at the dot on top of the image until ...\n'
         imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize)
         self.textbox.draw()
         self.crcl.pos = imgpos
         self.crcl.draw()
+        self.draw_instruction_eyes('right')
         self.instruction_flip()
 
-        self.textbox.text = 'Wait: go back to center'
+        self.textbox.text = 'Wait: go back to center and focus there until ...'
         self.textbox.draw()
         self.isi_fix.draw()
+        self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Recall: look to where image was'
+        self.textbox.text = 'Recall: look to where image was and focus there until ...'
         self.textbox.draw()
+        self.draw_instruction_eyes('right')
         self.instruction_flip()
 
         self.textbox.text = 'Relax: wait for the red cross to signal a new round'
         self.textbox.draw()
         self.iti_fix.draw()
+        self.draw_instruction_eyes('center')
         self.instruction_flip()
 
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
-           'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
-           '1. Prep: Look at the red cross.\n' + \
-           '\t An image is about to appear.\n\n' + \
-           '2. Look: Look at the dot inside the image\n' + \
-           '\t until it goes away.\n' + \
-           '\t Remember where you looked.\n\n' + \
-           '3. Wait: Look at the centered yellow cross.\n\n' + \
-           '4. Recall: When the yellow cross goes away.\n' + \
-           '\t Look where the image just was.\n\n' + \
-           '5. Relax: Look center at the white cross.'
+            'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
+            '1. Prep: Look at the red cross.\n' + \
+            '\t An image is about to appear.\n\n' + \
+            '2. Look: Look at the dot inside the image\n' + \
+            '\t until it goes away.\n' + \
+            '\t Remember where you looked.\n\n' + \
+            '3. Wait: Look at the centered yellow cross.\n\n' + \
+            '4. Recall: When the yellow cross goes away.\n' + \
+            '\t Look where the image just was.\n\n' + \
+            '5. Relax: Look center at the white cross.\n\n' +\
+            'NOTE: you do not need to remember the images for this task\n' +\
+            'but you may be asked about them later'
         # 'Color Hints: \n' + \
         # 'red = get ready\n' + \
         # 'yellow = remember\n' + \
