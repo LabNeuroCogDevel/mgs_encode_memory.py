@@ -2,9 +2,10 @@ var app = new Vue({
     el: '#disp',
     data: {
        cur_idx: 0,
-       cur_slide: 'saw' 
+       cur_slide: 'saw',
        //cur_img: 'img/A/inside/sun_aaloiwdypreqzwnn.png'
-       cur_img: 'img/example.png'
+       cur_img: 'img/example.png',
+       imglist: []
     },
     methods: {
        side: function(pos) {
@@ -19,6 +20,12 @@ var app = new Vue({
           } else {
             this.cur_slide = 'side' 
           }
+       },
+       getlist: function(){
+          $.ajax({datatype:'json',
+                  ContentType : "application/json",
+                  url: 'imglist.json'})
+              .done( d => this.imglist=d )
        }
     }
 })

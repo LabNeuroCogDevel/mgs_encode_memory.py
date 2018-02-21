@@ -15,6 +15,7 @@ import numpy
 import pickle
 import winmute
 import socket
+import datetime
 
 
 def host_tasktype():
@@ -33,14 +34,29 @@ def host_tasktype():
         return('unknown')
 
 
+def vdate_str():
+    """
+    return YYYYMMDD format for right now
+    """
+    datestr = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
+    return(datestr)
+
+
 def getSubjectDataPath(subjid, tasktype, imgset, timepoint):
     """
     generate (and create) a path to save subjects visit data
     directory for subject and task like "10931/01_eeg_A"
     """
+
+    # remove date from id if it is the last bit ("xxxx_YYYYMMDD" -> "xxxx")
+    vdate = vdate_str()
+    subjid = re.sub("_%s$" % vdate, "", subjid)
+
+    # subj_info/subj/timepoint/modality_set_date/
     savepath = 'subj_info'
-    taskinfo = "%02d_%s_%s" % (timepoint, tasktype, imgset)
-    datadir = os.path.join(savepath, subjid, taskinfo)
+    tpdir = "%02d" % timepoint
+    lastdir = "%s_%s_%s" % (tasktype, imgset, vdate)
+    datadir = os.path.join(savepath, subjid, tpdir, lastdir)
     logdir = os.path.join(datadir, 'log')
     for thisoutdir in [savepath, datadir, logdir]:
         if not os.path.exists(thisoutdir):
@@ -53,8 +69,8 @@ def getInfoFromDataPath(datadir):
     """
     get subject info from path
     expects os.dirname(pkl_file)
-    from subj_info/someid/01_eeg_A
-    to ("someid", "eeg", "A", 1 )
+    from  subj_info/abcd/01/eeg_mgsenc-B_20180221/runs_info.pkl
+    to ("abcd", "eeg", "A", 1 )
     """
     print(datadir)
     # match to subj_info directory with
@@ -62,8 +78,10 @@ def getInfoFromDataPath(datadir):
     rm_str = ".*subj_info[/\\\\]"
     print(rm_str)
     justdir = re.sub(rm_str, "", datadir)
-    (subjid, taskinfo) = os.path.split(justdir)
-    (timepoint, imgset, tasktype) = taskinfo.split("_")
+    (subjid_timepoint, taskinfo) = os.path.split(justdir)
+    (subjid, timepoint) = os.path.split(subjid_timepoint)
+    (tasktype, imgset, vdate) = taskinfo.split("_")
+    imgset = re.sub('mgsenc-', '', imgset)  # mgsenc-A into A
     timepoint = int(timepoint)
     return((subjid, tasktype, imgset, timepoint))
 
@@ -667,7 +685,7 @@ class mgsTask:
         if logh is not None:
             logh.log(level=logging.INFO, msg='flipped %s (%s,%s)' % (event, side, catagory))
         if takeshots:
-            take_screenshot(self.win, takeshots + ('_%02d_%s' % (num, name) ))
+            take_screenshot(self.win, takeshots + ('_%02d_%s' % (num, event) ))
             
         
     def send_code(self, event, side, catagory):

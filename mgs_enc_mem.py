@@ -124,7 +124,9 @@ subjid = subjnum + '_' + subjdateid
 
 # # paths
 # like: "subj_info/10931/01_eeg_A"
-(datadir, logdir) = getSubjectDataPath(subjid, tasktype, imgset, timepoint)
+(datadir, logdir) = getSubjectDataPath(subjid, tasktype,
+                                       'mgsenc-' + imgset,
+                                       timepoint)
 
 # # get all_runs_info
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
@@ -158,7 +160,8 @@ else:
 
 # take screenshots:
 # takeshots="20171101"
-takeshots = None
+# takeshots = "20180221"
+takeshots = False
 
 # this is kludgy. duration is included in timing files
 # maybe iti should be an included 1D

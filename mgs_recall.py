@@ -5,20 +5,19 @@
 # (setq elpy-rpc-python-command "python")  (setq py-which-shell "python2") 
 # (setq elpy-use-ipython "ipython")
 from __future__ import division
-from psychopy import visual, core, data, logging, gui, event
+from psychopy import visual, data, gui
 import datetime
-import pickle
-import pandas as pd
 import glob
 import os
 import sys
 from mgs_task import mgsTask, response_should_be, \
-                     getInfoFromDataPath, imagedf_to_novel, \
-                     recallFromPickle, host_tasktype
+                     getInfoFromDataPath, \
+                     recallFromPickle, host_tasktype, vdate_str
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
-pkl_glb = os.path.join('subj_info', '*', '*', 'runs_info.pkl')
+# like: subj_info/abcd/01/eeg_B_20180221/runs_info.pkl
+pkl_glb = os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl')
 # what keys do we use?
 accept_keys = {'known': '1',
                'maybeknown': '2',
@@ -161,7 +160,11 @@ for t in recall_trials:
     task.run_iti(.5)
 
 # save results to recall.csv inside datadir
-saveas = os.path.join(datadir, 'recall_%s.csv' % seconds)
+csvfilename = "_".join([subjid, vdate_str(), tasktype,
+                        str(timepoint),
+                        'recall-%s_%s.csv' % (imgset, seconds)])
+saveas = os.path.join(datadir, csvfilename)
+
 recall_trials.data.to_csv(saveas)
 print('saved %s' % saveas)
 task.wait_for_scanner(['space'], 'Finished!')

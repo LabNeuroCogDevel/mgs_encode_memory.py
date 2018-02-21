@@ -1,10 +1,15 @@
+<!DOCTYPE html>
 <html>
+   <meta charset="UTF-8">
    <head>
       <script src="vue.js"></script>
+      <script src="csv.js"></script>
+      <script src="jquery.js"></script>
       <title>MGSEM Recall</title>
    </head>
    <body>
       <div id="disp">
+         <button v-on:click="getlist()"> load </button>
          {{cur_slide}}
          {{cur_idx}}
 
@@ -19,7 +24,7 @@
          </div>
 
 
-         <img src="{{cur_img}}">
+         <img :src="cur_img">
 
          <div v-if="cur_slide === 'saw'">
             <button v-on:click="saw(.5)"> maybe saw </button>
@@ -29,6 +34,10 @@
          <div v-if="cur_slide === 'side'">
             <button v-on:click="side(.5)"> right </button>
             <button v-on:click="side(1)"> right </button>
+         </div>
+
+         <div >
+            {{JSON.stringify(imglist)}}
          </div>
 
       </div>
