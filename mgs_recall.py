@@ -125,27 +125,48 @@ for t in recall_trials:
 
     # did we get the correct known/unknown
     trialscore = 0
+
+    # ---- scores ----
+    # -- didn't see
+    # 1   = said saw (but didn't)
+    # 101 = said maybe didn't
+    # 201 = confidently correct
+    # --- did see
+    # 0 = said didn't
+    # 100 = maybe known
+    # 200 = confidently correct
+    # -- side
+    # +5  = correct side    (105, 205)
+    # +15 = exactly correct (115,215)
+
+    # we should have respond that we knew the image
     if t['pos'] in [-1, -.5, .5, 1]:
         if keypresses[0] == accept_keys['known']:
             trialscore += 200
         elif keypresses[0] == accept_keys['maybeknown']:
             trialscore += 100
 
+        # did we get the side right (add 5)
         leftkeys = [accept_keys['Left'], accept_keys['NearLeft']]
-        rightkeys = [accept_keys['Right'], accept_keys['NearRight']] 
+        rightkeys = [accept_keys['Right'], accept_keys['NearRight']]
         if keypresses[1] in leftkeys and t['corkeys'][1] in leftkeys:
             trialscore += 5
         if keypresses[1] in rightkeys and t['corkeys'][1] in rightkeys:
             trialscore += 5
 
-        # up to 15 if correct key
+        # up to 15 if correct side and correct near/far
         if keypresses[1] == t['corkeys'][1]:
             trialscore += 10
+    # did not see image
     else:
         if keypresses[0] == accept_keys['unknown']:
             trialscore += 201
         elif keypresses[0] == accept_keys['maybeunknown']:
             trialscore += 101
+        # we said we saw an image but we didn't
+        # give one point to distinguish from saw but said no (score=0)
+        else:
+            trialscore += 1
 
     # add key and rt
     recall_trials.addData('score', trialscore)

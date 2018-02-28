@@ -161,7 +161,7 @@ else:
 # take screenshots:
 # takeshots="20171101"
 # takeshots = "20180221"
-takeshots = False
+takeshots = None
 
 # this is kludgy. duration is included in timing files
 # maybe iti should be an included 1D
