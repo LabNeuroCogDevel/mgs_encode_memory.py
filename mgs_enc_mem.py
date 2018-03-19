@@ -21,6 +21,7 @@ run_total_time = {'mri': 420, 'eeg': 358, 'test': 15, 'unknown': 420}
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unknown': 3}
 parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False}
 arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unknown': True}
+vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0, 'unknown': 0}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -51,6 +52,7 @@ if tasktype == 'unknown':
 nruns = nruns_opt[tasktype]
 useArrington = arrington_opt[tasktype]
 useParallel = parallel_opt[tasktype]
+vertOffset = vert_offset_opt[tasktype]
 
 
 # # different defaults for different computers
@@ -92,6 +94,7 @@ else:
     box.addField("timing type", tasktype, choices=run_total_time.keys())
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
     box.addField("total # runs", nruns)
+    box.addField("Vert offset (fraction of screen)", vertOffset)
 
     boxdata = box.show()
     if box.OK:
@@ -106,6 +109,7 @@ else:
         tasktype = boxdata[8]
         timepoint = boxdata[9]
         nruns = int(boxdata[10])
+        vertOffset = float(boxdata[11])
     else:
         sys.exit(1)
 
@@ -143,7 +147,7 @@ else:
 win.winHandle.activate()  # make sure the display window has focus
 win.mouseVisible = False  # and that we don't see the mouse
 
-task = mgsTask(win, useArrington=useArrington, usePP=useParallel)
+task = mgsTask(win, useArrington=useArrington, usePP=useParallel,vertOffset=vertOffset)
 
 
 # # instructions

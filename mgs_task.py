@@ -239,7 +239,7 @@ def ratio(screen, image, scale):
     return(float(screen) * scale/float(image))
 
 
-def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255)):
+def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255), vertOffset=0):
     '''
     replace_img adjust the image and position of a psychopy.visual.ImageStim
     '''
@@ -271,8 +271,12 @@ def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255)):
         horzpos = halfimgsize - winmax
     elif horzpos + halfimgsize > winmax:
         horzpos = winmax - halfimgsize
+
+    # where to show the image 
+    vertpos = (vertOffset)*sh/2.0
+
     # set
-    img.pos = (horzpos, 0)
+    img.pos = (horzpos, vertpos)
 
     # # draw if we are not None
     if filename is not None:
@@ -516,6 +520,7 @@ class mgsTask:
                               'NearRight':    '9',
                               'Right':        '9',
                               'oops':         '5'},
+                 vertOffset=0,
                  useArrington=False,
                  usePP=False,
                  fullscreen=True):
@@ -549,6 +554,9 @@ class mgsTask:
 
         self.verbose = True
 
+        # how far off the horizonal do we display cross and images?
+        self.vertOffset = vertOffset
+
         # images relative to screen size
         self.imgratsize = .15
 
@@ -578,6 +586,12 @@ class mgsTask:
         self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
                                        alignHoriz='left', color='white',
                                        wrapWidth=2)
+        
+        # if we are mr and want horzinal line to have vertical offset, need to increase position
+        # .5 is center
+        self.iti_fix.pos[1] = self.vertOffset
+        self.isi_fix.pos[1] = self.vertOffset
+        self.cue_fix.pos[1] = self.vertOffset
 
         # # for quiz
         self.text_KU = visual.TextStim(win,
@@ -760,7 +774,7 @@ class mgsTask:
         horz = {'Right': 1, 'Left': -1, 'NearLeft': -.5, 'NearRight': .5}.\
             get(posstr, 0)
 
-        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize)
+        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize, vertOffset=self.vertOffset)
 
         self.crcl.pos = imgpos
         self.crcl.draw()
@@ -984,7 +998,7 @@ class mgsTask:
 
         self.textbox.text = \
             'Look: look at the dot on top of the image until ...\n'
-        imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize)
+        imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize, vertOffset=self.vertOffset)
         self.textbox.draw()
         self.crcl.pos = imgpos
         self.crcl.draw()
