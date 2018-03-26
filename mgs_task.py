@@ -1049,7 +1049,7 @@ class mgsTask:
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
             '1. Prep: Look at the blue cross.' + \
-            ' An dot is about to appear.\n\n' + \
+            ' A dot is about to appear.\n\n' + \
             '2. Look: Look at the dot inside the dot and remember that spot' + \
             ' until it goes away.\n\n' + \
             '3. Wait: Look at the yellow cross in the center.\n\n' + \
