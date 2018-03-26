@@ -6,22 +6,26 @@
 # ^M-: (run-python "/usr/bin/python2")
 
 from __future__ import division
-from psychopy import visual, data, logging, gui  # , event
+from psychopy import data, logging, gui  # , event
 import datetime  # set timepoint default, start time
 import sys
 import os
 from mgs_task import mgsTask, gen_run_info, \
                      take_screenshot, wait_until, getSubjectDataPath, \
-                     host_tasktype
+                     host_tasktype, create_window
 # from mgs_task import *
 
 # ---- settings -----
 # -- host specific --
-run_total_time = {'mri': 420, 'eeg': 358, 'test': 15, 'unknown': 420}
-nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unknown': 3}
-parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False}
-arrington_opt = {'mri': True, 'eeg': False, 'test': False, 'unknown': True}
-vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0, 'unknown': 0}
+run_total_time = {'mri': 420, 'eeg': 358, 'test': 15,
+                  'practice': 65, 'unknown': 420}
+nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2,
+             'practice': 1, 'unknown': 3}
+parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False, 'practice': False}
+arrington_opt = {'mri': True, 'eeg': False, 'test': False,
+                 'practice': False, 'unknown': True}
+vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0, 
+                   'practice': 0, 'unknown': 0}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -66,6 +70,9 @@ elif tasktype == 'test':
     isfullscreen = False
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'TESTING TESTING TESTING'
+elif tasktype == 'practice':
+    scannerTriggerKeys = scannerTriggerKeys + ['space']
+    getReadyMsg = 'Get Ready!'
 elif tasktype == 'mri':
     pass
 else:
@@ -138,15 +145,7 @@ all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 
 
 # # screen setup
-# win = visual.Window([400,400],screen=0)
-if isfullscreen:
-    win = visual.Window(fullscr=True)
-else:
-    win = visual.Window([800, 600])
-
-win.winHandle.activate()  # make sure the display window has focus
-win.mouseVisible = False  # and that we don't see the mouse
-
+win = create_window(isfullscreen)
 task = mgsTask(win, useArrington=useArrington, usePP=useParallel,vertOffset=vertOffset)
 
 
@@ -165,6 +164,7 @@ else:
 # take screenshots:
 # takeshots="20171101"
 # takeshots = "20180221"
+# takeshots = "20180326"
 takeshots = None
 
 # this is kludgy. duration is included in timing files

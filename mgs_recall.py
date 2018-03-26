@@ -12,7 +12,9 @@ import os
 import sys
 from mgs_task import mgsTask, response_should_be, \
                      getInfoFromDataPath, \
-                     recallFromPickle, host_tasktype, vdate_str
+                     recallFromPickle, host_tasktype, vdate_str, \
+                     create_window
+
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -83,11 +85,7 @@ recall_trials = data.TrialHandler2(trialdict, 1, extraInfo=extraInfo)
 
 
 # # screen setup
-if settings['fullscreen']:
-    win = visual.Window(fullscr=True)
-else:
-    win = visual.Window([400, 400], screen=0)
-# win = visual.Window(fullscr=True)
+win = create_window(settings['fullscreen'])
 
 # win settings
 win.winHandle.activate()  # make sure the display window has focus

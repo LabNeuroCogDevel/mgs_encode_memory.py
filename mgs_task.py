@@ -21,6 +21,7 @@ import datetime
 def host_tasktype():
     hosts = {'EEG': ['Oaco14Datapb1'],
              'MR': ['7T-EPRIME-PC'],
+             'practice': ['eyelab130'],
              'test': ['reese']}
     host = socket.gethostname()
     if host in hosts['EEG']:
@@ -29,6 +30,8 @@ def host_tasktype():
         return('mri')
     elif host in hosts['test']:
         return('test')
+    elif host in hosts['practice']:
+        return('practice')
     else:
         print("dont know about host '%s', task type is unknown" % host)
         return('unknown')
@@ -504,6 +507,13 @@ def create_window(fullscr):
 
     win.winHandle.activate()  # make sure the display window has focus
     win.mouseVisible = False  # and that we don't see the mouse
+
+    # -- change color to black --
+    win.color = (-1,-1,-1)
+    # flip twice to get the color
+    win.flip()
+    win.flip()
+
     return(win)
 
 
@@ -565,7 +575,7 @@ class mgsTask:
         self.accept_keys = accept_keys
 
         # allocate screen parts
-        self.img = visual.ImageStim(win, name="imgdot")
+        self.img = visual.ImageStim(win, name="imgdot", interpolate=True)
         self.crcl = visual.Circle(win, radius=10, lineColor=None,
                                   fillColor='yellow', name="circledot")
         #  ,AutoDraw=False)
@@ -573,20 +583,27 @@ class mgsTask:
 
         # instruction eyes image
         # for draw_instruction_eyes(self,
-        self.eyeimg = visual.ImageStim(win, name="eye_img_instructions")
+        self.eyeimg = visual.ImageStim(win, name="eye_img_instructions", interpolate=True)
         self.eyeimg.image = 'img/instruction/eyes_center.png'
         self.eyeimg.pos = (0, -.9)
+
+        # instructions overview
+        self.imgoverview = visual.ImageStim(win, name="eye_img_overview", interpolate=True)
+        self.imgoverview.image = 'img/instruction/overview.png'
 
         self.timer = core.Clock()
 
         # could have just one and change the color
-        self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation', color='white')
-        self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation', color='yellow')
-        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='lightblue')
+        self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation', color='white', bold=True)
+        self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation', color='yellow', bold=True)
+        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='royalblue', bold=True)
+        # double size
+        self.iti_fix.size=2
+        self.isi_fix.size=2
+        self.cue_fix.size=2
         self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
                                        alignHoriz='left', color='white',
                                        wrapWidth=2)
-        
         # if we are mr and want horzinal line to have vertical offset, need to increase position
         # .5 is center
         self.iti_fix.pos[1] = self.vertOffset
@@ -985,8 +1002,11 @@ class mgsTask:
         saccade task instructions
         """
         self.textbox.pos = (-.5, 0)
-        self.textbox.text = 'MGS Encode Task\n\nReady for a walk through?'
+        self.textbox.text = 'Memory Guided Saccade Task\n\nLook at and remember a dot.\nWait.\nLook back to where it was.\n\nReady for a walk through?'
         self.textbox.draw()
+        self.instruction_flip()
+
+        self.imgoverview.draw()
         self.instruction_flip()
 
         self.textbox.pos = (-.9, .9)
@@ -996,8 +1016,7 @@ class mgsTask:
         self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = \
-            'Look: look at the dot on top of the image until ...\n'
+        self.textbox.text = 'Look: look at the dot on top of the image and\nremember that spot until it disappears'
         imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize, vertOffset=self.vertOffset)
         self.textbox.draw()
         self.crcl.pos = imgpos
@@ -1005,18 +1024,18 @@ class mgsTask:
         self.draw_instruction_eyes('right')
         self.instruction_flip()
 
-        self.textbox.text = 'Wait: go back to center and focus there until ...'
+        self.textbox.text = 'Wait: go back to center and focus on the yellow cross\nuntil it disappears'
         self.textbox.draw()
         self.isi_fix.draw()
         self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Recall: look to where image was and focus there until ...'
+        self.textbox.text = 'Recall: look to where image was and focus there\nuntil a new cross appears'
         self.textbox.draw()
         self.draw_instruction_eyes('right')
         self.instruction_flip()
 
-        self.textbox.text = 'Relax: wait for the red cross to signal a new round'
+        self.textbox.text = 'Relax: wait for the blue cross to signal a new round'
         self.textbox.draw()
         self.iti_fix.draw()
         self.draw_instruction_eyes('center')
@@ -1024,20 +1043,18 @@ class mgsTask:
 
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
-            'STEPS: Prep, Look, Wait, Recall, Relax\n\n' +\
-            '1. Prep: Look at the red cross.\n' + \
-            '\t An image is about to appear.\n\n' + \
-            '2. Look: Look at the dot inside the image\n' + \
-            '\t until it goes away.\n' + \
-            '\t Remember where you looked.\n\n' + \
-            '3. Wait: Look at the centered yellow cross.\n\n' + \
-            '4. Recall: When the yellow cross goes away.\n' + \
-            '\t Look where the image just was.\n\n' + \
-            '5. Relax: Look center at the white cross.\n\n' +\
-            'NOTE: you do not need to remember the images for this task\n' +\
+            '1. Prep: Look at the blue cross.' + \
+            ' An image is about to appear.\n\n' + \
+            '2. Look: Look at the dot inside the image and remember that spot' + \
+            ' until it goes away.\n\n' + \
+            '3. Wait: Look at the yellow cross in the center.\n\n' + \
+            '4. Recall: When the yellow cross goes away. ' + \
+            'Look back to where you saw the dot until ... \n\n' + \
+            '5. Relax: Look at the white cross in the center when it comes back.\n\n' +\
+            'NOTE: you do not need to remember the images for this task ' +\
             'but you may be asked about them later'
         # 'Color Hints: \n' + \
-        # 'red = get ready\n' + \
+        # 'blue = get ready\n' + \
         # 'yellow = remember\n' + \
         # 'white = relax'
 
