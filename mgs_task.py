@@ -996,13 +996,16 @@ class mgsTask:
         self.eyeimg.image = 'img/instruction/eyes_%s.png' % where
         self.eyeimg.draw()
 
-
     def sacc_instructions(self):
         """
         saccade task instructions
         """
         self.textbox.pos = (-.5, 0)
-        self.textbox.text = 'Memory Guided Saccade Task\n\nLook at and remember a dot.\nWait.\nLook back to where it was.\n\nReady for a walk through?'
+        self.textbox.text = 'Memory Guided Saccade Task\n\n' + \
+                            'Look at and remember a dot.\n' + \
+                            'Wait.\n' + \
+                            'Look back to where it was.\n\n' + \
+                            'Ready for a walk through?'
         self.textbox.draw()
         self.instruction_flip()
 
@@ -1010,14 +1013,16 @@ class mgsTask:
         self.instruction_flip()
 
         self.textbox.pos = (-.9, .9)
-        self.textbox.text = 'Prep: get ready to look at an image'
+        self.textbox.text = 'Prep: get ready to look at a dot'
         self.textbox.draw()
         self.cue_fix.draw()
         self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Look: look at the dot on top of the image and\nremember that spot until it disappears'
-        imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize, vertOffset=self.vertOffset)
+        self.textbox.text = 'Look: look at the dot on top of the dot and\n' + \
+                            'remember that spot until it disappears'
+        imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize,
+                             vertOffset=self.vertOffset)
         self.textbox.draw()
         self.crcl.pos = imgpos
         self.crcl.draw()
@@ -1030,7 +1035,7 @@ class mgsTask:
         self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Recall: look to where image was and focus there\nuntil a new cross appears'
+        self.textbox.text = 'Recall: look to where dot was and focus there\nuntil a new cross appears'
         self.textbox.draw()
         self.draw_instruction_eyes('right')
         self.instruction_flip()
@@ -1044,8 +1049,8 @@ class mgsTask:
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
             '1. Prep: Look at the blue cross.' + \
-            ' An image is about to appear.\n\n' + \
-            '2. Look: Look at the dot inside the image and remember that spot' + \
+            ' An dot is about to appear.\n\n' + \
+            '2. Look: Look at the dot inside the dot and remember that spot' + \
             ' until it goes away.\n\n' + \
             '3. Wait: Look at the yellow cross in the center.\n\n' + \
             '4. Recall: When the yellow cross goes away. ' + \
