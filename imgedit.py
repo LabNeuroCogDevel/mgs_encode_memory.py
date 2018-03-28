@@ -54,6 +54,8 @@ if __name__ == "__main__":
             print(imgfile)
             outname = re.sub('.jpe?g$', '.png', os.path.basename(imgfile))
             outfile = os.path.join('SUN/circles/', outname)
+            # 20180328 - practice images
+            # outfile = os.path.join('img/practice/circles/', outname)
             if os.path.isfile(outfile):
                 continue
             im_alpha = make_circle(imgfile)
