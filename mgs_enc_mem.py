@@ -73,6 +73,7 @@ elif tasktype == 'test':
 elif tasktype == 'practice':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Get Ready!'
+    imgset = 'practice'
 elif tasktype == 'mri':
     pass
 else:
@@ -91,7 +92,7 @@ if (len(sys.argv) > 1):
 else:
     box = gui.Dlg()
     box.addField("Subject ID:", subjnum)
-    box.addField("Image Set", imgset, choices=['A', 'B'])
+    box.addField("Image Set", imgset, choices=['A', 'B', 'practice'])
     box.addField("Date ID:", subjdateid)
     box.addField("Run number:", 1)
     box.addField("instructions?", show_instructions)
@@ -143,10 +144,15 @@ subjid = subjnum + '_' + subjdateid
 # all_run_info = {'imagedf': imagedf, 'run_timing': run_timing }
 all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 
+# TODO:
+# if tasktype == 'practice':
+#    all_runs_info['imagedf'][1,'imgfile'] = 'img/example.png'
+#    all_runs_info['imagedf'][4,'imgfile'] = 'img/example.png'
 
 # # screen setup
 win = create_window(isfullscreen)
-task = mgsTask(win, useArrington=useArrington, usePP=useParallel,vertOffset=vertOffset)
+task = mgsTask(win, useArrington=useArrington,
+               usePP=useParallel, vertOffset=vertOffset)
 
 
 # # instructions
@@ -175,11 +181,11 @@ if tasktype == 'test':
 for runi in range(start_runnum-1, nruns):
     run = runi + 1
     print("### run %d" % run)
-    
+
     trialdf = all_runs_info['run_timing'][runi]
 
     seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
-    
+
     # # logging
     logfilename = "info_%s_%d_%s.log" % (subjid, run, seconds)
     logfile = os.path.join(logdir, logfilename)
