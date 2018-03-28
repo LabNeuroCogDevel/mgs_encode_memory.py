@@ -1009,9 +1009,6 @@ class mgsTask:
         self.textbox.draw()
         self.instruction_flip()
 
-        self.imgoverview.draw()
-        self.instruction_flip()
-
         self.textbox.pos = (-.9, .9)
         self.textbox.text = 'Prep: get ready to look at a dot'
         self.textbox.draw()
@@ -1019,7 +1016,7 @@ class mgsTask:
         self.draw_instruction_eyes('center')
         self.instruction_flip()
 
-        self.textbox.text = 'Look: look at the dot on top of the dot and\n' + \
+        self.textbox.text = 'Look: look at the dot\n' + \
                             'remember that spot until it disappears'
         imgpos = replace_img(self.img, 'img/example.png', 1, self.imgratsize,
                              vertOffset=self.vertOffset)
@@ -1066,6 +1063,9 @@ class mgsTask:
         self.textbox.draw()
         self.instruction_flip()
         self.textbox.pos = (0, 0)
+
+        self.imgoverview.draw()
+        self.instruction_flip()
 
     def run_end(self, run=1, nruns=1):
         """
