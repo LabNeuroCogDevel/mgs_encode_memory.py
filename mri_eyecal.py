@@ -3,23 +3,48 @@
 
 from mgs_task import mgsTask, wait_until
 import numpy as np
+from psychopy import gui  # , event
+import datetime
+import sys
 
-isfullscreen = False
+tracking_type = "pupil"
+box = gui.Dlg()
+box.addField("traking type/file name:", tracking_type)
+boxdata = box.show()
+if box.OK:
+    tracking_type = boxdata[0]
+else:
+    sys.exit(1)
+
+
+
+isfullscreen = True
 # if we are fullscreen, we're at eeg and want to send ttl too
 useArrington = isfullscreen
 
 # how long to wait at each event
-fixdur = .5
-dotdur = .5
+fixdur = .75
+dotdur = .75
+
 
 # setup task (get send_ttl, crcl, iti_fix)
 task = mgsTask(None, fullscreen=isfullscreen, useArrington=useArrington)
 
+# start eyetracking file
+seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
+eyetrackingfile = '%s_run_%s.txt' % (tracking_type, seconds)
+task.eyetracking_newfile('%s' % eyetrackingfile)
+
+
 # get 20 positions from 10% to 90%
 pos = np.linspace(.1, .9, 20)
+# duplicate each
+
 allpos = np.concatenate([pos, -1 * pos])
 ridx = np.random.permutation(len(allpos))
-
+allpos = allpos[ridx]
+pos_rep = np.array([[x,x] for x in allpos ]).reshape(1,len(allpos)*2)[0]
+ridx = range(pos_rep.size)
 
 def print_and_ttl(msg, pos):
     print(msg)
@@ -51,19 +76,21 @@ task.send_code('start', None, None)
 
 winwidth = task.win.size[0]/2
 print(winwidth)
+task.start_aux()
+#task.vpx.VPX_SendCommand('dataFile_Pause 0')
 for ri in range(len(ridx)):
     # find position and ttlcode
     i = ridx[ri]
-    p = allpos[i] * winwidth
+    p = pos_rep[i] * winwidth
 
     fixttl = .5
-    posttl = allpos[i]
+    posttl = pos_rep[i]
 
     # draw cricle
     task.crcl.pos = (p, 0)
     task.crcl.draw()
     task.win.callOnFlip(print_and_ttl,
-                        "p at %.02fx (%.02fpx)" % (allpos[i], p),
+                        "p at %.02fx (%.02fpx)" % (pos_rep[i], p),
                         posttl)
     ft = task.win.flip()
     # wait a bit
@@ -82,5 +109,7 @@ for ri in range(len(ridx)):
 
 # all done, wrap up
 task.send_code('end', None, None)
+task.stop_aux()
 task.run_end()
 task.win.close()
+task.stop_aux()
