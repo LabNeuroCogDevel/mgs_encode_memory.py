@@ -1,13 +1,16 @@
 #!/usr/bin/env Rscript
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(cowplot)
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(cowplot)
+#library(eyetrackingR)
+#library(gazetools) # https://github.com/RyanHope/gazetools
+#library(saccades) # https://github.com/tmalsburg/saccades
 
 # read avotec text output using perl pipe to add event
 # add ld8 and runno as parsed from filename
 # add trial by changes event change to iti (iti included as first part of trial)
-read_avotec <- function (filename) {
+read_avotec <- function (filename, trial_start_event="iti") {
    perlcmd <- 'BEGIN{$event="NA\\tNA"} $event="$F[2]\\t$F[1]" if/^12/;
                print join("\\t",@F[1..12],$event) if m/^10/'
 
@@ -29,10 +32,11 @@ read_avotec <- function (filename) {
 
    edf <-
       eyed %>%
-      separate(event, c("event", "side", "imgtype")) %>%
+      separate(event, c("event", "side", "imgtype"),
+               fill="right", extra="merge") %>%
       filter(!is.na(side)) %>%
       mutate(ld8=ld8, runno=as.numeric(runno),
-             trial = lag(event) != event & event == "iti",
+             trial = lag(event) != event & event == trial_start_event,
              trial = cumsum(ifelse(is.na(trial), T, trial)))
 }
 
@@ -49,9 +53,9 @@ plot_eyedf <- function(edf) {
 }
 
 
-trial_xpos_plot <- function(fsum, x) {
+trial_xpos_plot <- function(fsum, x,normalize=T) {
    # subtract center from xposition
-   #x <- paste0(x, " - x_isi_wmode")
+   if(normalize) x <- paste0(x, " - x_isi_wmode")
    ggplot(fsum) +
    aes_string(size="ldur", color="event", shape="side",
        x=x, y="trial") +
@@ -64,7 +68,8 @@ weight_hist_mid <- function(x, dur) {
    h$mids[which.max(h$counts)]
 }
 
-fixation_summary <- function (rundf) {
+fixation_summary <- function (rundf, fixation_event="isi",
+                              keep_events=c("img", "mgs", "isi")) {
   d <- rundf %>%
        mutate(tt=paste(trial, event, side)) %>%
        select(time=totaltime, x=x_gaze, y=y_gaze, trial=tt)
@@ -78,26 +83,35 @@ fixation_summary <- function (rundf) {
           by=c("trial", "event")) %>%
      mutate(start_rel=start-event_onset)
 
+  # remove unwanted events if we have keep events
+  if (length(keep_events)>0L) {
+     f <- f %>% filter(event %in% keep_events )
+  }
 
-  # grab the place they were looking the most during isi
-  # as the center fix
-  # ggplot(f %>% filter(event=='isi')) + aes(x=x,weight=dur) + geom_histogram() + facet_wrap(~trial)
-  isi_xpos <- f %>%
-     group_by(trial, event) %>%
-     summarise(x_isi_wmode = weight_hist_mid(x, dur)) %>%
-     filter(event=="isi") %>% select(-event)
-
-  fsum <-
-     f %>% filter(event %in% c("img", "mgs", "isi")) %>%
+  fsum <- f %>%
      mutate(trial=as.numeric(trial)) %>%
      group_by(trial, event, side) %>%
      mutate(dur_w=dur/sum(dur)) %>%
      summarize( lidx=which.max(dur), ldur=max(dur),
                x_long=x[lidx], y_long=y[lidx],
                x_weight= sum(x*dur_w), y_weight=sum(y*dur_w),
-               x_mean=mean(x), y_mean=mean(y)) %>%
-     # add x_isi_wmode
-     merge(isi_xpos, by="trial")
+               x_mean=mean(x), y_mean=mean(y))
+
+  # skip merging if no fixation_event to use as normalizer
+  if (length(fixation_event)==0L) return(fsum)
+
+  # grab the place they were looking the most during isi
+  # as the center fix
+  # ggplot(f %>% filter(event=='isi')) + aes(x=x,weight=dur) + geom_histogram() + facet_wrap(~trial)
+
+  isi_xpos <- f %>%
+     group_by(trial, event) %>%
+     summarise(x_isi_wmode = weight_hist_mid(x, dur)) %>%
+     filter(event=="isi") %>% select(-event)
+
+  # return summary and best idea of fixation position
+  # add x_isi_wmode
+  merge(fsum, isi_xpos, by="trial")
 }
 
 sort_eye_list <- function(run_list) {
@@ -158,22 +172,4 @@ view_trial_traces <- function(eydf) {
      # prompt for enxt
      readline(prompt=sprintf("%d, next?", i)) }
 }
-
-eye_files <- Sys.glob("/Volumes/L/bea_res/Data/Tasks/MGSEncMem/7T/*/eye/*txt")
-eye_dfs <- lapply(eye_files, read_avotec )
-
-view_runs(sort_eye_list(eye_dfs), "x_weight")
-
-#eye_dfs[[25]]  %>% filter(!is.na(event) ) %>% group_by(ld8,runno,event,trial) %>% summarise_at(vars(x_correctedgaze,y_correctedgaze),funs(mean,sd)) %>% ggplot() + aes(x_correctedgaze_mean,y_correctedgaze_mean, color=event) + geom_point() + theme_bw() + facet_wrap(~trial)
-
-# ggsave(p, "../etc/eyetracking.pdf")
-
-
-#library(eyetrackingR)
-#library(gazetools) # https://github.com/RyanHope/gazetools
-library(saccades) # https://github.com/tmalsburg/saccades
-
-
-
-
 
