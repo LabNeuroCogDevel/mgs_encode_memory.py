@@ -560,6 +560,7 @@ class mgsTask:
 
         # want to mute windows computer
         # so monitor switching doesn't beep
+        
         self.winvolume = winmute.winmute()
 
         self.verbose = True
@@ -990,7 +991,7 @@ class mgsTask:
         """
         self.win.flip()
         core.wait(.4)
-        event.waitKeys()
+        event.waitKeys(keyList=['space'])
 
     def draw_instruction_eyes(self, where='center'):
         self.eyeimg.image = 'img/instruction/eyes_%s.png' % where

@@ -19,7 +19,8 @@ class winmute():
                             for session in sessions]
             # is already muted?
             self.origMute = [v.GetMute() for v in self.volumes]
-        except ImportError:
+        #except ImportError: # 20180409 -- if it fails for anyreason, continue
+        except:
             # set no volumes and no origMutes, nothing will be done by funcs below
             if os.name in ['nt']:
                 print("WARNING: no volume control; install pycaw")
