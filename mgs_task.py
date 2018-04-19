@@ -542,7 +542,9 @@ class mgsTask:
         # settings for eyetracking and parallel port ttl (eeg)
         # thisscript=os.path.abspath(os.path.dirname(__file__))
         # self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")
-        self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
+        #self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
+        self.vpxDll = 'C:\\Users\\Luna\\Desktop\\VPx32\\Interfaces\\VPx32-Client\\VPX_InterApp_32.dll'
+        #self.vpxDll = 'C:\Users\Luna\Desktop\VPx32\Interfaces\Programing\SDK\\VPX_InterApp_32.dll'
         self.useArrington = useArrington
         # # eyetracking
         if(self.useArrington):
