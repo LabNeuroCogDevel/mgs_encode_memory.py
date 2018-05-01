@@ -714,15 +714,16 @@ class mgsTask:
                 from psychopy import parallel
                 self.port = parallel.ParallelPort(address=self.pp_address)
 
-    def log_and_code(self,event,side,catagory,logh=None,takeshots=None,num=1):
-        self.send_code(event,side,catagory)
+    def log_and_code(self, event, side, catagory, logh=None, takeshots=None,
+                     num=1, trialno=None):
+        self.send_code(event, side, catagory, trialno)
         if logh is not None:
-            logh.log(level=logging.INFO, msg='flipped %s (%s,%s)' % (event, side, catagory))
+            logh.log(level=logging.INFO,
+                     msg='flipped %s (%s,%s)' % (event, side, catagory))
         if takeshots:
-            take_screenshot(self.win, takeshots + ('_%02d_%s' % (num, event) ))
-            
-        
-    def send_code(self, event, side, catagory):
+            take_screenshot(self.win, takeshots + ('_%02d_%s' % (num, event)))
+
+    def send_code(self, event, side, catagory, trialno=None):
         """
         send a trigger on parallel port (eeg) or ethernet (eyetracker)
         in MR, we do eyetracking, and want to send a trigger to the tracker
@@ -731,17 +732,20 @@ class mgsTask:
 
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
         if self.useArrington:
-            ttlstr = "_".join(map(lambda x: "%s" % x, [event,side,catagory]))
+            # if we have a trialno, include it in the output
+            if trialno is not None:
+                cat_t = "%s_%d" % (catagory, trialno)
+            else:
+                cat_t = catagory
+            ttlstr = "_".join(map(lambda x: "%s" % x, [event, side, cat_t]))
             self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
             if self.verbose:
                 print("eye code %s" % ttlstr)
-                self.vpx.VPX_SendCommand('say "sent %s"'% ttlstr)
-            # TODO start with setTTL? see manual ViewPoint-UserGuide-082.pdf
+                self.vpx.VPX_SendCommand('say "sent %s"' % ttlstr)
         if self.usePP:
             # send code, or 100 if cannot find
             thistrigger = eventToTTL(event, side, catagory)
             self.send_ttl(thistrigger)
-
 
     def send_ttl(self, thistrigger):
         """
@@ -785,7 +789,8 @@ class mgsTask:
             core.wait(iti)
         return(showtime)
 
-    def vgs_show(self, imgon, posstr, imgfile=None, imgtype=None, logh=None, takeshots=False):
+    def vgs_show(self, imgon, posstr, imgfile=None, imgtype=None, logh=None,
+                 takeshots=False, trialno=None):
         """
         run the vgs event: show an image with a dot over it in some postiion
         """
@@ -794,12 +799,13 @@ class mgsTask:
         horz = {'Right': 1, 'Left': -1, 'NearLeft': -.5, 'NearRight': .5}.\
             get(posstr, 0)
 
-        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize, vertOffset=self.vertOffset)
+        imgpos = replace_img(self.img, imgfile, horz, self.imgratsize,
+                             vertOffset=self.vertOffset)
 
         self.crcl.pos = imgpos
         self.crcl.draw()
         self.win.callOnFlip(self.log_and_code, 'img', posstr, imgtype,
-                            logh, takeshots, num=2)
+                            logh, takeshots, num=2, trialno=trialno)
         wait_until(imgon)
         showtime = self.win.flip()
         return(showtime)
@@ -837,19 +843,19 @@ class mgsTask:
         # get ready red target
         self.cue_fix.draw()
         self.win.callOnFlip(self.log_and_code, 'cue', t['side'], t['imgtype'],
-                            logh, takeshots, 1)
+                            logh, takeshots, 1, trialno=t['trial'])
 
         wait_until(cueon)
         cueflipt = self.win.flip()
 
         # show an image if we have one to show
         vgsflipt = self.vgs_show(imgon, t['side'], t['imgfile'], t['imgtype'],
-                                 logh, takeshots)
+                                 logh, takeshots, trialno=t['trial'])
 
         # back to fix
         self.isi_fix.draw()
         self.win.callOnFlip(self.log_and_code, 'isi', t['side'], t['imgtype'],
-                            logh, takeshots, 3)
+                            logh, takeshots, 3, trialno=t['trial'])
 
         wait_until(ision)
         isiflipt = self.win.flip()
@@ -857,7 +863,7 @@ class mgsTask:
         # memory guided (recall)
         # -- empty screen nothing to draw
         self.win.callOnFlip(self.log_and_code, 'mgs', t['side'], t['imgtype'],
-                            logh, takeshots, 4)
+                            logh, takeshots, 4, t['trial'])
         wait_until(mgson)
         mgsflipt = self.win.flip()
 
