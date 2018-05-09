@@ -24,8 +24,11 @@ read_avotec <- function (filename, trial_start_event="iti") {
                      "x_gaze", "y_gaze", "x_correctedgaze", "y_correctedgaze",
                      "region", "pupilwidth", "pupilheight", "quality",
                      "fixation", "count", "event", "event_onset")),
+                    warning=function(w)  print(w),
                     error=function(e) {
-                       warning("parse: ", filename, ": ", e)
+                       # "Error in ... (converted from warning)"
+                       # so dont throw warning (e or filename is NA?)
+                       #warning("parse: ", filename, ": ", e)
                        return(NULL)
                     })
    if (is.null(eyed)) return(NULL)
@@ -53,14 +56,14 @@ plot_eyedf <- function(edf) {
 }
 
 
-trial_xpos_plot <- function(fsum, x,normalize=T) {
+## plot xposition by trial
+trial_xpos_plot <- function(fsum, x, normalize="x_isi_wmode") {
    # subtract center from xposition
-   if(normalize) x <- paste0(x, " - x_isi_wmode")
+   if (!is.null(normalize)) x <- paste0(x, " - ", normalize)
    ggplot(fsum) +
    aes_string(size="ldur", color="event", shape="side",
        x=x, y="trial") +
    geom_point() + theme_bw()
-   #facet_wrap(~trial)
 }
 
 weight_hist_mid <- function(x, dur) {
@@ -70,6 +73,9 @@ weight_hist_mid <- function(x, dur) {
 
 fixation_summary <- function (rundf, fixation_event="isi",
                               keep_events=c("img", "mgs", "isi")) {
+
+  if (is.null(rundf)) return(NULL)
+
   d <- rundf %>%
        mutate(tt=paste(trial, event, side)) %>%
        select(time=totaltime, x=x_gaze, y=y_gaze, trial=tt)
@@ -85,7 +91,7 @@ fixation_summary <- function (rundf, fixation_event="isi",
 
   # remove unwanted events if we have keep events
   if (length(keep_events)>0L) {
-     f <- f %>% filter(event %in% keep_events )
+     f <- f %>% filter(event %in% keep_events)
   }
 
   fsum <- f %>%
@@ -95,7 +101,10 @@ fixation_summary <- function (rundf, fixation_event="isi",
      summarize( lidx=which.max(dur), ldur=max(dur),
                x_long=x[lidx], y_long=y[lidx],
                x_weight= sum(x*dur_w), y_weight=sum(y*dur_w),
-               x_mean=mean(x), y_mean=mean(y))
+               x_mean=mean(x), y_mean=mean(y),
+               x_first=x[1], y_first=y[1],
+               first_t=start_rel[1],
+               nsac=length(x))
 
   # skip merging if no fixation_event to use as normalizer
   if (length(fixation_event)==0L) return(fsum)
@@ -107,7 +116,7 @@ fixation_summary <- function (rundf, fixation_event="isi",
   isi_xpos <- f %>%
      group_by(trial, event) %>%
      summarise(x_isi_wmode = weight_hist_mid(x, dur)) %>%
-     filter(event=="isi") %>% select(-event)
+     filter(event==fixation_event) %>% select(-event)
 
   # return summary and best idea of fixation position
   # add x_isi_wmode
@@ -167,9 +176,68 @@ view_trial_traces <- function(eydf) {
       aes(x=x_correctedgaze, y=y_correctedgaze, color=event) +
       geom_path() +
       ggtitle(sprintf("correct: %s", tinfo))
-     print(plot_grid(p,pc))
+     print(plot_grid(p, pc))
 
      # prompt for enxt
-     readline(prompt=sprintf("%d, next?", i)) }
+     readline(prompt=sprintf("%d, next?", i))
+   }
 }
 
+# 20180504
+eye_score <- function(d, xpos_measure="x_weight"){
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+
+  # use:
+  #  x_first  -> first fixation position
+  #  x_long   -> longest fix pos
+  #  x_weight -> time weighted mean fix pos
+  #  x_mean   -> average fix pos
+  xpos_m <- rlang::sym(xpos_measure)
+
+  d_diff <-
+   d %>%
+   select(trial, event, side, !! xpos_m, x_isi_wmode) %>% #, first_t) %>%
+   # TODO: drop saccades that are too soon?
+   group_by(trial, side) %>%
+   spread(event, !!xpos_m) %>%
+   mutate(posdiff=img-mgs,
+          # left = -1, right = 1
+          side_sign = ifelse(grepl("left", side, ignore.case=T), -1, 1),
+          img_sign  = sign(img-x_isi_wmode),
+          mgs_sign  = sign(mgs-x_isi_wmode),
+          # img and mgs should both be on the expected side
+          correct   = all(c(img_sign, mgs_sign) == side_sign)
+          ##could calc based on pos diff
+          # screen range is 0 to 1.
+          # more than 20% difference is looking elsewhere
+          #correct=abs(posdiff)<.2)
+         )
+
+  # keep time and dir
+  # setDT %>% data.table::dcast(trial + side ~ event, value.var=c('x_first','first_t'),sep="."
+}
+
+# plot the scored dataframe
+plot_scored <- function(d) {
+  d_label <- d %>%
+     ungroup %>%
+     #mutate(xpos=max(max(abs(img)), max(abs(mgs)))*side_sign)
+     mutate(xpos=side_sign)
+  # undo wide format scoreing
+  d_long <-
+     d %>%
+     #mutate_at( vars(img, isi, mgs), funs(. - x_isi_wmode)) %>%
+     gather(event, xpos,
+            -trial, -side,
+            -correct, -posdiff,
+            -x_isi_wmode, -matches("_sign"), -isi) %>%
+     mutate(xpos=xpos-x_isi_wmode)
+  p <-
+     ggplot(d_long) +
+     aes(x=xpos, y=trial, color=event, shape=correct, size=abs(posdiff)) +
+     geom_point() +
+     geom_text(aes(label=side, group=NULL, color=NULL, size=NULL), data=d_label) +
+     geom_vline(xintercept=0) +
+     ggtitle(sprintf("ncor: %d/%d", length(which(d$correct)),max(d$trial)))
+  return(p)
+}
