@@ -46,6 +46,10 @@ df.columns=["totaltime", "deltatime",
 df['action'], df['side'], df['pos'] = df['event_str'].str.split('_',2).str
 df['pos'] = df['pos'].replace('None',pd.np.Inf).astype('float')
 
+
+# show box plot of each positions
+df.boxplot(column='x_gaze',by=['pos'],rot=90).show()
+
 #m = df.groupby(['pos'])['x_gaze'].mean()
 #smry = df.groupby(['pos'])['x_gaze'].agg({'m':lambda x: pd.np.mean(x), 's': lambda x: pd.np.std(x)})
 smry = df.groupby(['pos'])['x_gaze'].agg(['mean','std'])
