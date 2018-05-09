@@ -38,25 +38,31 @@ task.eyetracking_newfile('%s' % eyetrackingfile)
 
 # get 20 positions from 10% to 90%
 pos = np.linspace(.1, .9, 20)
-# duplicate each
 
+# concat + and - versions
 allpos = np.concatenate([pos, -1 * pos])
+# randomly position them
 ridx = np.random.permutation(len(allpos))
 allpos = allpos[ridx]
+# repeat each position in order e.g. [ .9,.9, -.1,-.1, ...]
 pos_rep = np.array([[x,x] for x in allpos ]).reshape(1,len(allpos)*2)[0]
+# ridx is 0:n, randomness happened earlier
 ridx = range(pos_rep.size)
 
+# trigger to use
 def print_and_ttl(msg, pos):
     print(msg)
     event = "look"
     side = "Left"
-    if pos > .5:
+    if pos > 0:
         side = "Right"
-    if pos == .5:
+    if pos == 0:
         event = "fix"
         side = "center"
     if useArrington:
         task.send_code(event, side, pos)
+    else:
+        print("%s %s %.02f" % (event, side,pos))
 
 
 # -- instructions
@@ -83,7 +89,7 @@ for ri in range(len(ridx)):
     i = ridx[ri]
     p = pos_rep[i] * winwidth
 
-    fixttl = .5
+    fixttl = 0
     posttl = pos_rep[i]
 
     # draw cricle
