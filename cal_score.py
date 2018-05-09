@@ -48,7 +48,12 @@ df['pos'] = df['pos'].replace('None',pd.np.Inf).astype('float')
 
 
 # show box plot of each positions
-df.boxplot(column='x_gaze',by=['pos'],rot=90).show()
+df['pos'] = ["%.02f" % x for x in df['pos']]
+df = df.query('pos not in ["nan", "inf"] ')
+df['onset_rank'] = df.groupby('pos')['event_onset'].rank(method="dense").astype(int)
+df.loc[df.onset_rank>=3,'onset_rank'] = 3
+df.boxplot(column=['x_gaze'],by=['pos','onset_rank'],rot=90)
+plt.show()
 
 #m = df.groupby(['pos'])['x_gaze'].mean()
 #smry = df.groupby(['pos'])['x_gaze'].agg({'m':lambda x: pd.np.mean(x), 's': lambda x: pd.np.std(x)})
