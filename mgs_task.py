@@ -1081,13 +1081,15 @@ class mgsTask:
         show end of run screen
         send stop codes for parallel port
         close eyetracking file
+        20180509: add fixation cross to center for slip correct
         """
         self.stop_aux()  # end ttl, close eye file
-        self.textbox.pos = (-.2, 0)
+        self.textbox.pos = (-.2, .5)
         runstr = ""
         if nruns > 1:
             runstr = '%d/%d!' % (run, nruns)
         self.textbox.text = 'Finished ' + runstr
+        self.iti_fix.draw()
         self.textbox.draw()
         self.instruction_flip()
 
