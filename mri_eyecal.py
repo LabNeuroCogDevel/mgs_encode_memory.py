@@ -6,20 +6,27 @@ import numpy as np
 from psychopy import gui  # , event
 import datetime
 import sys
+import os
 
 tracking_type = "pupil"
+isfullscreen = True
+useArrington = True
 box = gui.Dlg()
 box.addField("traking type/file name:", tracking_type)
+box.addField("fullscreen", isfullscreen)
+box.addField("send triggers", useArrington)
+box.addField("number dots", 40)
 boxdata = box.show()
 if box.OK:
     tracking_type = boxdata[0]
+    isfullscreen = boxdata[1]
+    useArrington = boxdata[2]
+    npoints = int(boxdata[3])*2
 else:
     sys.exit(1)
 
 getScreenShots = False
-isfullscreen = True
 # if we are fullscreen, we're at eeg and want to send ttl too
-useArrington = isfullscreen
 
 # how long to wait at each event
 fixdur = .75
@@ -40,8 +47,12 @@ pos = np.linspace(.1, .9, 20)
 
 # concat + and - versions
 allpos = np.concatenate([pos, -1 * pos])
-# randomly position them
-ridx = np.random.permutation(len(allpos))
+# -- randomly position them
+# ridx = np.random.permutation(len(allpos))
+# -- fix ridx for consitancy
+ridx = [19, 16, 33, 20, 24, 12, 23,  3, 15, 34, 25, 32,  8,  4, 10,  7, 30,
+        14, 13, 29,  9, 28, 31, 36, 39,  0,  2,  6, 18,  5, 27, 11, 37, 22,
+        17, 26, 35, 21,  1, 38]
 allpos = allpos[ridx]
 # repeat each position in order e.g. [ .9,.9, -.1,-.1, ...]
 pos_rep = np.array([[x, x] for x in allpos]).reshape(1, len(allpos)*2)[0]
@@ -84,7 +95,7 @@ task.textbox.draw()
 task.instruction_flip()
 
 # -- start
-task.wait_for_scanner(['space'], 'Ready?')
+starttime = task.wait_for_scanner(['space'], 'Ready?')
 # wait for scan sends start code
 task.send_code('start', None, None)
 
@@ -92,8 +103,11 @@ winwidth = task.win.size[0]/2
 print(winwidth)
 task.start_aux()
 
+# time, position
+info = np.zeros([len(ridx)*2, 2])
+
 # task.vpx.VPX_SendCommand('dataFile_Pause 0')
-for ri in range(len(ridx)):
+for ri in range(npoints):
     # find position and ttlcode
     i = ridx[ri]
     p = pos_rep[i] * winwidth
@@ -108,6 +122,8 @@ for ri in range(len(ridx)):
                         "p at %.02fx (%.02fpx)" % (pos_rep[i], p),
                         posttl)
     ft = task.win.flip()
+    # save dot flip to info
+    info[2*(i-1)] = [ft - starttime, pos_rep[i]]
     # wait a bit
     wait_until(ft + dotdur)
 
@@ -118,6 +134,8 @@ for ri in range(len(ridx)):
     task.iti_fix.draw()
     task.win.callOnFlip(print_and_ttl, "back to fix", fixttl)
     ft = task.win.flip()
+    # update list
+    info[2*(i-1)+1] = [ft - starttime, 0.0]
     # wait a bit
     wait_until(ft + fixdur)
 
@@ -128,3 +146,8 @@ task.stop_aux()
 task.run_end()
 task.win.close()
 task.stop_aux()
+
+# save look info
+if not os.path.exists("cal"):
+    os.makedirs("cal")
+np.savetxt('cal/%s_timing_%s.txt' % (tracking_type, seconds), info, "%.03f")
