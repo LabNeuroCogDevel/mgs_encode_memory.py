@@ -6,7 +6,7 @@
 # ^M-: (run-python "/usr/bin/python2")
 
 from __future__ import division
-from psychopy import data, logging, gui  # , event
+from psychopy import data, logging, gui, core  # , event
 import datetime  # set timepoint default, start time
 import sys
 import os
@@ -57,12 +57,14 @@ nruns = nruns_opt[tasktype]
 useArrington = arrington_opt[tasktype]
 useParallel = parallel_opt[tasktype]
 vertOffset = vert_offset_opt[tasktype]
+midwayPause = False
 
 
 # # different defaults for different computers
 if tasktype == 'eeg':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Ready?'
+    midwayPause = True
 elif tasktype == 'test':
     tasktype = 'test'
     subjnum = 'test'
@@ -103,6 +105,7 @@ else:
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
     box.addField("total # runs", nruns)
     box.addField("Vert offset (fraction of screen)", vertOffset)
+    box.addField("Midway Pause", midwayPause)
 
     boxdata = box.show()
     if box.OK:
@@ -118,6 +121,7 @@ else:
         timepoint = boxdata[9]
         nruns = int(boxdata[10])
         vertOffset = float(boxdata[11])
+        midwayPause = boxdata[12]
     else:
         sys.exit(1)
 
@@ -213,6 +217,22 @@ for runi in range(start_runnum-1, nruns):
 
     # for all trials in this run
     for t in sacc_trials:
+        if midwayPause and t['trial'] == int(sacc_trials.nTotal/2.0):
+            # setup pause screen
+            task.textbox.pos = (-.2, -.1)
+            task.textbox.text = 'Half way break!'
+            task.iti_fix.draw()
+            task.textbox.draw()
+            # wait out the previous iti
+            break_at = blockstarttime + t['cue']
+            wait_until(break_at)
+            # and pause
+            task.send_code('end', None, None)
+            task.instruction_flip()
+            # compensate for break in future onsets
+            task.addTime = core.getTime() - break_at
+            task.send_code('start', None, None)
+
         # run the trial
         fliptimes = task.sacc_trial(t, blockstarttime, takeshots=takeshots,
                                     logh=logging)
@@ -233,6 +253,8 @@ for runi in range(start_runnum-1, nruns):
 
     # finish up
     task.run_iti()
+    # undo any extra waiting
+    task.addTime = 0
 
     savefile_csv = '%s_%s_%d_view.csv' % (subjid, tasktype, run)
     savefile_csv_path = os.path.join(datadir, savefile_csv)

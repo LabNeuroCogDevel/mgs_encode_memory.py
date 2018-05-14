@@ -534,6 +534,9 @@ class mgsTask:
                  useArrington=False,
                  usePP=False,
                  fullscreen=True):
+
+        # compensate for mdiway pause
+        self.addTime = 0
         # were we given a window?
         # make our own if not
         if win is None:
@@ -818,26 +821,27 @@ class mgsTask:
         """
         if(starttime == 0):
             starttime = core.getTime()
-        cueon = starttime + t['cue']
-        imgon = starttime + t['vgs']
-        ision = starttime + t['dly']
-        mgson = starttime + t['mgs']
+        cueon = starttime + t['cue'] + self.addTime
+        imgon = starttime + t['vgs'] + self.addTime
+        ision = starttime + t['dly'] + self.addTime
+        mgson = starttime + t['mgs'] + self.addTime
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
         # give header for output if this is the first trial
         if t.thisN == 0:
             print("")
-            print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)")
+            print("ideal\tcur\tlaunch\tpos\ttype\tdly\tdiff (remaning iti)\taddTime")
 
-        print("%.02f\t%.02f\t%.02f\t%s\t%s\t%.02f\t%.02f" %
+        print("%.02f\t%.02f\t%.02f\t%s\t%s\t%.02f\t%.02f\t%.02f" %
               (t['cue'],
                core.getTime(),
                starttime + t['cue'],
                t['side'],
                t['imgtype'],
                t['mgs'] - t['dly'],
-               starttime + t['cue'] - core.getTime()
+               starttime + t['cue'] - core.getTime() + self.addTime,
+               self.addTime
                ))
 
         # get ready red target
