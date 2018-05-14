@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- elpy-use-ipython: "ipython"; -*-
 
-from mgs_task import mgsTask, wait_until
+from mgs_task import mgsTask, wait_until, take_screenshot
 import numpy as np
 from psychopy import gui  # , event
 import datetime
@@ -16,8 +16,7 @@ if box.OK:
 else:
     sys.exit(1)
 
-
-
+getScreenShots = False
 isfullscreen = True
 # if we are fullscreen, we're at eeg and want to send ttl too
 useArrington = isfullscreen
@@ -45,9 +44,18 @@ allpos = np.concatenate([pos, -1 * pos])
 ridx = np.random.permutation(len(allpos))
 allpos = allpos[ridx]
 # repeat each position in order e.g. [ .9,.9, -.1,-.1, ...]
-pos_rep = np.array([[x,x] for x in allpos ]).reshape(1,len(allpos)*2)[0]
+pos_rep = np.array([[x, x] for x in allpos]).reshape(1, len(allpos)*2)[0]
 # ridx is 0:n, randomness happened earlier
 ridx = range(pos_rep.size)
+
+# screenshot of it all
+if getScreenShots:
+    for p in pos_rep*task.win.size[0]/2:
+        task.crcl.pos = (p, 0)
+        task.crcl.draw()
+    task.win.flip()
+    take_screenshot(task.win, "mri_cal_example")
+
 
 # trigger to use
 def print_and_ttl(msg, pos):
@@ -62,7 +70,7 @@ def print_and_ttl(msg, pos):
     if useArrington:
         task.send_code(event, side, pos)
     else:
-        print("%s %s %.02f" % (event, side,pos))
+        print("%s %s %.02f" % (event, side, pos))
 
 
 # -- instructions
@@ -83,7 +91,8 @@ task.send_code('start', None, None)
 winwidth = task.win.size[0]/2
 print(winwidth)
 task.start_aux()
-#task.vpx.VPX_SendCommand('dataFile_Pause 0')
+
+# task.vpx.VPX_SendCommand('dataFile_Pause 0')
 for ri in range(len(ridx)):
     # find position and ttlcode
     i = ridx[ri]
