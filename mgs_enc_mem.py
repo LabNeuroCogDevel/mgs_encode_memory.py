@@ -228,7 +228,16 @@ for runi in range(start_runnum-1, nruns):
             wait_until(break_at)
             # and pause
             task.send_code('end', None, None)
+
+            # wait for a keep press then flip
             task.instruction_flip()
+
+            # dispaly another screen before going into task
+            task.textbox.pos = (-.2, 0)
+            task.textbox.text = 'Ready!?'
+            task.textbox.draw()
+            task.instruction_flip()
+
             # compensate for break in future onsets
             task.addTime = core.getTime() - break_at
             task.send_code('start', None, None)
