@@ -57,7 +57,7 @@ def getSubjectDataPath(subjid, tasktype, imgset, timepoint):
 
     # subj_info/subj/timepoint/modality_set_date/
     savepath = 'subj_info'
-    tpdir = "%02d" % timepoint
+    tpdir = "%02d" % int(timepoint)
     lastdir = "%s_%s_%s" % (tasktype, imgset, vdate)
     datadir = os.path.join(savepath, subjid, tpdir, lastdir)
     logdir = os.path.join(datadir, 'log')
@@ -821,10 +821,11 @@ class mgsTask:
         """
         if(starttime == 0):
             starttime = core.getTime()
-        cueon = starttime + t['cue'] + self.addTime
-        imgon = starttime + t['vgs'] + self.addTime
-        ision = starttime + t['dly'] + self.addTime
-        mgson = starttime + t['mgs'] + self.addTime
+
+        cueon = starttime + t['cue']
+        imgon = starttime + t['vgs']
+        ision = starttime + t['dly']
+        mgson = starttime + t['mgs']
 
         # if takeshots: take_screenshot(self.win,takeshots+'_00_start')
 
@@ -840,7 +841,7 @@ class mgsTask:
                t['side'],
                t['imgtype'],
                t['mgs'] - t['dly'],
-               starttime + t['cue'] - core.getTime() + self.addTime,
+               starttime + t['cue'] - core.getTime(),
                self.addTime
                ))
 

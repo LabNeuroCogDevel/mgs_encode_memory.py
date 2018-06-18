@@ -234,11 +234,11 @@ for runi in range(start_runnum-1, nruns):
             task.send_code('start', None, None)
 
         # run the trial
-        fliptimes = task.sacc_trial(t, blockstarttime, takeshots=takeshots,
-                                    logh=logging)
+        fliptimes = task.sacc_trial(t, blockstarttime + task.addTime,
+                                    takeshots=takeshots, logh=logging)
 
         # give mgs it's time then put up the iti cross
-        mgsoff = blockstarttime + t['mgs'] + mgsdur
+        mgsoff = blockstarttime + t['mgs'] + mgsdur + task.addTime
         wait_until(mgsoff)
         fliptimes['iti'] = task.run_iti()
 
