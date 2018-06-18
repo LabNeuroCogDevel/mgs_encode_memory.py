@@ -1,71 +1,39 @@
 #!/usr/bin/env python2
-import wx
 import os
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+from arrington import read_arrington, add_cal_timing, et_3part_trigger
 
-# open a file
-app = wx.App()
-frame = wx.Frame(None, -1, "score calibratation")
-eyefile_dlg = wx.FileDialog(frame, "File")
-eyefile_dlg.ShowModal()
-eyefile = eyefile_dlg.GetPath()
+# need at least a calibration file
+# and maybe a event timing file
+# eyefile="/home/foranw/src/tasks/mgs_encode_memory.py/cal/20180515/2018-5-15;12-20-3.txt"
+# timefile="/home/foranw/src/tasks/mgs_encode_memory.py/cal/20180515/s1_timing_122100.txt"
+if len(sys.argv) <= 0:
+    import wx
+    app = wx.App()
+    frame = wx.Frame(None, -1, "score calibratation")
+    eyefile_dlg = wx.FileDialog(frame, "eye file")
+    eyefile_dlg.ShowModal()
+    eyefile = eyefile_dlg.GetPath()
+    # optinal timing file
+    timefile_dlg = wx.FileDialog(frame, "timing file")
+    timefile_dlg.ShowModal()
+    timefile = eyefile_dlg.GetPath()
+else:
+    eyefile = sys.argv[1]
+    if len(sys.argv) == 2:
+        timefile = sys.argv[0]
+
 if eyefile is None:
     os.exit(1)
 
 
-# --- read in a calibration file
-# adapted from perl:
-# BEGIN{$event="NA\\tNA"}
-#  $event="$F[2]\\t$F[1]" if/^12/;
-#  print join("\\t",@F[1..12],$event) if m/^10/'
-def read_arrington(eyefile):
-    with open(eyefile) as f:
-        event = None
-        event_time = 0
-        data = []
-        for line in f:
-            v = line.split()
-            # line starts with 10, it's data
-            #                  12, it's event info
-            if v[0] == "10":
-                data.append([float(x) for x in v[1:13]] + [event, event_time])
-            elif v[0] == "12":
-                event = v[2]
-                event_time = float(v[1])
-            else:
-                pass
-                # print("Bad line " + line)
-
-    df = pd.DataFrame(data)
-    df.columns = ["totaltime", "deltatime",
-                  "x_gaze", "y_gaze", "x_correctedgaze", "y_correctedgaze",
-                  "region", "pupilwidth", "pupilheight", "quality",
-                  "fixation", "count", "event_str", "event_onset"]
-    return(df)
-
-
-def et_3part_trigger(df):
-    # event like ["fix_center_0.5", "look_Left_-0.605...",...] =>
-    #  separate columns, pos should be numeric
-
-    df['action'], df['side'], df['pos'] = df['event_str'].str.split('_', 2).str
-    df['pos'] = df['pos'].replace('None', pd.np.Inf).astype('float')
-
-    # show box plot of each positions
-    df['pos'] = ["%.02f" % x for x in df['pos']]
-    df = df.query('pos not in ["nan", "inf"] ')
-    df['onset_rank'] = df.\
-        groupby('pos')['event_onset'].\
-        rank(method="dense").\
-        astype(int)
-    df.loc[df.onset_rank >= 3, 'onset_rank'] = 3
-
-    return(df)
-
-
-df = read_arrington(eyefile)
-df = et_3part_trigger(df)
+raw_df = read_arrington(eyefile)
+if timefile is None:
+    df = et_3part_trigger(raw_df)
+else:
+    df = add_cal_timing(timefile, raw_df)
 
 gzcol = 'x_correctedgaze'
 
@@ -114,3 +82,11 @@ allpos = pd.np.concatenate([pos, -1 * pos])
 for x in (allpos + 1)/2:
     plt.axvline(x=x, color='k', linestyle='--')
 plt.show()
+
+
+import seaborn as sns
+
+gzcol = 'x_correctedgaze'
+
+df.boxplot(column=[gzcol], by=['pos', 'onset_rank'], rot=90)
+#ax = sns.boxplot(x=gzcol,
