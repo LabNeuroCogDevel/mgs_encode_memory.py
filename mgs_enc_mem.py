@@ -163,7 +163,7 @@ all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 # 20180717 - redudant but easy easy to set port
 #            prev only needed for eeg
 # other tasks dont matter if pp address is set
-if(tasktype == 'practice' and useParallel):
+if(tasktype in ['practice', 'behave'] and useParallel):
     pp_address=0x0378
     zeroTTL=False
     print("using practice computer address")
