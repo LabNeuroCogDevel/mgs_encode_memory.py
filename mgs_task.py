@@ -538,7 +538,8 @@ class mgsTask:
                  usePP=None,
                  fullscreen=True,
                  pp_address=0xDFF8,
-                 zeroTTL=True):
+                 zeroTTL=True,
+                 recVideo=False):
 
         # compensate for mdiway pause
         self.addTime = 0
@@ -579,6 +580,10 @@ class mgsTask:
 
         # how far off the horizonal do we display cross and images?
         self.vertOffset = vertOffset
+        
+        # do we tell arrington to record eye video?
+        self.recVideo = recVideo
+        self.runEyeName  = datetime.datetime.strftime(datetime.datetime.now(), "unnamed_%Y%m%d_%H%M%S.avi")
 
         # images relative to screen size
         self.imgratsize = .15
@@ -677,6 +682,7 @@ class mgsTask:
         # start a new file and pause it
         if(self.useArrington):
             fname = str(fname)
+            self.runEyeName = fname.replace(".txt","") # setup for eye recording video
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
             self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
             if self.verbose:
@@ -690,6 +696,9 @@ class mgsTask:
         self.winvolume.mute_all()
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Pause 0')
+            if self.recVideo:
+                print("send eyeMoive_NewName cmd")
+                self.vpx.VPX_SendCommand('eyeMovie_NewName "%s.avi"'% self.runEyeName)
         if(self.usePP):
             self.send_code('start', None, None)
 
@@ -699,6 +708,10 @@ class mgsTask:
         """
         if(self.useArrington):
             self.vpx.VPX_SendCommand('dataFile_Close 0')
+            if self.recVideo:
+                print("send end movie cmd")
+                self.vpx.VPX_SendCommand('eyeMovie_Close')
+
         if(self.usePP):
             self.send_code('end', None, None)
         #self.winvolume.undo_mute() #  causes error

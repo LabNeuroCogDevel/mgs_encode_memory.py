@@ -30,6 +30,9 @@ vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0,
                    'practice': 0, 'unknown': 0,
                    'behave': 0}
 
+record_video_opt = {'mri': True, 'eeg': False, 'test': False,
+                    'practice': False, 'unknown': False}
+
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
 # TODO check against traildf max
@@ -60,6 +63,7 @@ nruns = nruns_opt[tasktype]
 useArrington = arrington_opt[tasktype]
 useParallel = parallel_opt[tasktype]
 vertOffset = vert_offset_opt[tasktype]
+recVideo = record_video_opt[tasktype]
 midwayPause = False
 
 
@@ -113,6 +117,7 @@ else:
     box.addField("total # runs", nruns)
     box.addField("Vert offset (fraction of screen)", vertOffset)
     box.addField("Midway Pause", midwayPause)
+    box.addField("Record Eye Video", recVideo)
 
     boxdata = box.show()
     if box.OK:
@@ -129,6 +134,7 @@ else:
         nruns = int(boxdata[10])
         vertOffset = float(boxdata[11])
         midwayPause = boxdata[12]
+        recVideo = boxdata[13]
     else:
         sys.exit(1)
 
@@ -175,7 +181,8 @@ else:
 win = create_window(isfullscreen)
 task = mgsTask(win, useArrington=useArrington,
                usePP=useParallel, vertOffset=vertOffset,
-               pp_address=pp_address,zeroTTL=zeroTTL)
+               pp_address=pp_address, zeroTTL=zeroTTL,
+               recVideo=recVideo)
 
 
 # # instructions
