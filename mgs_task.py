@@ -532,8 +532,10 @@ class mgsTask:
                               'oops':         '5'},
                  vertOffset=0,
                  useArrington=False,
-                 usePP=False,
-                 fullscreen=True):
+                 usePP=None,
+                 fullscreen=True,
+                 pp_address=0xDFF8,
+                 zeroTTL=True):
 
         # compensate for mdiway pause
         self.addTime = 0
@@ -557,12 +559,14 @@ class mgsTask:
         # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
         #self.pp_address = 0x0378
         #self.pp_address = 0x0278
-        self.pp_address = 0xDFF8
-
+        #self.pp_address = 0xDFF8 # EEG
+        #self.pp_address = 0x0378 # ASL practice
         self.usePP = usePP
         if usePP:
+            self.pp_address = pp_address
+            self.zeroTTL    = zeroTTL
             self.init_PP()
-
+        
         # want to mute windows computer
         # so monitor switching doesn't beep
         
@@ -759,8 +763,9 @@ class mgsTask:
         self.port.setData(thistrigger)
         if self.verbose:
             print("eeg code %s" % thistrigger)
-        core.wait(.01)  # wait 10ms and send zero
-        self.port.setData(0)
+        if self.zeroTTL:
+            core.wait(.01)  # wait 10ms and send zero
+            self.port.setData(0)
 
     def wait_for_scanner(self, trigger, msg='Waiting for scanner (pulse trigger)'):
         """

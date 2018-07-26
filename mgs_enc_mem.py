@@ -18,14 +18,17 @@ from mgs_task import mgsTask, gen_run_info, \
 # ---- settings -----
 # -- host specific --
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15,
-                  'practice': 65, 'unknown': 420}
+        'practice': 65, 'unknown': 420, 'behave': 240}
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2,
-             'practice': 1, 'unknown': 3}
-parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False, 'practice': False}
+        'practice': 1, 'behave': 2, 'unknown': 3}
+parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False,
+                'practice': False, 'behave': True}
 arrington_opt = {'mri': True, 'eeg': False, 'test': False,
-                 'practice': False, 'unknown': True}
-vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0, 
-                   'practice': 0, 'unknown': 0}
+                 'practice': False, 'behave': False,
+                 'unknown': True}
+vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0,
+                   'practice': 0, 'unknown': 0,
+                   'behave': 0}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -76,6 +79,10 @@ elif tasktype == 'practice':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Get Ready!'
     imgset = 'practice'
+elif tasktype == 'behave':
+    scannerTriggerKeys = scannerTriggerKeys + ['space']
+    getReadyMsg = 'Get Ready!'
+    imgset = 'behave'
 elif tasktype == 'mri':
     pass
 else:
@@ -94,7 +101,7 @@ if (len(sys.argv) > 1):
 else:
     box = gui.Dlg()
     box.addField("Subject ID:", subjnum)
-    box.addField("Image Set", imgset, choices=['A', 'B', 'practice'])
+    box.addField("Image Set", imgset, choices=['A', 'B', 'behave', 'practice'])
     box.addField("Date ID:", subjdateid)
     box.addField("Run number:", 1)
     box.addField("instructions?", show_instructions)
@@ -153,10 +160,22 @@ all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 #    all_runs_info['imagedf'][1,'imgfile'] = 'img/example.png'
 #    all_runs_info['imagedf'][4,'imgfile'] = 'img/example.png'
 
+# 20180717 - redudant but easy easy to set port
+#            prev only needed for eeg
+# other tasks dont matter if pp address is set
+if(tasktype == 'practice' and useParallel):
+    pp_address=0x0378
+    zeroTTL=False
+    print("using practice computer address")
+else:
+    zeroTTL=True
+    pp_address=0xDFF8
+
 # # screen setup
 win = create_window(isfullscreen)
 task = mgsTask(win, useArrington=useArrington,
-               usePP=useParallel, vertOffset=vertOffset)
+               usePP=useParallel, vertOffset=vertOffset,
+               pp_address=pp_address,zeroTTL=zeroTTL)
 
 
 # # instructions
