@@ -19,7 +19,11 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
 # like: subj_info/abcd/01/eeg_B_20180221/runs_info.pkl
-pkl_glb = os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl')
+pkl_glb = [#os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl'),
+           os.path.join('/Volumes', '*', '*','subj_info','*', '*', '*','runs_info.pkl'),
+           os.path.join('/Volumes', '*', 'subj_info','*', '*', '*', 'runs_info.pkl')#,
+           #os.path.join('/Volumes', '*', '*', 'runs_info.pkl')
+           ]
 # what keys do we use?
 accept_keys = {'known': '1',
                'maybeknown': '2',
@@ -37,7 +41,11 @@ accept_keys = {'known': '1',
 
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3}
 
-allsubjs = sorted(glob.glob(pkl_glb), key=lambda x: -os.path.getmtime(x))
+# glob all the paths provided, flatten, order by modified time
+globs = [ glob.glob(x) for x in pkl_glb ];
+globs_flat = [item for sublist in globs for item in sublist]
+allsubjs = sorted(globs_flat, key=lambda x: -os.path.getmtime(x))
+
 settings = {'recall_from': allsubjs,
             'fullscreen': True,
             'instructions': True,
@@ -116,6 +124,7 @@ for t in recall_trials:
         print("responding: %s" % resparr)
         r = ResponseEmulator(resparr)
         r.start()
+    if not os.path.exists(t['imgfile']):   t['imgfile'] = t['imgfile'].replace("\\","/") 
     (keypresses, rts) = task.recall_trial(t['imgfile'])
 
     grade = [expect == given
@@ -184,7 +193,15 @@ csvfilename = "_".join([subjid, vdate_str(), tasktype,
                         'recall-%s_%s.csv' % (imgset, seconds)])
 saveas = os.path.join(datadir, csvfilename)
 
-recall_trials.data.to_csv(saveas)
+# save file in data directory. might be read only :(
+isSaved = False
+while not isSaved:
+    try:
+        recall_trials.data.to_csv(saveas)
+        isSaved = True
+    except:
+        saveas = gui.fileSaveDlg(initFilePath='/Users/danielamejia/Desktop/', initFileName=csvfilename, prompt=u'Data is readonly, save where?')
 print('saved %s' % saveas)
+
 task.wait_for_scanner(['space'], 'Finished!')
 task.win.close()

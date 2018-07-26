@@ -20,8 +20,8 @@ import datetime
 
 def host_tasktype():
     hosts = {'EEG': ['Oaco14Datapb1'],
-             'MR': ['7T-EPRIME-PC'],
-             'practice': ['eyelab130xx'], # behave instead
+             'MR': ['7T-EPRIME-PC', 'mc-wifi-10-215-130-29.wireless.pitt.edu'],
+             'practice': ['eyelab130xx'],  # behave instead
              'behave': ['eyelab130'],
              'test': ['reese']}
     host = socket.gethostname()
