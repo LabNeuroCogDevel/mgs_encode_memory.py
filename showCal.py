@@ -15,8 +15,13 @@ class showCal:
 
         if(w is None):
             w = visual.Window([800, 600])
+            w.color = (-1,-1,-1)
+            w.flip() # flip to get color change
 
         self.w = w
+
+        self.showText = True
+
         self.c = visual.Circle(self.w)
         rx = self.w.size[0]
         ry = self.w.size[1]
@@ -40,11 +45,11 @@ class showCal:
             radius=innerRadius,
             lineWidth=0)
         self.txt = visual.TextStim(
-            self.w, name='num', color='black', units='pix')
+            self.w, name='num', color='white', units='pix')
 
     def show(self, rednum=9):
 
-        self.txt.color = 'black'
+        self.txt.color = 'white'
         for xi in range(self.ncol):
             xi = xi + 1
             cx = self.offset + self.spacingx * (xi - 1) - self.w.size[0] / 2
@@ -60,7 +65,7 @@ class showCal:
                     innercolor = 'white'
                 else:
                     ovalcolor = 'lightblue'  # [.46, .54, .60]*255
-                    innercolor = 'grey'
+                    innercolor = 'black'
 
                 # outer circle
                 self.outerC.fillColor = ovalcolor
@@ -77,17 +82,18 @@ class showCal:
                 self.txt.pos = [cx + self.outerRadius, cy + self.outerRadius]
                 self.txt.draw()
 
-                print("%d %d,%d %d,%d %s" % (num, xi, yi, cx, cy, ovalcolor))
+                #print("%d %d,%d %d,%d %s" % (num, xi, yi, cx, cy, ovalcolor))
 
         # upper help text
-        self.txt.text = "Eye calibrate: look at white center"
-        self.txt.pos = [0, self.w.size[1] / 2 * .33]
-        self.txt.draw()
-        # lower help text
-        self.txt.text = "q:quit, enter:center, 1:start, space:advance"
-        self.txt.color = 'darkgrey'
-        self.txt.pos = [0, -self.w.size[1] / 2 * .33]
-        self.txt.draw()
+        if(self.showText):
+            self.txt.text = "Eye calibrate: look at white center"
+            self.txt.pos = [0, self.w.size[1] / 2 * .33]
+            self.txt.draw()
+            # lower help text
+            self.txt.text = "q:quit, enter:center, 1:start, space:advance\nt:toggle text"
+            self.txt.color = '#333333'
+            self.txt.pos = [0, -self.w.size[1] / 2 * .33]
+            self.txt.draw()
         self.w.flip()
         core.wait(.05)
 
@@ -97,8 +103,8 @@ class showCal:
         movekeys = ['space', 'left', 'right', 'up', 'down',
                     'q', 'escape',
                     'c', 'return',
-                    '1', 's', 'b',
-                    '2', '3', '4', '5', '6', '7', '8', '9']
+                    't',
+                    '1','2', '3', '4', '5', '6', '7', '8', '9']
         while(True):
             keys = event.waitKeys(keyList=movekeys)
             if 'left' in keys:
@@ -111,9 +117,9 @@ class showCal:
                 num = num + self.nrow
             elif anyin(keys, ['return', 'c']):
                 num = 5
-            elif anyin(keys, ['1', 'b', 's']):
-                num = 1
-            elif re.match('[0-9]', keys[0]):
+            elif 't' in keys:
+                self.showText = not self.showText
+            elif re.match('[1-9]', keys[0]):
                 num = int(keys[0])
             else:  # anyin(keys, ['q','escape']):
                 break
@@ -125,5 +131,7 @@ class showCal:
 
 if __name__ == "__main__":
     win = visual.Window(fullscr=True)
+    win.color=(-1,-1,-1)
+    win.flip()
     c = showCal(win)
     c.calibrate()

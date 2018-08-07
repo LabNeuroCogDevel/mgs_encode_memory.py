@@ -13,6 +13,7 @@ import os
 from mgs_task import mgsTask, gen_run_info, \
                      take_screenshot, wait_until, getSubjectDataPath, \
                      host_tasktype, create_window
+from showCal import showCal
 # from mgs_task import *
 
 # ---- settings -----
@@ -31,7 +32,10 @@ vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0,
                    'behave': 0}
 
 record_video_opt = {'mri': True, 'eeg': False, 'test': False,
-                    'practice': False, 'unknown': False}
+                    'behave': False, 'practice': False, 'unknown': False}
+
+calibration_opt = {'mri': False, 'eeg': False, 'test': False,
+                   'behave':True, 'practice': False, 'unknown': False}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -64,6 +68,7 @@ useArrington = arrington_opt[tasktype]
 useParallel = parallel_opt[tasktype]
 vertOffset = vert_offset_opt[tasktype]
 recVideo = record_video_opt[tasktype]
+calEyeScreen=calibration_opt[tasktype] 
 midwayPause = False
 
 
@@ -118,6 +123,7 @@ else:
     box.addField("Vert offset (fraction of screen)", vertOffset)
     box.addField("Midway Pause", midwayPause)
     box.addField("Record Eye Video", recVideo)
+    box.addField("Calibrate Eye",calEyeScreen)
 
     boxdata = box.show()
     if box.OK:
@@ -135,6 +141,7 @@ else:
         vertOffset = float(boxdata[11])
         midwayPause = boxdata[12]
         recVideo = boxdata[13]
+        calEyeScreen = boxdata[14]
     else:
         sys.exit(1)
 
@@ -233,6 +240,10 @@ for runi in range(start_runnum-1, nruns):
                                'epoch': seconds,
                                })
 
+    ## Run calibration if we need it
+    if calEyeScreen:
+        c=showCal(task.win)
+        c.calibrate()
     # # run saccade trials
     # blockstarttime=core.getTime()
     eyetrackingfile = '%s_run%d_%s.txt' % (subjid, run, seconds)
