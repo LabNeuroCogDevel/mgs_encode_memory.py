@@ -35,6 +35,8 @@ def host_tasktype():
         return('practice')
     elif host in hosts['behave']:
         return('behave')
+    elif re.search('.*.wireless.pitt.edu',host):
+        return('mri')
     else:
         print("dont know about host '%s', task type is unknown" % host)
         return('unknown')
