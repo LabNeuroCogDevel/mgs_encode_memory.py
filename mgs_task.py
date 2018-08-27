@@ -20,7 +20,7 @@ import datetime
 
 def host_tasktype():
     hosts = {'EEG': ['Oaco14Datapb1'],
-             'MR': ['7T-EPRIME-PC', 'mc-wifi-10-215-130-29.wireless.pitt.edu'],
+             'MR': ['7T-EPRIME-PC', 'mc-wifi-10-215-130-29.wireless.pitt.edu','JulliesiMac.local'] ,
              'practice': ['eyelab130xx'],  # behave instead
              'behave': ['eyelab130'],
              'test': ['reese']}
