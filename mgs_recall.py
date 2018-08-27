@@ -189,6 +189,9 @@ for t in recall_trials:
     # finish with iti
     task.run_iti(.5)
 
+task.wait_for_scanner(['space'], 'Finished!')
+task.win.close()
+
 # save results to recall.csv inside datadir
 csvfilename = "_".join([subjid, vdate_str(), tasktype,
                         str(timepoint),
@@ -205,5 +208,4 @@ while not isSaved:
         saveas = gui.fileSaveDlg(initFilePath='/Users/danielamejia/Desktop/', initFileName=csvfilename, prompt=u'Data is readonly, save where?')
 print('saved %s' % saveas)
 
-task.wait_for_scanner(['space'], 'Finished!')
-task.win.close()
+
