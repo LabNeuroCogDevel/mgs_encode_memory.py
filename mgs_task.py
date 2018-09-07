@@ -10,17 +10,22 @@ from psychopy import visual, core,  event, logging
 import glob
 import re
 import os
+import sys
 import pandas
 import numpy
 import pickle
 import winmute
 import socket
 import datetime
+from showCal import showCal
 
 
 def host_tasktype():
     hosts = {'EEG': ['Oaco14Datapb1'],
-             'MR': ['7T-EPRIME-PC', 'mc-wifi-10-215-130-29.wireless.pitt.edu','JulliesiMac.local'] ,
+             'MR': ['7T-EPRIME-PC',  # task
+                    # recall
+                    'mc-wifi-10-215-130-29.wireless.pitt.edu',
+                    'JulliesiMac.local'],
              'practice': ['eyelab130xx'],  # behave instead
              'behave': ['eyelab130'],
              'test': ['reese']}
@@ -35,7 +40,7 @@ def host_tasktype():
         return('practice')
     elif host in hosts['behave']:
         return('behave')
-    elif re.search('.*.wireless.pitt.edu',host):
+    elif re.search('.*.wireless.pitt.edu', host):
         return('mri')
     else:
         print("dont know about host '%s', task type is unknown" % host)
@@ -129,8 +134,8 @@ def eventToTTL(event, side, catagory):
     side_dict = {'bad': 0, 'Left': 1,
                  'NearLeft': 2, 'NearRight': 3, 'Right': 4}
     composite = event_dict.get(event, 0) + \
-                side_dict.get(side, 0) + \
-                ctgry_dict.get(catagory, 0)
+        side_dict.get(side, 0) + \
+        ctgry_dict.get(catagory, 0)
     return(composite)
 
 
@@ -280,7 +285,7 @@ def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255), vertOff
     elif horzpos + halfimgsize > winmax:
         horzpos = winmax - halfimgsize
 
-    # where to show the image 
+    # where to show the image
     vertpos = (vertOffset)*sh/2.0
 
     # set
@@ -572,20 +577,22 @@ class mgsTask:
             self.pp_address = pp_address
             self.zeroTTL    = zeroTTL
             self.init_PP()
-        
+
         # want to mute windows computer
         # so monitor switching doesn't beep
-        
+
         self.winvolume = winmute.winmute()
 
         self.verbose = True
 
         # how far off the horizonal do we display cross and images?
         self.vertOffset = vertOffset
-        
+
         # do we tell arrington to record eye video?
         self.recVideo = recVideo
-        self.runEyeName  = datetime.datetime.strftime(datetime.datetime.now(), "unnamed_%Y%m%d_%H%M%S.avi")
+        self.runEyeName = datetime.datetime.strftime(
+                            datetime.datetime.now(),
+                            "unnamed_%Y%m%d_%H%M%S.avi")
 
         # images relative to screen size
         self.imgratsize = .15
@@ -603,28 +610,34 @@ class mgsTask:
 
         # instruction eyes image
         # for draw_instruction_eyes(self,
-        self.eyeimg = visual.ImageStim(win, name="eye_img_instructions", interpolate=True)
+        self.eyeimg = visual.ImageStim(win, name="eye_img_instructions",
+                                       interpolate=True)
         self.eyeimg.image = 'img/instruction/eyes_center.png'
         self.eyeimg.pos = (0, -.9)
 
         # instructions overview
-        self.imgoverview = visual.ImageStim(win, name="eye_img_overview", interpolate=True)
+        self.imgoverview = visual.ImageStim(win, name="eye_img_overview",
+                                            interpolate=True)
         self.imgoverview.image = 'img/instruction/overview.png'
 
         self.timer = core.Clock()
 
         # could have just one and change the color
-        self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation', color='white', bold=True)
-        self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation', color='yellow', bold=True)
-        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation', color='royalblue', bold=True)
+        self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation',
+                                       color='white', bold=True)
+        self.isi_fix = visual.TextStim(win, text='+', name='isi_fixation',
+                                       color='yellow', bold=True)
+        self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation',
+                                       color='royalblue', bold=True)
         # double size
-        self.iti_fix.size=2
-        self.isi_fix.size=2
-        self.cue_fix.size=2
+        self.iti_fix.size = 2
+        self.isi_fix.size = 2
+        self.cue_fix.size = 2
         self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
                                        alignHoriz='left', color='white',
                                        wrapWidth=2)
-        # if we are mr and want horzinal line to have vertical offset, need to increase position
+        # if we are mr and want horzinal line to have vertical offset,
+        #  need to increase position
         # .5 is center
         self.iti_fix.pos[1] = self.vertOffset
         self.isi_fix.pos[1] = self.vertOffset
@@ -1027,7 +1040,17 @@ class mgsTask:
         """
         self.win.flip()
         core.wait(.4)
-        event.waitKeys(keyList=['space'])
+        pressevent = event.waitKeys(keyList=['space', 'q', 'c'])
+        return(pressevent)
+
+    def instruction_flip_or_quit(self):
+        """
+        quick def to flip, stall half a second, and wait for any key
+        """
+        pressevent = self.instruction_flip()
+        if('q' in pressevent):
+            self.win.close()
+            sys.exit()
 
     def draw_instruction_eyes(self, where='center'):
         self.eyeimg.image = 'img/instruction/eyes_%s.png' % where
@@ -1044,14 +1067,14 @@ class mgsTask:
                             'Look back to where it was.\n\n' + \
                             'Ready for a walk through?'
         self.textbox.draw()
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.pos = (-.9, .9)
         self.textbox.text = 'Prep: get ready to look at a dot'
         self.textbox.draw()
         self.cue_fix.draw()
         self.draw_instruction_eyes('center')
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.text = 'Look: look at the dot\n' + \
                             'remember that spot until it disappears'
@@ -1061,24 +1084,24 @@ class mgsTask:
         self.crcl.pos = imgpos
         self.crcl.draw()
         self.draw_instruction_eyes('right')
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.text = 'Wait: go back to center and focus on the yellow cross\nuntil it disappears'
         self.textbox.draw()
         self.isi_fix.draw()
         self.draw_instruction_eyes('center')
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.text = 'Recall: look to where dot was and focus there\nuntil a new cross appears'
         self.textbox.draw()
         self.draw_instruction_eyes('right')
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.text = 'Relax: wait for the blue cross to signal a new round'
         self.textbox.draw()
         self.iti_fix.draw()
         self.draw_instruction_eyes('center')
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
         self.textbox.pos = (-.9, 0)
         self.textbox.text = \
@@ -1098,11 +1121,11 @@ class mgsTask:
         # 'white = relax'
 
         self.textbox.draw()
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
         self.textbox.pos = (0, 0)
 
         self.imgoverview.draw()
-        self.instruction_flip()
+        self.instruction_flip_or_quit()
 
     def run_end(self, run=1, nruns=1):
         """
@@ -1110,6 +1133,7 @@ class mgsTask:
         send stop codes for parallel port
         close eyetracking file
         20180509: add fixation cross to center for slip correct
+        20180907: add option to exit earily
         """
         self.stop_aux()  # end ttl, close eye file
         self.textbox.pos = (-.2, .5)
@@ -1119,7 +1143,23 @@ class mgsTask:
         self.textbox.text = 'Finished ' + runstr
         self.iti_fix.draw()
         self.textbox.draw()
-        self.instruction_flip()
+
+        self.textbox.pos = (-.9, -.9)
+        self.textbox.text = "[space continue, q quit, c calibrate]"
+        self.textbox.draw()
+
+        pressevent = self.instruction_flip()
+        if('q' in pressevent):
+            return("done")
+        elif('c' in pressevent):
+            c = showCal(self.win)
+            c.calibrate()
+            self.textbox.text = 'Ready for the next run?'
+            self.textbox.pos = (-.5, 0)
+            self.textbox.draw()
+            pressevent = self.instruction_flip()
+
+        return("next")
 
 
 def gen_run_info(nruns, datadir, imgset, task='mri'):
@@ -1189,7 +1229,7 @@ def imagedf_to_novel(imdf):
     print(nused)
     if(any(nused.used > nused.aval)):
         print("WARNING: will see more repeats than novel images!")
-    
+
     # use as many as we can
     # might not be balanced!
     novelimg = pandas.concat([
@@ -1237,8 +1277,8 @@ def recallFromPickle(pckl, lastrunidx=3):
 
     # combine them
     trialdf = pandas.concat([seendf[['imgfile', 'pos', 'imgtype']],
-                         novelimg[['imgfile', 'pos', 'imgtype']]]).\
-                         sample(frac = 1, replace = False)
+                            novelimg[['imgfile', 'pos', 'imgtype']]]).\
+        sample(frac=1, replace=False)
 
     # set(trialdf.imgfile[pandas.notnull(df.pos)]) == \
     # set(seendf.imgfile[pandas.notnull(seendf.imgfile)])

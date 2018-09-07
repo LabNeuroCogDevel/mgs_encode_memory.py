@@ -240,9 +240,9 @@ for runi in range(start_runnum-1, nruns):
                                'epoch': seconds,
                                })
 
-    ## Run calibration if we need it
+    # ## Run calibration if we need it
     if calEyeScreen:
-        c=showCal(task.win)
+        c = showCal(task.win)
         c.calibrate()
     # # run saccade trials
     # blockstarttime=core.getTime()
@@ -311,8 +311,14 @@ for runi in range(start_runnum-1, nruns):
     print("running to end of time (%.02f, actual %.02f)" %
           (run_total_time[tasktype], thisendtime))
     wait_until(thisendtime)
-    task.run_end(run, nruns)  # end ttl/close eyefile, show finsihed text
     logging.flush()
+    # end ttl/close eyefile, show finsihed text
+    # option for quiting early
+    end_info = task.run_end(run, nruns)
+    print(end_info)
+    print(end_info == "done")
+    if end_info == "done":
+        break
 
 # done will all runs
 win.close()
