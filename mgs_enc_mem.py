@@ -68,7 +68,7 @@ useArrington = arrington_opt[tasktype]
 useParallel = parallel_opt[tasktype]
 vertOffset = vert_offset_opt[tasktype]
 recVideo = record_video_opt[tasktype]
-calEyeScreen=calibration_opt[tasktype] 
+calEyeScreen = calibration_opt[tasktype]
 midwayPause = False
 
 
@@ -123,7 +123,7 @@ else:
     box.addField("Vert offset (fraction of screen)", vertOffset)
     box.addField("Midway Pause", midwayPause)
     box.addField("Record Eye Video", recVideo)
-    box.addField("Calibrate Eye",calEyeScreen)
+    box.addField("Calibrate Eye", calEyeScreen)
 
     boxdata = box.show()
     if box.OK:

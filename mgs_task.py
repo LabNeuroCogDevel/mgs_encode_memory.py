@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- py-which-shell: "python2"; -*-
+# python -m doctest -v mgs_task.py
 
 from __future__ import division
 import numpy
@@ -366,6 +367,18 @@ def gen_imagedf(path_dict):
     - label matches vgs_ file names
     output is "imgtype","image" dataframe
     - imgtype names matches parse_onsets
+
+    >>> ();run_data=gen_run_info(3, None, 'A', task='mri')  # doctest:+ELLIPSIS
+    (...
+    >>> # have 16 images per run, plus a bunch of 'None' images
+    >>> [len(x.query("imgfile==imgfile")) for x in run_data['run_timing'] ]
+    [16, 16, 16]
+    >>> img_trial = run_data['imagedf'].merge(
+    ...    pandas.concat(run_data['run_timing']),
+    ...    on='imgfile', how='left')
+    >>> # everything with a trial is used
+    >>> len(img_trial.query('trial==trial and not used'))
+    0
     """
     # path_dict={'Inside': ['SUN/circle_select/inside/*png'],
     #            'Outside': ['SUN/circle_select/outside_man/*png',
@@ -1171,13 +1184,13 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
     task is mri or eeg
     """
     # where do we save this file?
-    runs_info_file = os.path.join(datadir, 'runs_info.pkl')
-
-    # if we have it, just return it
-    if os.path.exists(runs_info_file):
-        print('reusing timing/image selection from %s' % runs_info_file)
-        with open(runs_info_file, 'rU') as f:
-            return(pickle.load(f))
+    if datadir is not None:
+        runs_info_file = os.path.join(datadir, 'runs_info.pkl')
+        # if we have it, just return it
+        if os.path.exists(runs_info_file):
+            print('reusing timing/image selection from %s' % runs_info_file)
+            with open(runs_info_file, 'rU') as f:
+                return(pickle.load(f))
 
     # images
     path_dict = {'Indoor':  ['img/' + imgset + '/inside/*png'],
@@ -1209,8 +1222,9 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
     subj_runs_info = {'imagedf': imagedf, 'run_timing': run_timing}
 
     # save what we have
-    with open(runs_info_file, 'wb') as f:
-        pickle.dump(subj_runs_info, f)
+    if datadir is not None:
+        with open(runs_info_file, 'wb') as f:
+            pickle.dump(subj_runs_info, f)
 
     return(subj_runs_info)
 
@@ -1219,13 +1233,25 @@ def imagedf_to_novel(imdf):
     """
     take an imagedf with imgtype,subtype and used column
     return shuffled df with just the unused images matched on number of used
+
+    >>> ();run_data=gen_run_info(3, None, 'A', task='mri')  # doctest:+ELLIPSIS
+    (...
+    >>> ();novel = imagedf_to_novel(run_data['imagedf']) # doctest:+ELLIPSIS
+    (...
+    >>> not novel.used.any()    # no known images
+    True
+    >>> novel.index[1] != 1 # is shuffled
+    True
+    >>> novel.columns.sort_values().tolist()
+    ['imgfile', 'imgtype', 'pos', 'subtype', 'used']
+
     """
     nused = imdf[imdf.used].\
-            groupby(['imgtype','subtype']).\
-            aggregate({'used': lambda x: x.shape[0]})
+        groupby(['imgtype', 'subtype']).\
+        aggregate({'used': lambda x: x.shape[0]})
     nused['aval'] = imdf[~imdf.used].\
-            groupby(['imgtype','subtype'])['used'].\
-            apply(lambda x: x.shape[0])
+        groupby(['imgtype', 'subtype'])['used'].\
+        apply(lambda x: x.shape[0])
     print(nused)
     if(any(nused.used > nused.aval)):
         print("WARNING: will see more repeats than novel images!")
@@ -1235,15 +1261,57 @@ def imagedf_to_novel(imdf):
     novelimg = pandas.concat([
         imdf[(imdf.used == False) &
              (imdf.imgtype == r[0][0]) &
-             (imdf.subtype == r[0][1]) ].
-        sample(min(r[1].aval,r[1].used))
+             (imdf.subtype == r[0][1])].
+        sample(min(r[1].aval, r[1].used))
         for r in nused.iterrows()])
     # add empty position
     novelimg['pos'] = float("nan")
     return(novelimg)
 
 
-def recallFromPickle(pckl, lastrunidx=3):
+def dropUnseen(seendf, imdf, drop=True):
+    """
+    Remove unseen trials (when excluding trials from recall)
+
+    >>> ();run_data=gen_run_info(3, None, 'A', task='mri')  # doctest:+ELLIPSIS
+    (...
+    >>> # just the last trial, remove 2 * 16
+    >>> seendf = pandas.concat(run_data['run_timing'][2:3])
+    >>> imdf = run_data['imagedf']
+    >>> ddf = dropUnseen(seendf, imdf) # doctest:+ELLIPSIS
+    have ... 16 in run... with 32 to remove
+    >>> ddf.groupby("used").agg('count')['imgfile'] # doctest:+ELLIPSIS
+    used
+    False    ...
+    True     16
+    Name: imgfile, dtype: int64
+    >>> ddf.columns.sort_values().tolist()
+    ['imgfile', 'imgtype', 'subtype', 'used']
+    """
+
+    # what did we say we saw but didn't actually see
+    alldf = imdf.merge(seendf.drop(columns='imgtype'),
+                       on='imgfile', how='left')
+    fortest = alldf.\
+        query('(used and trial==trial) or not used').\
+        filter(imdf.columns)
+
+    # drop, dont use --  incase this is resuming
+    msgstr = "have %(total)d imgs in set: " + \
+             "%(task)d in task, %(actual)d in run(s) to test, " + \
+             "with %(remove)d to remove"
+    print(msgstr % {'total': len(alldf),
+                    'task': len(alldf.query('used and imgfile == imgfile')),
+                    'actual': len(fortest.query('used')),
+                    'remove': len(alldf) - len(fortest)})
+    if(drop):
+        return(fortest)
+    else:
+        alldf.loc[alldf.used & (alldf.trial != alldf.trial), 'used'] = False
+        return(alldf.filter(imdf.columns))
+
+
+def recallFromPickle(pckl, lastrunidx=3, firstrunidx=0):
     """
     use a pckl file to define a trial list for recall
     """
@@ -1253,15 +1321,14 @@ def recallFromPickle(pckl, lastrunidx=3):
         run_data = pickle.load(p)
 
     # select what we've seen
-    # put all runs together
-    seendf = pandas.concat(run_data['run_timing'][0:lastrunidx])
+    # put all used runs together
+    seendf = pandas.concat(run_data['run_timing'][firstrunidx:lastrunidx])
     # --- pick some novel stims --
     imdf = run_data['imagedf']
     # but remove images we haven't seen (but should have)
-    if(lastrunidx < len(run_data['run_timing'])):
-        actuallysaw = pandas.unique(seendf['imgfile'])
-        unsee = [x not in actuallysaw for x in imdf['imgfile']]
-        imdf.loc[unsee, 'used'] = False
+    if(firstrunidx > 0 or lastrunidx < len(run_data['run_timing'])):
+        print("using only runs %d to %d" % (firstrunidx+1, lastrunidx))
+        imdf = dropUnseen(seendf, imdf)
 
     # from that, make a novelimg dataset
     # with columns that match

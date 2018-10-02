@@ -19,11 +19,12 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
 # like: subj_info/abcd/01/eeg_B_20180221/runs_info.pkl
-pkl_glb = [#os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl'),
+pkl_glb = [
            os.path.join('/Volumes', '*','Data','1*','*', '*', '*','runs_info.pkl'),
            os.path.join('/Volumes', '*','Data','1*', '*', '*','runs_info.pkl'),
            os.path.join('/Volumes', '*', '*','subj_info','*', '*', '*','runs_info.pkl'),
-           os.path.join('/Volumes', '*', 'subj_info','*', '*', '*', 'runs_info.pkl')#,
+           os.path.join('/Volumes', '*', 'subj_info','*', '*', '*', 'runs_info.pkl'),
+           os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl'),
            #os.path.join('/Volumes', '*', '*', 'runs_info.pkl')
            ]
 # what keys do we use?
@@ -51,6 +52,7 @@ allsubjs = sorted(globs_flat, key=lambda x: -os.path.getmtime(x))
 settings = {'recall_from': allsubjs,
             'fullscreen': True,
             'instructions': True,
+            'firstrun': 1,
             'lastrun': nruns_opt[host_tasktype()]}
 
 # --- test vs actual settings
@@ -79,7 +81,7 @@ pckl = settings['recall_from']
 datadir = os.path.dirname(pckl)
 (subjid, tasktype, imgset, timepoint) = getInfoFromDataPath(datadir)
 
-trialdf = recallFromPickle(pckl, settings['lastrun'])
+trialdf = recallFromPickle(pckl, settings['lastrun'], settings['firstrun']-1)
 
 # set correct keys and format for trialhandler
 trialdict = trialdf.reset_index().T.to_dict().values()
@@ -126,7 +128,8 @@ for t in recall_trials:
         print("responding: %s" % resparr)
         r = ResponseEmulator(resparr)
         r.start()
-    if not os.path.exists(t['imgfile']):   t['imgfile'] = t['imgfile'].replace("\\","/") 
+    if not os.path.exists(t['imgfile']):
+        t['imgfile'] = t['imgfile'].replace("\\", "/")
     (keypresses, rts) = task.recall_trial(t['imgfile'])
 
     grade = [expect == given
