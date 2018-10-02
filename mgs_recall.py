@@ -19,12 +19,15 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
 # like: subj_info/abcd/01/eeg_B_20180221/runs_info.pkl
+
 pkl_glb = [
+           # put all macOS volume possiblities first
            os.path.join('/Volumes', '*','Data','1*','*', '*', '*','runs_info.pkl'),
            os.path.join('/Volumes', '*','Data','1*', '*', '*','runs_info.pkl'),
            os.path.join('/Volumes', '*', '*','subj_info','*', '*', '*','runs_info.pkl'),
            os.path.join('/Volumes', '*', 'subj_info','*', '*', '*', 'runs_info.pkl'),
-           os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl'),
+           # lastly check the curent (script) folder (for presentaiton on MR computer)
+           os.path.join('subj_info', '*', '*', '*', 'runs_info.pkl')#,
            #os.path.join('/Volumes', '*', '*', 'runs_info.pkl')
            ]
 # what keys do we use?
