@@ -28,7 +28,7 @@ def host_tasktype():
                     'mc-wifi-10-215-130-29.wireless.pitt.edu',
                     'JulliesiMac.local'],
              'practice': ['eyelab130xx'],  # behave instead
-             'behave': ['eyelab130'],
+             'behave': ['eyelab130', 'eprime'],  # 20180814 -- eyelab130 died!
              'test': ['reese']}
     host = socket.gethostname()
     if host in hosts['EEG']:
@@ -584,7 +584,7 @@ class mgsTask:
         #self.pp_address = 0x0378
         #self.pp_address = 0x0278
         #self.pp_address = 0xDFF8 # EEG
-        #self.pp_address = 0x0378 # ASL practice
+        # self.pp_address = 0x0378 # ASL practice
         self.usePP = usePP
         if usePP:
             self.pp_address = pp_address
