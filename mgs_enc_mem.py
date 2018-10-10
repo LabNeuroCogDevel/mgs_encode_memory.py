@@ -27,7 +27,7 @@ parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False,
 arrington_opt = {'mri': True, 'eeg': False, 'test': False,
                  'practice': False, 'behave': False,
                  'unknown': True}
-vert_offset_opt = {'mri': .25, 'eeg': 0, 'test': 0,
+vert_offset_opt = {'mri': 0, 'eeg': 0, 'test': 0,
                    'practice': 0, 'unknown': 0,
                    'behave': 0}
 
