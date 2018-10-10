@@ -1290,7 +1290,7 @@ def dropUnseen(seendf, imdf, drop=True):
     """
 
     # what did we say we saw but didn't actually see
-    alldf = imdf.merge(seendf.drop(columns='imgtype'),
+    alldf = imdf.merge(seendf.drop(axis=1, labels='imgtype'),
                        on='imgfile', how='left')
     fortest = alldf.\
         query('(used and trial==trial) or not used').\
