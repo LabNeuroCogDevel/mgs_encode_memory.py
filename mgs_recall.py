@@ -69,7 +69,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     lastrun = nruns_opt['test'] if len(sys.argv) <= 3 else int(sys.argv[3])
 
     # no instructions, pick first (in time) data file
-    settings = {'recall_from': allsubjs[-1],
+    settings = {'recall_from': allsubjs[0],
                 'fullscreen': False,
                 'instructions': False,
                 'firstrun': firstrun,
@@ -210,9 +210,14 @@ task.wait_for_scanner(['space'], 'Finished!')
 task.win.close()
 
 # save results to recall.csv inside datadir
-csvfilename = "_".join([subjid, vdate_str(), tasktype,
-                        str(timepoint),
-                        'recall-%s_%s.csv' % (imgset, seconds)])
+namesarray = [subjid, vdate_str(), tasktype, str(timepoint)]
+# add runs to output file name if non-standard
+if settings['firstrun'] != 1 or \
+   settings['lastrun'] != nruns_opt[host_tasktype()]:
+    namesarray.append('runs%d-%d' % (settings['firstrun'],
+                                     settings['lastrun']))
+namesarray.append('recall-%s_%s.csv' % (imgset, seconds))
+csvfilename = "_".join(namesarray)
 saveas = os.path.join(datadir, csvfilename)
 
 # save file in data directory. might be read only :(
