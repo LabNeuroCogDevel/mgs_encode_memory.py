@@ -64,11 +64,17 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     from psychopy.hardware.emulator import ResponseEmulator
     import random
     import gc
+    # specify runs
+    firstrun = 1 if len(sys.argv) <= 2 else int(sys.argv[2])
+    lastrun = nruns_opt['test'] if len(sys.argv) <= 3 else int(sys.argv[3])
+
     # no instructions, pick first (in time) data file
     settings = {'recall_from': allsubjs[-1],
                 'fullscreen': False,
                 'instructions': False,
-                'lastrun': 3}
+                'firstrun': firstrun,
+                'lastrun': lastrun}
+
     # clear the get ready screen
     r = ResponseEmulator([(5, 'space')])
     r.start()
@@ -121,10 +127,10 @@ blockstarttime = task.wait_for_scanner(['space', 'escape'], 'ready?')
 for t in recall_trials:
     print("correct keys: %s" % list(t['corkeys']))
     if iscodetest:
-        resp = random.randint(1, 4)
+        resp = [1, 2, 9, 0][random.randint(0, 3)]
         if resp <= 2:
             resparr = [(.5, resp),
-                       (.75, random.randint(1, 4))]
+                       (.75, [1, 2, 9, 0][random.randint(0, 3)])]
         else:
             resparr = [(1, resp)]
         gc.collect()
@@ -194,6 +200,11 @@ for t in recall_trials:
            t['pos'], t['imgfile']))
     # finish with iti
     task.run_iti(.5)
+
+# clear last screen if testing
+if iscodetest:
+    r = ResponseEmulator([(1, 'space')])
+    r.start()
 
 task.wait_for_scanner(['space'], 'Finished!')
 task.win.close()

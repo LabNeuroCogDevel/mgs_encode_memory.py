@@ -19,9 +19,9 @@ from showCal import showCal
 # ---- settings -----
 # -- host specific --
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15,
-        'practice': 65, 'unknown': 420, 'behave': 240}
+                  'practice': 65, 'unknown': 420, 'behave': 240}
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2,
-        'practice': 1, 'behave': 2, 'unknown': 3}
+             'practice': 1, 'behave': 2, 'unknown': 3}
 parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False,
                 'practice': False, 'behave': True}
 arrington_opt = {'mri': True, 'eeg': False, 'test': False,
@@ -35,7 +35,7 @@ record_video_opt = {'mri': True, 'eeg': False, 'test': False,
                     'behave': False, 'practice': False, 'unknown': False}
 
 calibration_opt = {'mri': False, 'eeg': False, 'test': False,
-                   'behave':True, 'practice': False, 'unknown': False}
+                   'behave': True, 'practice': False, 'unknown': False}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -105,7 +105,12 @@ subjdateid = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
 # or we can get a windowed dialog box
 if (len(sys.argv) > 1):
     subjnum = sys.argv[1]
-    start_runnum = 1
+    start_runnum = 1 if len(sys.argv) <= 2 else int(sys.argv[2])
+    from psychopy.hardware.emulator import ResponseEmulator
+    print("sending trigger in 6 seconds")
+    r = ResponseEmulator([(6, 'space'),    # advance trigger
+                          (27, 'space')])  # finish
+    r.start()
 
 else:
     box = gui.Dlg()
@@ -220,7 +225,7 @@ for runi in range(start_runnum-1, nruns):
     print("### run %d" % run)
 
     trialdf = all_runs_info['run_timing'][runi]
-    run_getReadyMsg = ("Run %d"%run) + "\n" + getReadyMsg
+    run_getReadyMsg = ("Run %d" % run) + "\n" + getReadyMsg
 
     seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
 
