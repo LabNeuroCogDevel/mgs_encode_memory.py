@@ -1,0 +1,164 @@
+3	Product Version: PC-60
+3	Executable File Version: 2.9.5,125 
+3	Program Build Date: Dec  8 2016,  11:30:41
+3	Customer Serial Number:  200-1509-1-1
+3	Customer Name:  AVOTEC, INC 
+3	Customer Organization:  AVOTEC, INC 
+3	--------------------------------------------------------
+3	TimeValues	2018	11	29	18	41	36	UTC
+3	TimeStamp	Thursday, November 29, 2018, 1:41:36 PM 
+3	DataFormat	2.9.3,113
+3	ScreenSize	142.857	107.143	// full screen size (not measured lines) in mm
+3	ViewingDistance	100
+3	InterPupillaryDistance	60
+3	ImageShape	Fit
+3	SmoothingMethod	ExponentialMovingAverage
+3	SmoothingPoints	7
+3	eyeA:pupilSegmentationMethod	Ellipse
+3	eyeA:gazeNudge	0	0
+3	--------------------------------------------------------
+3	Data Notes:
+3	 1) X_Gaze and Y_Gaze are uncorrected gaze values (no smoothing, etc...).
+3	 2) X_CorrectedGaze and Y_CorrectedGaze are corrected gaze values that may include smoothing, averaging, parallax correction, nudging, etc...
+3	 3) Regions are calculated with respect to the corrected gaze values.
+3	 4) PupilWidth and PupilHeight calculations are relative to which pupil segmentation method is active.
+3	    a) Ellipse - PupilWidth is the major-axis (larger value) and PupilHeight is the minor-axis (smaller value).
+3	       The major-axis and the minor-axis are both normalized by the width of the EyeCamera window so the scales of the axes are commensurable.
+3	    b) Oval Fit - PupilWidth is the HORIZONTAL dimension and PupilHeight is the VERTICAL dimension of the rectangular bounding box of the unrotated Oval.
+3	       The HORIZONTAL and VERTICAL dimensions are both normalized by the width and height of the EyeCamera window respectively so the scales of the axes are incommensurable (see manual for details).
+3	    c) Centroid - PupilWidth and PupilHeight are 0, because no pupil size is obtained.
+3	--------------------------------------------------------
+3	 idName	
+3	 idTest	
+3	 idSession	
+3	 idNotes	
+3	--------------------------------------------------------
+6	ATT	ADT	ALX	ALY	ACX	ACY	ARI	APW	APH	AQU	AFX	CNT	MRK
+5	TotalTime	DeltaTime	X_Gaze	Y_Gaze	X_CorrectedGaze	Y_CorrectedGaze	Region	PupilWidth	PupilHeight	Quality	Fixation	Count	Marker
+7	 0.000000	EyeA FrameRate	60
+16	 0.000000	MGSEncMem.bmp
+7	 0.000000	EyeA FrameRate	60
+7	 0.000000	EyeA FrameRate	60
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_Outdoor_1
+12	 0.000000	img_NearLeft_Outdoor_1
+12	 0.000000	isi_NearLeft_Outdoor_1
+12	 0.000000	mgs_NearLeft_Outdoor_1
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_None_2
+12	 0.000000	img_Left_None_2
+12	 0.000000	isi_Left_None_2
+12	 0.000000	mgs_Left_None_2
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_Outdoor_3
+12	 0.000000	img_Right_Outdoor_3
+12	 0.000000	isi_Right_Outdoor_3
+12	 0.000000	mgs_Right_Outdoor_3
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_None_4
+12	 0.000000	img_Right_None_4
+12	 0.000000	isi_Right_None_4
+12	 0.000000	mgs_Right_None_4
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_Indoor_5
+12	 0.000000	img_Right_Indoor_5
+12	 0.000000	isi_Right_Indoor_5
+12	 0.000000	mgs_Right_Indoor_5
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_None_6
+12	 0.000000	img_NearLeft_None_6
+12	 0.000000	isi_NearLeft_None_6
+12	 0.000000	mgs_NearLeft_None_6
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_Indoor_7
+12	 0.000000	img_Right_Indoor_7
+12	 0.000000	isi_Right_Indoor_7
+12	 0.000000	mgs_Right_Indoor_7
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_Indoor_8
+12	 0.000000	img_NearLeft_Indoor_8
+12	 0.000000	isi_NearLeft_Indoor_8
+12	 0.000000	mgs_NearLeft_Indoor_8
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_None_9
+12	 0.000000	img_NearRight_None_9
+12	 0.000000	isi_NearRight_None_9
+12	 0.000000	mgs_NearRight_None_9
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_Indoor_10
+12	 0.000000	img_Left_Indoor_10
+12	 0.000000	isi_Left_Indoor_10
+12	 0.000000	mgs_Left_Indoor_10
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_Outdoor_11
+12	 0.000000	img_Left_Outdoor_11
+12	 0.000000	isi_Left_Outdoor_11
+12	 0.000000	mgs_Left_Outdoor_11
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_None_12
+12	 0.000000	img_NearLeft_None_12
+12	 0.000000	isi_NearLeft_None_12
+12	 0.000000	mgs_NearLeft_None_12
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_Outdoor_13
+12	 0.000000	img_NearRight_Outdoor_13
+12	 0.000000	isi_NearRight_Outdoor_13
+12	 0.000000	mgs_NearRight_Outdoor_13
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_None_14
+12	 0.000000	img_NearRight_None_14
+12	 0.000000	isi_NearRight_None_14
+12	 0.000000	mgs_NearRight_None_14
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_None_15
+12	 0.000000	img_Right_None_15
+12	 0.000000	isi_Right_None_15
+12	 0.000000	mgs_Right_None_15
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_Indoor_16
+12	 0.000000	img_NearRight_Indoor_16
+12	 0.000000	isi_NearRight_Indoor_16
+12	 0.000000	mgs_NearRight_Indoor_16
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_Indoor_17
+12	 0.000000	img_Left_Indoor_17
+12	 0.000000	isi_Left_Indoor_17
+12	 0.000000	mgs_Left_Indoor_17
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_Outdoor_18
+12	 0.000000	img_Left_Outdoor_18
+12	 0.000000	isi_Left_Outdoor_18
+12	 0.000000	mgs_Left_Outdoor_18
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_Outdoor_19
+12	 0.000000	img_NearLeft_Outdoor_19
+12	 0.000000	isi_NearLeft_Outdoor_19
+12	 0.000000	mgs_NearLeft_Outdoor_19
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_Indoor_20
+12	 0.000000	img_NearRight_Indoor_20
+12	 0.000000	isi_NearRight_Indoor_20
+12	 0.000000	mgs_NearRight_Indoor_20
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearLeft_Indoor_21
+12	 0.000000	img_NearLeft_Indoor_21
+12	 0.000000	isi_NearLeft_Indoor_21
+12	 0.000000	mgs_NearLeft_Indoor_21
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Left_None_22
+12	 0.000000	img_Left_None_22
+12	 0.000000	isi_Left_None_22
+12	 0.000000	mgs_Left_None_22
+12	 0.000000	iti_None_None
+12	 0.000000	cue_NearRight_Outdoor_23
+12	 0.000000	img_NearRight_Outdoor_23
+12	 0.000000	isi_NearRight_Outdoor_23
+12	 0.000000	mgs_NearRight_Outdoor_23
+12	 0.000000	iti_None_None
+12	 0.000000	cue_Right_Outdoor_24
+12	 0.000000	img_Right_Outdoor_24
+12	 0.000000	isi_Right_Outdoor_24
+12	 0.000000	mgs_Right_Outdoor_24
+12	 0.000000	iti_None_None
+12	 0.000000	iti_None_None
+12	 0.000000	END
