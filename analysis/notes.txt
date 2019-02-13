@@ -1,0 +1,2 @@
+Data for "10644_20180216_run2_144435.txt" really good?
+Some data, like "10195_20180129_run2_123548.txt", garbage!
