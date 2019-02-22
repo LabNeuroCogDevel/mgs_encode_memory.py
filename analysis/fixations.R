@@ -3,14 +3,16 @@ path<-sprintf("%s%s", getwd(), "/mgs_encode_memory.py/analysis")
 source(sprintf("%s%s",path,"/eyetracking.R"))
 files <- list.files(path=sprintf("%s%s",path,"/runs"), pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
+#results <- data.frame(filename = NA)
+
 GetSpread <- function(fname) {
   
   data <- read_avotec(fname)
   
-  # scoring code
+  ## SCORE ##
   
   data.mt90 <- data %>%
-    group_by(trial, event, side) %>%
+    group_by(trial, event, side,ld8) %>%
     summarise(mt90=mean(tail(x_gaze,90))) %>%
     ungroup() %>%
     mutate(side=ifelse(event=="iti",lag(side),side)) %>%
@@ -26,33 +28,42 @@ GetSpread <- function(fname) {
   #  (-)score = (+)side
   
   data.sides <- data.mt90 %>%
-    mutate(ic=(img-cue)/abs(img-cue), mi=(mgs-isi)/abs(mgs-isi), score=(ic-side_num + (mi-side_num)*2))
+    mutate(ic=(img-cue)/abs(img-cue), mi=(mgs-isi)/abs(mgs-isi), score=(ic-side_num + (mi-side_num)*2)) %>%
+    mutate(basename(fname))
   
-  # data quality code
-  data.trial <- data %>%
-    group_by(event,trial,side) %>%
-    summarise(trial.mean=mean(tail(x_gaze,90)),trial.sd=sd(tail(x_gaze,90)))
+#  results$filename <- fname
   
-  data.global <- data %>%
-    group_by(event,side) %>%
-    summarise(event.mean=mean(tail(x_gaze,90)),event.sd=sd(tail(x_gaze,90))) %>% 
-    ungroup()
+  ## QUALITY ##
   
-  data.all <- merge(data.trial, data.global, by = c("side","event")) %>% arrange(trial, side)
-  
-  norm.factor <- diff(quantile(data$x_gaze, c(0.05, 0.95)))
-  
-  data.norm <- data.all %>% mutate(mean.diff = data.all$event.mean - data.all$trial.mean, norm = mean.diff/norm.factor)
+  # data.trial <- data %>%
+  #   group_by(event,trial,side) %>%
+  #   summarise(trial.mean=mean(tail(x_gaze,90)),trial.sd=sd(tail(x_gaze,90)))
+  # 
+  # data.global <- data %>%
+  #   group_by(event,side) %>%
+  #   summarise(event.mean=mean(tail(x_gaze,90)),event.sd=sd(tail(x_gaze,90))) %>% 
+  #   ungroup()
+  # 
+  # data.all <- merge(data.trial, data.global, by = c("side","event")) %>% arrange(trial, side)
+  # 
+  # norm.factor <- diff(quantile(data$x_gaze, c(0.05, 0.95)))
+  # 
+  # data.norm <- data.all %>% mutate(mean.diff = data.all$event.mean - data.all$trial.mean, norm = mean.diff/norm.factor)
     
-  data.norm %>% ggplot()+aes(x=side, y=norm, color=event)+geom_point()
+  #data.norm %>% ggplot()+aes(x=side, y=norm, color=event)+geom_point()
 }
 
-for(i in 1:length(files)) {
-  fname <- files[i]
-  Check <- function(fname) {
-    tryCatch(GetSpread(fname), error=function(x) NULL) 
-  }
+doAll <- function() {
+  scored.out <- lapply(files[1:2],function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>%
+  bind_rows()
 }
+
+# for(i in 1:length(files)) {
+#   fname <- files[i]
+#   Check <- function(fname) {
+#     tryCatch(GetSpread(fname), error=function(x) NULL) 
+#   }
+# }
 
 #data.m90t %>%  ggplot()+aes(x=trial, y=m90t, color=event)+geom_point()
 #data.mt90 %>% ggplot()+aes(x=trial, y=mt90, color=event)+geom_point()+geom_smooth(data=data.mt90%>%filter(event %in% c("iti","isi","cue")))
