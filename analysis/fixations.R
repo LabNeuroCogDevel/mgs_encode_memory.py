@@ -12,7 +12,7 @@ GetSpread <- function(fname) {
   ## SCORE ##
   
   data.mt90 <- data %>%
-    group_by(trial, event, side,ld8) %>%
+    group_by(trial, event, side, ld8) %>%
     summarise(mt90=mean(tail(x_gaze,90))) %>%
     ungroup() %>%
     mutate(side=ifelse(event=="iti",lag(side),side)) %>%
@@ -27,9 +27,18 @@ GetSpread <- function(fname) {
   #  2 = img-cue, 4 = mgs-isi
   #  (-)score = (+)side
   
+  file_base <- basename(fname)
+  
+  reg_start <- regexpr("run.", file_base, TRUE)
+  reg_end <- attr(reg_start, "match.length")-1
+  run_num <- substr(file_base, reg_start, reg_start+reg_end)
+  
   data.sides <- data.mt90 %>%
-    mutate(ic=(img-cue)/abs(img-cue), mi=(mgs-isi)/abs(mgs-isi), score=(ic-side_num + (mi-side_num)*2)) %>%
-    mutate(file=basename(fname))
+    mutate(ic=(img-cue)/abs(img-cue), mi=(mgs-isi)/abs(mgs-isi), score=abs((ic-side_num + (mi-side_num)*2))/2) %>%
+    mutate(file=file_base, run=run_num)
+  
+  return(data.sides)
+    #mutate(file=basename(fname))
   
 #  results$filename <- fname
   
@@ -54,19 +63,23 @@ GetSpread <- function(fname) {
 }
 
 doAll <- function() {
-  scored.out <- lapply(files[1:2],function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) #%>% bind_rows()
+  scored.out <- lapply(files[1:5], function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>% bind_rows()
 }
 
-d <- scored.out[[1]]
+scored.out <- doAll()
 
-scored.out[[2]]$score
+#scored.out %>% ggplot()+aes(x=ld8, y=trial, color=score)+geom_point()
 
-lapply(scored.out, function(x) sum(x$score, na.rm=TRUE))
+#d <- scored.out[[1]]
 
-scored.out %>%
-  bind_rows() %>%
-  group_by(file,score) %>%
-  summarise(n())
+# scored.out[[2]]$score
+# 
+# lapply(scored.out, function(x) sum(x$score, na.rm=TRUE))
+# 
+# scored.out %>%
+#   bind_rows() %>%
+#   group_by(file,score) %>%
+#   summarise(n())
 
 #geom_histogram/density, boxplot
   
