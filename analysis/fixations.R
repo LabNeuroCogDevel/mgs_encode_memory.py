@@ -53,19 +53,19 @@ doAll <- function() {
 # Retrieve large row-bound dataframe
 scored.out <- suppressWarnings(doAll())
 
+# data for mgs + img
 mgs_data <- scored.out %>% 
   #select(c(ld8, runno, trial, score, event, totaltime)) %>%
-  filter(event=="mgs")
+  filter(event %in% c("mgs","img"))
 
  trial_start_times <- mgs_data %>%
-  group_by(ld8, runno, trial) %>%
+  group_by(ld8, runno, trial, event) %>%
   summarise(mtime=min(totaltime))
 
  run_start_times <- mgs_data %>%
    group_by(ld8, runno) %>%
    summarise(mtime=min(totaltime))
- 
- 
+
 ctimes <- merge(mgs_data, trial_start_times)
 
 ctimes$adjusted_time <- ctimes$totaltime-(ctimes$mtime)
@@ -73,16 +73,16 @@ ctimes$adjusted_time <- ctimes$totaltime-(ctimes$mtime)
 ctimes<-ctimes %>% select(-mtime)
 
 ss<- ctimes %>%
-  arrange(ld8, runno, trial) %>%
-  select(trial, ld8, runno, score, x_gaze, event, side, adjusted_time) %>%
-  filter(ld8==unique(ctimes$ld8)[1])
+  arrange(ld8, runno, trial, event) %>%
+  select(ld8, runno, trial, event, x_gaze, side, score, adjusted_time) %>%
+  filter(!is.na(side)) #%>%
+  #filter(ld8==unique(ctimes$ld8)[1])
 
 #ctimes %>% ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=runno))+geom_smooth()+facet_wrap(runno~trial)
 #ctimes %>% ggplot()+ylim(-2,2)+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=trial))+geom_smooth(aes(color=trial))+facet_wrap(ld8~runno)
 
 ss %>%
-  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=side, group=paste(trial,runno)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(~side)
-
+  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=side, group=paste(trial,runno)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(ld8 ~ event~side)
 
 
 # Box plot
