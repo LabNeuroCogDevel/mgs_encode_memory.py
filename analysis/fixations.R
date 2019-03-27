@@ -6,7 +6,8 @@ files <- list.files(path=sprintf("%s%s",path,"/runs"), pattern="*.txt", full.nam
 GetSpread <- function(fname) {
   
   # source(eyetracking.R)
-  data <- read_avotec(fname)
+  data <- read_avotec(fname) %>%
+    select(-region)
   
   ## SCORE ##
   
@@ -45,7 +46,7 @@ GetSpread <- function(fname) {
 
 # Apply scoring to files[1:last_file] times
 doAll <- function() {
-  last_file <- 5
+  last_file <- 12
   #scored.out <- lapply(files[1:last_file], function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>% bind_rows()
   scored.out <- lapply(files[1:last_file], function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>% bind_rows()
 }
@@ -80,6 +81,32 @@ ss<- ctimes %>%
 
 #ctimes %>% ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=runno))+geom_smooth()+facet_wrap(runno~trial)
 #ctimes %>% ggplot()+ylim(-2,2)+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=trial))+geom_smooth(aes(color=trial))+facet_wrap(ld8~runno)
+
+### FILTERING BY SCORE ###
+b<-ss %>%
+  filter(score==2) %>%
+  select(ld8) %>%
+  unique()
+
+a<-ss%>%
+  select(ld8) %>%
+  unique()
+
+s2 <- anti_join(a,b, by="ld8")
+
+#ld8 %in% unlist(s2)
+
+# break point: 
+# pick up from below, focus on connecting score with ggplot
+# explore linear modeling, specifically on grouped data (ld8, trial, runno)
+
+### PLOTS ###
+ss %>%
+  filter(event=="mgs",side=="Left") %>%
+  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=ld8, group=paste(ld8)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(~score)
+
+### linear modeling
+lm(data=ss, x_gaze~adjusted_time) %>% summary()
 
 ss %>%
   ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=side, group=paste(trial,runno)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(ld8 ~ event~side)
