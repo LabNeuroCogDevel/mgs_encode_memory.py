@@ -7,7 +7,7 @@ GetSpread <- function(fname) {
   
   # source(eyetracking.R)
   data <- read_avotec(fname) %>%
-    select(-region)
+    select(c(ld8, runno, trial, event, x_gaze, side, totaltime))
   
   ## SCORE ##
   
@@ -24,7 +24,7 @@ GetSpread <- function(fname) {
     ifelse(1,-1)
   
   # Trial order:
-  #  iti -> cue -> img -> isi -> mgs
+  #  iti -> [cue -> img] -> [isi -> mgs]
   # Scoring:
   #  0 (best) --> 2 (worst)
   #  0 = side_num == ic == mi
@@ -46,7 +46,7 @@ GetSpread <- function(fname) {
 
 # Apply scoring to files[1:last_file] times
 doAll <- function() {
-  last_file <- 12
+  last_file <- 30
   #scored.out <- lapply(files[1:last_file], function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>% bind_rows()
   scored.out <- lapply(files[1:last_file], function(fname) tryCatch(GetSpread(fname), error=function(x) NULL)) %>% bind_rows()
 }
@@ -75,41 +75,31 @@ ctimes<-ctimes %>% select(-mtime)
 
 ss<- ctimes %>%
   arrange(ld8, runno, trial, event) %>%
-  select(ld8, runno, trial, event, x_gaze, side, score, adjusted_time) %>%
   filter(!is.na(side)) #%>%
-  #filter(ld8==unique(ctimes$ld8)[1])
-
-#ctimes %>% ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=runno))+geom_smooth()+facet_wrap(runno~trial)
-#ctimes %>% ggplot()+ylim(-2,2)+aes(x=adjusted_time, y=x_gaze)+geom_point(aes(color=trial))+geom_smooth(aes(color=trial))+facet_wrap(ld8~runno)
-
-### FILTERING BY SCORE ###
-b<-ss %>%
-  filter(score==2) %>%
-  select(ld8) %>%
-  unique()
-
-a<-ss%>%
-  select(ld8) %>%
-  unique()
-
-s2 <- anti_join(a,b, by="ld8")
-
-#ld8 %in% unlist(s2)
-
-# break point: 
-# pick up from below, focus on connecting score with ggplot
-# explore linear modeling, specifically on grouped data (ld8, trial, runno)
 
 ### PLOTS ###
-ss %>%
-  filter(event=="mgs",side=="Left") %>%
-  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=ld8, group=paste(ld8)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(~score)
-
-### linear modeling
-lm(data=ss, x_gaze~adjusted_time) %>% summary()
 
 ss %>%
-  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=side, group=paste(trial,runno)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(ld8 ~ event~side)
+  filter(score==0, event=='mgs') %>%
+  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=ld8, group=paste(ld8)), se=FALSE)+xlim(0,1.0)+facet_wrap(~side)
+
+## TODO: filter out wild outlying junk data from frame
+
+fitted_models <- ss %>%
+  filter(score==0, event=='mgs') %>%
+  group_by(ld8, runno, trial, side) %>%
+  do(model=lm(x_gaze ~ adjusted_time, data=.))
+
+# use lapply to just grab slope
+
+
+
+#ss %>%
+#  filter(score==0, event=='mgs') %>%
+#  lm(data=.,x_gaze~adjusted_time)
+
+#ss %>%
+#  ggplot()+aes(x=adjusted_time, y=x_gaze)+geom_smooth(aes(color=side, group=paste(trial,runno)), se=FALSE)+ylim(-2,2)+xlim(0,1.0)+facet_wrap(ld8 ~ event~side)
 
 
 # Box plot
