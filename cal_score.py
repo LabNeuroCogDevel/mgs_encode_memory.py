@@ -4,12 +4,17 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 from arrington import read_arrington, add_cal_timing, et_3part_trigger
+#
+# Usage: 
+#   ./cal_score.py cal/20181116_7tgood/M*{run,tim}*
+#   give eye(run) file, task(timing) file
+#
 
 # need at least a calibration file
 # and maybe a event timing file
 # eyefile="/home/foranw/src/tasks/mgs_encode_memory.py/cal/20180515/2018-5-15;12-20-3.txt"
 # timefile="/home/foranw/src/tasks/mgs_encode_memory.py/cal/20180515/s1_timing_122100.txt"
-if len(sys.argv) <= 0:
+if len(sys.argv) <= 2:
     import wx
     app = wx.App()
     frame = wx.Frame(None, -1, "score calibratation")
@@ -22,8 +27,8 @@ if len(sys.argv) <= 0:
     timefile = eyefile_dlg.GetPath()
 else:
     eyefile = sys.argv[1]
-    if len(sys.argv) == 2:
-        timefile = sys.argv[0]
+    if len(sys.argv) >= 3:
+        timefile = sys.argv[2]
 
 if eyefile is None:
     os.exit(1)
@@ -61,7 +66,7 @@ smry = df.groupby(['pos'])[gzcol].agg(['mean', 'std'])
 smry.plot()
 plt.show()
 
-
+sys.exit(0)
 # --- for a file that does not have triggers
 # df.\
 #     assign(onset=df.event_onset).\

@@ -3,6 +3,7 @@
 # functions to deal with arrington eyetracking data
 #
 import pandas as pd
+import re
 
 # --- read in a calibration file
 # adapted from perl:
@@ -16,10 +17,14 @@ def read_arrington(eyefile):
         data = []
         for line in f:
             v = line.split()
+            if len(v) == 0: continue
             # line starts with 10, it's data
             #                  12, it's event info
             if v[0] == "10":
-                data.append([float(x) for x in v[1:13]] + [event, event_time])
+                data.append(
+                    [float( re.sub(',.*','',x) )
+                      for x in v[1:13] ] +
+                    [event, event_time])
             elif v[0] == "12":
                 event = v[2]
                 event_time = float(v[1])
