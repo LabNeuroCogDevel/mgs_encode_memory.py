@@ -10,6 +10,11 @@ python -m pip --user install https://github.com/AndreMiras/pycaw/archive/master.
 
 ## The task
 
+## Addtional Tasks
+ - `vgs_anti.py`   - eeg anti or vgs (not mixed)
+ - `ring_reward.py`- behavioral "rewarded" antisaccade task
+ - `eeg_eyecal.py`- eeg eog eye postion calibaration task
+
 ## Timing
 `stimtime/00_mktime.bash` using [`genTaskTime`](https://github.com/LabNeuroCogDevel/genTaskTime) 
 
@@ -30,10 +35,14 @@ each run length in seconds:
 
 
 ## Eye tracking
-Eye tracking interfaces with ViewPoint EyeTracker software (via Arrington Research and Avotec). see `MR_note.txt`
+ * Eye tracking interfaces with ViewPoint EyeTracker software (via Arrington Research and Avotec). see `MR_note.txt`
+ * EEG eye tracking using EOG after collecting calibration with `eeg_eyecal.py`
+ * ASL eye tracking triggers can be sent over parallel port same as EEG TTL
 
-## TTL triggers
-`inpout32.dll` should be in directory where python runs `from psychopy import parallel`
+## TTL Parrallel Port Triggers 
+ * `inpout32.dll` should be in directory where python runs `from psychopy import parallel`
+ * used to mark task events EEG or ASL eyetracking
+
 
 ## Images
 Selection made with `img_pick.py`:
