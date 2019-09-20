@@ -20,26 +20,26 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # ---------- TASK CONFIG ----------------------
 # how long to wait at each event
 # iti is only variable, num trials set on lenght of iti vec
-dur = {'iti': .5, 'cue': .5, 'dot': .5}
+dur = {'iti': 1, 'rew': 1, 'cue': 1, 'dot': 1}
 
 # positions are -1 far left to 1 far right
 positions = [-1, -.5, .5, 1]
 
 # reward tyes have different colors and symbols
-cues = {'neu': {'color': 'blue', 'sym': '#'},
+cues = {'neu': {'color': 'gray', 'sym': '#'},
         'rew': {'color': 'green', 'sym': '$'}}
 
 # what color is the + in the center of the screen during cue
-cue_fix_color = 'white'
+# red usualy used for anti saccade tasks
+cue_fix_color = 'red'
 
 
 # ---------- RUN SETTINGS --------------------
 datestr = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
 # get settings with gui prompt
 settings = {'_subjid': '',
-            'ntrials': 30,
+            'ntrials': 28,
             'dateid': datestr,
-            'tasktype': ['ringreward'],
             'timepoint': datetime.datetime.now().year - 2019,
             'fullscreen': True,
             'instructions': True,
@@ -52,29 +52,34 @@ if not box.OK:
 # # paths
 # like: "subj_info/10931/01_eeg_anti"
 subjid = settings['_subjid'] + '_' + settings['dateid']
-(datadir, logdir) = getSubjectDataPath(subjid,
-                                       'behave',
-                                       settings['tasktype'],
+(datadir, logdir) = getSubjectDataPath(subjid, 'behave', 'ringreward',
                                        settings['timepoint'])
 
 # ---- TTL
 # neu
-#  cue:  1  2  4  5
+#  rew:  1  2  4  5
+#  cue: 21 22 24 25
 #  dot: 51 52 54 55
 # rew
-#  cue: 101 103 104 105
-#  dot: 151 153 154 155
+#  rew: 101 102 104 105
+#  cue: 121 122 124 125
+#  dot: 151 152 154 155
 
 # side is added to these base trigger values
-eventTTLlookup = {'cue': 0, 'dot': 50}  # iti = 254 | start = 128 | end = 129
+eventTTLlookup = {'rew': 0, 'cue': 20, 'dot': 50}
+# iti = 254 | start = 128 | end = 129
 
 
-def print_and_ttl(event, pos, tasktype=settings['tasktype']):
+def print_and_ttl(event, pos, trialtype):
+    """ determin what ttl trigger should be based on
+        event, position, and trialtype
+        eventTTLlookup is global var dictionary with TTL offset
+    """
     # left to right 1 to 5 from -1 -.5 .5 1 | no 0 (center), never see 3
     pos_code = pos*2 + 3
     ttl = pos_code + \
         eventTTLlookup.get(event, 0) +\
-        100 * int(tasktype == 'rew')
+        100 * int(trialtype == 'rew')
     # send code
     print('%s at %d: ttl %d' % (event, pos, ttl))
     if settings['usePP']:
@@ -94,14 +99,16 @@ task = mgsTask(None,
                usePP=settings['usePP'],
                fullscreen=settings['fullscreen'])
 
+# ----- DRAW A RING OF $ OR  --------
+
 # create the ring, see
 # https://discourse.psychopy.org/t/the-best-way-to-draw-many-text-objects-rsvp/2758
 n_in_ring = 12
 el_rs = 250  # TODO: make relative to screen size?
 el_thetas = np.linspace(0, 360, n_in_ring, endpoint=False)
 el_xys = np.array(misc.pol2cart(el_thetas, el_rs)).T
-text_size = 40
-ringtext = visual.TextStim(win=task.win, units='pix',
+text_size = 45
+ringtext = visual.TextStim(win=task.win, units='pix', bold=True,
                            height=text_size, text='$')  # '$' will be changed
 cap_rect_norm = [
     -(text_size / 2.0) / (task.win.size[0] / 2.0),  # left
@@ -129,25 +136,26 @@ for k in ['rew', 'neu']:
         elementMask=None,
         elementTex=buff.image)
 
-# instructions
+# -----  INSTRUCTIONS ------
 if settings['instructions']:
     cuesym = cues['rew']['sym']
     task.textbox.pos = (-.9, 0)
     task.textbox.text = \
         'STEPS:\n\n' + \
-        '1. relax, look at center white cross\n\n' +\
-        '2. get ready when you see a circle of symbols\n\n' + \
-        '    if you see %s, you can get points\n\n' % cuesym +\
-        '3. look opposite the dot when it appears\n\n'
+        '1. Relax. Look at the center white cross\n\n' +\
+        '2. If you see a %s ring, you can get points\n\n' % cuesym +\
+        '3. Get ready when you see the %s cross\n\n' % cue_fix_color +\
+        '4. Look opposite the dot when it appears\n\n'
 
     task.textbox.draw()
     task.instruction_flip()
+
+# -----  ACTUALLY RUN TASK ------
 
 # start task, also sends start ttl code
 starttime = task.wait_for_scanner(['space'], 'Ready?')
 
 # could do inside loop, but never changes
-task.cue_fix.color = cue_fix_color
 
 nextonset = starttime
 timing = []
@@ -159,11 +167,23 @@ for ri in range(ntrials):
 
     nextonset += dur['iti']
 
-    # show cue colored fix
-    cueon = nextonset
-    task.cue_fix.draw()
+    # reward display setup
+    rewon = nextonset
     ringimg[this_rew].draw()
+    task.cue_fix.color = 'white'
+    task.cue_fix.draw()
+    task.win.callOnFlip(print_and_ttl, 'rew', this_pos, this_rew)
+    # timing
+    wait_until(rewon)
+    flip['rew'] = task.win.flip()
+    nextonset += dur['rew']
+
+    # cue setup
+    cueon = nextonset
+    task.cue_fix.color = cue_fix_color
     task.win.callOnFlip(print_and_ttl, 'cue', this_pos, this_rew)
+    task.cue_fix.draw()
+    # timing
     wait_until(cueon)
     flip['cue'] = task.win.flip()
     nextonset += dur['cue']
@@ -174,6 +194,7 @@ for ri in range(ntrials):
     task.crcl.pos = imgpos
     task.crcl.draw()
     task.win.callOnFlip(print_and_ttl, 'dot', this_pos, this_rew)
+    # timing
     wait_until(doton)
     flip['dot'] = task.win.flip()
     nextonset += dur['dot']
@@ -182,6 +203,7 @@ for ri in range(ntrials):
     ition = nextonset
     task.iti_fix.draw()
     task.win.callOnFlip(task.log_and_code, 'iti', None, None)
+    # timing
     wait_until(ition)
     flip['iti'] = task.win.flip()
 
