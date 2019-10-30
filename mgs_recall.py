@@ -12,9 +12,9 @@ import os
 import sys
 from mgs_task import mgsTask, response_should_be, \
                      getInfoFromDataPath, \
-                     recallFromPickle, host_tasktype, vdate_str, \
+                     recallFromPickle, vdate_str, \
                      create_window
-
+from host_info import host_tasktype 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # where do we store data?
@@ -48,7 +48,7 @@ accept_keys = {'known': '1',
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3, 'behave': 2}
 
 # glob all the paths provided, flatten, order by modified time
-globs = [ glob.glob(x) for x in pkl_glb ];
+globs = [glob.glob(x) for x in pkl_glb]
 globs_flat = [item for sublist in globs for item in sublist]
 allsubjs = sorted(globs_flat, key=lambda x: -os.path.getmtime(x))
 

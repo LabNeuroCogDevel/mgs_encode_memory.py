@@ -16,36 +16,8 @@ import pandas
 import numpy
 import pickle
 import winmute
-import socket
 import datetime
 from showCal import showCal
-
-
-def host_tasktype():
-    hosts = {'EEG': ['Oaco14Datapb1'],
-             'MR': ['7T-EPRIME-PC',  # task
-                    # recall
-                    'mc-wifi-10-215-130-29.wireless.pitt.edu',
-                    'JulliesiMac.local'],
-             'practice': ['eyelab130xx'],  # behave instead
-             'behave': ['eyelab130', 'eprime'],  # 20180814 -- eyelab130 died!
-             'test': ['reese']}
-    host = socket.gethostname()
-    if host in hosts['EEG']:
-        return('eeg')
-    elif host in hosts['MR']:
-        return('mri')
-    elif host in hosts['test']:
-        return('test')
-    elif host in hosts['practice']:
-        return('practice')
-    elif host in hosts['behave']:
-        return('behave')
-    elif re.search('.*.wireless.pitt.edu', host):
-        return('mri')
-    else:
-        print("dont know about host '%s', task type is unknown" % host)
-        return('unknown')
 
 
 def vdate_str():
@@ -532,7 +504,7 @@ def create_window(fullscr):
     win.mouseVisible = False  # and that we don't see the mouse
 
     # -- change color to black --
-    win.color = (-1,-1,-1)
+    win.color = (-1, -1, -1)
     # flip twice to get the color
     win.flip()
     win.flip()
@@ -554,8 +526,8 @@ class mgsTask:
                               'Right':        '9',
                               'oops':         '5'},
                  vertOffset=0,
-                 useArrington=False,
-                 usePP=None,
+                 ET_type=None,
+                 usePP=False,
                  fullscreen=True,
                  pp_address=0xDFF8,
                  zeroTTL=True,
@@ -574,22 +546,28 @@ class mgsTask:
         #self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
         self.vpxDll = 'C:\\Users\\Luna\\Desktop\\VPx32\\Interfaces\\VPx32-Client\\VPX_InterApp_32.dll'
         #self.vpxDll = 'C:\Users\Luna\Desktop\VPx32\Interfaces\Programing\SDK\\VPX_InterApp_32.dll'
-        self.useArrington = useArrington
-        # # eyetracking
-        if(self.useArrington):
-            self.init_vpx()
-
-        # settings for parallel port
-        # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
-        #self.pp_address = 0x0378
-        #self.pp_address = 0x0278
-        #self.pp_address = 0xDFF8 # EEG
-        # self.pp_address = 0x0378 # ASL practice
         self.usePP = usePP
-        if usePP:
+        # ## eyetracking -- updated later if to be used
+        self.vpx = None
+        self.eyelink = None
+        self.ET_type = ET_type
+
+        # # parallel port triggers or eyetracking
+        if self.ET_type == "arrington":
+            self.init_vpx()
+        elif self.ET_type == "pylink":
+            from pylink_help import eyelink
+            self.eyelink = eyelink(win.size)
+        if self.usePP:
             self.pp_address = pp_address
             self.zeroTTL    = zeroTTL
             self.init_PP()
+            # settings for parallel port
+            # see also 0x03BC, LPT2 0x0278 or 0x0378, LTP 0x0278
+            #self.pp_address = 0x0378
+            #self.pp_address = 0x0278
+            #self.pp_address = 0xDFF8 # EEG
+            # self.pp_address = 0x0378 # ASL practice
 
         # want to mute windows computer
         # so monitor switching doesn't beep
@@ -708,41 +686,55 @@ class mgsTask:
 
     def eyetracking_newfile(self, fname):
         # start a new file and pause it
-        if(self.useArrington):
+        if self.vpx:
             fname = str(fname)
-            self.runEyeName = fname.replace(".txt","") # setup for eye recording video
+            # setup for eye recording video
+            self.runEyeName = fname.replace(".txt", "")
             self.vpx.VPX_SendCommand('dataFile_Pause 1')
             self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
             if self.verbose:
                 print("tried to open eyetracking file %s" % fname)
                 self.vpx.VPX_SendCommand('say "newfile %s"' % fname)
 
+        elif self.eyelink:
+            self.eyelink.open(fname[1:6])
+            if self.verbose:
+                print("open eyetracking file with truncated name '%s'" %
+                      fname[1:6])
+
     def start_aux(self):
         """
         start eyetracking, send start ttl to parallel port
         """
         self.winvolume.mute_all()
-        if(self.useArrington):
+        if self.usePP:
+            self.send_code('start', None, None)
+            # causes 10ms delay
+        if self.vpx:
             self.vpx.VPX_SendCommand('dataFile_Pause 0')
             if self.recVideo:
                 print("send eyeMoive_NewName cmd")
-                self.vpx.VPX_SendCommand('eyeMovie_NewName "%s.avi"'% self.runEyeName)
-        if(self.usePP):
-            self.send_code('start', None, None)
+                self.vpx.VPX_SendCommand('eyeMovie_NewName "%s.avi"' %
+                                         self.runEyeName)
+        elif self.eyelink:
+            self.eyelink.start()
 
     def stop_aux(self):
         """
         stop eyetracking file, send start ttl to parallel port
         """
-        if(self.useArrington):
+        if self.usePP:
+            self.send_code('end', None, None)
+            # causes 10ms delay
+        if self.vpx:
             self.vpx.VPX_SendCommand('dataFile_Close 0')
             if self.recVideo:
                 print("send end movie cmd")
                 self.vpx.VPX_SendCommand('eyeMovie_Close')
+        elif self.eyelink:
+            self.eyelink.stop()
 
-        if(self.usePP):
-            self.send_code('end', None, None)
-        #self.winvolume.undo_mute() #  causes error
+        # self.winvolume.undo_mute() #  causes error
         self.winvolume.unmute_all()
 
     def init_vpx(self):
@@ -759,9 +751,10 @@ class mgsTask:
 
     def init_PP(self):
         # TODO: TEST SOMEWHERE
-        if(self.usePP):
+        if self.usePP:
             # initialize parallel port
             if not hasattr(self, 'port'):
+                # might need to 'pip install pyparallel'
                 from psychopy import parallel
                 self.port = parallel.ParallelPort(address=self.pp_address)
 
@@ -782,21 +775,35 @@ class mgsTask:
         """
 
         # see also: vpx.VPX_GetStatus(VPX_STATUS_ViewPointIsRunning) < 1
-        if self.useArrington:
+        if self.usePP:
+            # send code, or 100 if cannot find
+            thistrigger = eventToTTL(event, side, catagory)
+            self.send_ttl(thistrigger)
+
+        if self.ET_type in ['arrington', 'pylink']:
             # if we have a trialno, include it in the output
             if trialno is not None:
                 cat_t = "%s_%d" % (catagory, trialno)
             else:
                 cat_t = catagory
             ttlstr = "_".join(map(lambda x: "%s" % x, [event, side, cat_t]))
+
+            self.set_et_event(ttlstr)
+
+    def set_et_event(self, ttlstr):
+        """
+        set eyetracking event to either arrington or eyelink
+        """
+        if self.vpx:
             self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
-            if self.verbose:
-                print("eye code %s" % ttlstr)
+        elif self.eyelink:
+            self.eyelink.trigger(ttlstr)
+
+        # report what we did if verbose
+        if self.verbose:
+            print("eye code %s" % ttlstr)
+            if self.vpx:
                 self.vpx.VPX_SendCommand('say "sent %s"' % ttlstr)
-        if self.usePP:
-            # send code, or 100 if cannot find
-            thistrigger = eventToTTL(event, side, catagory)
-            self.send_ttl(thistrigger)
 
     def send_ttl(self, thistrigger):
         """

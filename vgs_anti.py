@@ -2,13 +2,14 @@
 # -*- elpy-use-ipython: "ipython"; -*-
 
 from psychopy import gui
-from mgs_task import mgsTask, wait_until,\
-                     shuf_for_ntrials, replace_img, getSubjectDataPath
 import numpy as np
 import pandas as pd
 import sys
 import os
 import datetime
+from mgs_task import mgsTask, wait_until,\
+                     shuf_for_ntrials, replace_img, getSubjectDataPath
+from host_info import host_tasktype
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -29,24 +30,28 @@ positions = [-1, -.5, .5, 1]
 cue_colors = {'anti': 'red', 'vgs': 'green'}
 cue_instrs = {'anti': 'away from', 'vgs': 'to'}
 
+host = host_tasktype()
 
 # ---------- RUN SETTINGS --------------------
 datestr = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
 # get settings with gui prompt
-settings = {'_subjid': '',
+settings = {'subjid': '',
             'dateid': datestr,
             'tasktype': ['vgs', 'anti'],
             'timepoint': datetime.datetime.now().year - 2017,
             'fullscreen': True,
             'instructions': True,
-            'usePP': True}
-box = gui.DlgFromDict(settings)
+            'usePP': True,
+            'ET_type': [host.ET, None, 'arrington', 'pylink']}
+box = gui.DlgFromDict(settings,
+                      order=['subjid', 'dateid', 'tasktype', 'timepoint',
+                             'fullscreen', 'instructions', 'usePP', 'ET_type'])
 if not box.OK:
     sys.exit(1)
 
 # # paths
 # like: "subj_info/10931/01_eeg_anti"
-subjid = settings['_subjid'] + '_' + settings['dateid']
+subjid = settings['subjid'] + '_' + settings['dateid']
 (datadir, logdir) = getSubjectDataPath(subjid,
                                        'eeg',
                                        settings['tasktype'],
@@ -76,6 +81,9 @@ def print_and_ttl(event, pos, tasktype=settings['tasktype']):
     print('%s at %d: ttl %d' % (event, pos, ttl))
     if settings['usePP']:
         task.send_ttl(ttl)
+    if settings['ET_type'] is not None:
+        print(settings['ET_type'])
+        task.set_et_event("%d=%s@%d" % (ttl, event, pos))
 
 
 # ---------- TIMING --------------------
@@ -89,16 +97,18 @@ pos = shuf_for_ntrials(positions, ntrials)
 # setup task (get send_ttl, crcl, iti_fix)
 task = mgsTask(None,
                usePP=settings['usePP'],
-               fullscreen=settings['fullscreen'])
+               ET_type=settings['ET_type'],
+               fullscreen=settings['fullscreen'],
+               pp_address=host.pp_address)
 
 # instructions
 if settings['instructions']:
     task.textbox.pos = (-.9, 0)
     task.textbox.text = \
-           'STEPS:\n\n' + \
-           '1. relax, look at center white cross\n\n' +\
-           '2. get ready when you see the %s cross\n\n' % cue_color + \
-           '3. look %s the dot when it appears\n\n' % cue_instr
+        'STEPS:\n\n' + \
+        '1. relax, look at center white cross\n\n' +\
+        '2. get ready when you see the %s cross\n\n' % cue_color + \
+        '3. look %s the dot when it appears\n\n' % cue_instr
 
     task.textbox.draw()
     task.instruction_flip()
@@ -157,7 +167,7 @@ print('saving to %s' % saveas)
 pd.DataFrame(timing).to_csv(saveas)
 # end task: send code and put up end screen
 if settings['usePP']:
-    task.send_ttl(129) 
+    task.send_ttl(129)
 #task.wait_for_scanner(['space'], 'Finished!')
 task.run_end()
 task.win.close()

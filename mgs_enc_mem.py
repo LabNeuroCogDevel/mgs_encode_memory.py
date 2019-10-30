@@ -12,30 +12,38 @@ import sys
 import os
 from mgs_task import mgsTask, gen_run_info, \
                      take_screenshot, wait_until, getSubjectDataPath, \
-                     host_tasktype, create_window
+                     create_window
 from showCal import showCal
+from host_info import host_tasktype
 # from mgs_task import *
 
 # ---- settings -----
 # -- host specific --
 run_total_time = {'mri': 420, 'eeg': 358, 'test': 15,
-                  'practice': 65, 'unknown': 420, 'behave': 240}
+                  'practice': 65, 'unknown': 420, 'behave': 240, 'ieeg': 358}
 nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2,
-             'practice': 1, 'behave': 2, 'unknown': 3}
-parallel_opt = {'mri': False, 'eeg': True, 'test': False, 'unknown': False,
-                'practice': False, 'behave': True}
-arrington_opt = {'mri': True, 'eeg': False, 'test': False,
-                 'practice': False, 'behave': False,
-                 'unknown': True}
+             'practice': 1, 'behave': 2, 'unknown': 3, 'ieeg': 4}
 vert_offset_opt = {'mri': 0, 'eeg': 0, 'test': 0,
                    'practice': 0, 'unknown': 0,
+                   'ieeg': 0,
                    'behave': 0}
 
-record_video_opt = {'mri': True, 'eeg': False, 'test': False,
+record_video_opt = {'mri': True, 'eeg': False, 'test': False, 'ieeg': False,
                     'behave': False, 'practice': False, 'unknown': False}
 
-calibration_opt = {'mri': False, 'eeg': False, 'test': False,
+calibration_opt = {'mri': False, 'eeg': False, 'test': False, 'ieeg': False,
                    'behave': True, 'practice': False, 'unknown': False}
+usePP_opt = {'mri': False, 'eeg': True, 'test': False, 'ieeg': True,
+             'behave': True, 'practice': False, 'unknown': False}
+
+# what are we doing with the parallel port
+ET_opts = {
+        'mri': 'arrington',
+        'unkown': 'arrington',
+        'behave': 'ASL',
+        'ieeg': 'pylink',
+        'eeg': None,
+        'practice': None, 'test': None}
 
 # -- general settings --
 mgsdur = 2  # this is tr locked for fmri
@@ -58,44 +66,43 @@ timepoint = datetime.datetime.now().year - 2017
 getReadyMsg = 'Waiting for scanner (pulse trigger)'
 
 # settings based on tasktype
-tasktype = host_tasktype()
-if tasktype == 'unknown':
+host_type = host_tasktype()
+default_type = host_type.tasktype
+if default_type == 'unknown':
     print('unkown host, defaulting to mri')
-    tasktype = 'mri'
+    default_type = 'mri'
 
-nruns = nruns_opt[tasktype]
-useArrington = arrington_opt[tasktype]
-useParallel = parallel_opt[tasktype]
-vertOffset = vert_offset_opt[tasktype]
-recVideo = record_video_opt[tasktype]
-calEyeScreen = calibration_opt[tasktype]
+nruns = nruns_opt[default_type]
+ET_type = ET_opts[default_type]
+vertOffset = vert_offset_opt[default_type]
+recVideo = record_video_opt[default_type]
+calEyeScreen = calibration_opt[default_type]
 midwayPause = False
 
 
 # # different defaults for different computers
-if tasktype == 'eeg':
+if default_type in ['eeg', 'ieeg']:
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Ready?'
     midwayPause = True
-elif tasktype == 'test':
-    tasktype = 'test'
+elif default_type == 'test':
     subjnum = 'test'
     show_instructions = False
     isfullscreen = False
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'TESTING TESTING TESTING'
-elif tasktype == 'practice':
+elif default_type == 'practice':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Get Ready!'
     imgset = 'practice'
-elif tasktype == 'behave':
+elif default_type == 'behave':
     scannerTriggerKeys = scannerTriggerKeys + ['space']
     getReadyMsg = 'Get Ready!'
     imgset = 'behave'
-elif tasktype == 'mri':
+elif default_type == 'mri':
     pass
 else:
-    print('tasktype is "%s"! This should never happen' % tasktype)
+    print('tasktype is "%s"! This should never happen' % default_type)
 
 # compute date compenent of id
 subjdateid = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d")
@@ -113,42 +120,64 @@ if (len(sys.argv) > 1):
     r.start()
 
 else:
+    # NB. should consider 'gui.DlgFromDict(settings)' a la vgs_anti.py
+    #     but cannot set default that way?
+    # so instead we manually keep order pushing to box_key array
+    box_key = []
     box = gui.Dlg()
+    box_key.append('subjnum')
     box.addField("Subject ID:", subjnum)
-    box.addField("Image Set", imgset, choices=['A', 'B', 'behave', 'practice'])
+    box_key.append('imgset')
+    box.addField("Image Set", imgset,
+                 choices=['A', 'B', 'C', 'behave', 'practice'])
+    box_key.append('subjdateid')
     box.addField("Date ID:", subjdateid)
+    box_key.append('start_runnum')
     box.addField("Run number:", 1)
+    box_key.append('show_instructions')
     box.addField("instructions?", show_instructions)
+    box_key.append('isfullscreen')
     box.addField("fullscreen?", isfullscreen)
-    box.addField("eyetracking (mr)?", useArrington)
-    box.addField("ttl (eeg)?", useParallel)
-    box.addField("timing type", tasktype, choices=run_total_time.keys())
+    box_key.append('ET_type')
+    box.addField("eyetracking", ET_opts.get(default_type),
+                 choices=['arrington', 'pylink', 'TTL', None])
+    box_key.append('usePP')
+    box.addField("TTL Trigger?", usePP_opt.get(default_type))
+    box_key.append('tasktype')
+    box.addField("timing type", default_type, choices=run_total_time.keys())
+    box_key.append('timepoint')
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
+    box_key.append('nruns')
     box.addField("total # runs", nruns)
+    box_key.append('vertOffset')
     box.addField("Vert offset (fraction of screen)", vertOffset)
+    box_key.append('midwayPause')
     box.addField("Midway Pause", midwayPause)
+    box_key.append('recVideo')
     box.addField("Record Eye Video", recVideo)
+    box_key.append('calEyeScreen')
     box.addField("Calibrate Eye", calEyeScreen)
 
     boxdata = box.show()
     if box.OK:
-        subjnum = boxdata[0]
-        imgset = boxdata[1]
-        subjdateid = boxdata[2]
-        start_runnum = int(boxdata[3])
-        show_instructions = boxdata[4]
-        isfullscreen = boxdata[5]
-        useArrington = boxdata[6]
-        useParallel = boxdata[7]
-        tasktype = boxdata[8]
-        timepoint = boxdata[9]
-        nruns = int(boxdata[10])
-        vertOffset = float(boxdata[11])
-        midwayPause = boxdata[12]
-        recVideo = boxdata[13]
-        calEyeScreen = boxdata[14]
+        subjnum = boxdata[box_key.index('subjnum')]
+        imgset = boxdata[box_key.index('imgset')]
+        subjdateid = boxdata[box_key.index('subjdateid')]
+        start_runnum = int(boxdata[box_key.index('start_runnum')])
+        show_instructions = boxdata[box_key.index('show_instructions')]
+        isfullscreen = boxdata[box_key.index('isfullscreen')]
+        ET_type = boxdata[box_key.index('ET_type')]
+        usePP = boxdata[box_key.index('usePP')]
+        tasktype = boxdata[box_key.index('tasktype')]
+        timepoint = boxdata[box_key.index('timepoint')]
+        nruns = int(boxdata[box_key.index('nruns')])
+        vertOffset = float(boxdata[box_key.index('vertOffset')])
+        midwayPause = boxdata[box_key.index('midwayPause')]
+        recVideo = boxdata[box_key.index('recVideo')]
+        calEyeScreen = boxdata[box_key.index('calEyeScreen')]
     else:
         sys.exit(1)
+
 
 subjid = subjnum + '_' + subjdateid
 # maybe we want to auto add date?
@@ -181,18 +210,18 @@ all_runs_info = gen_run_info(nruns, datadir, imgset, task=tasktype)
 # 20180717 - redudant but easy easy to set port
 #            prev only needed for eeg
 # other tasks dont matter if pp address is set
-if(tasktype in ['practice', 'behave'] and useParallel):
-    pp_address=0x0378
-    zeroTTL=False
-    print("using practice computer address")
+if(tasktype in ['practice', 'behave'] and usePP):
+    pp_address = 0x0378
+    zeroTTL = False
+    print("using practice computer address and zeroing")
 else:
-    zeroTTL=True
-    pp_address=0xDFF8
+    zeroTTL = True
+    # pp_address = 0xDFF8
+    pp_address = host_type.pp_address
 
 # # screen setup
 win = create_window(isfullscreen)
-task = mgsTask(win, useArrington=useArrington,
-               usePP=useParallel, vertOffset=vertOffset,
+task = mgsTask(win, ET_type=ET_type, usePP=usePP, vertOffset=vertOffset,
                pp_address=pp_address, zeroTTL=zeroTTL,
                recVideo=recVideo)
 

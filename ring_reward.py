@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- elpy-use-ipython: "ipython"; -*-
 
 from psychopy import gui, misc, visual

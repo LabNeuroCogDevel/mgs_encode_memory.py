@@ -14,7 +14,7 @@ useArrington = True
 box = gui.Dlg()
 box.addField("traking type/file name:", tracking_type)
 box.addField("fullscreen", isfullscreen)
-box.addField("send triggers", useArrington)
+box.addField("send events to ET", useArrington)
 box.addField("number dots", 40)
 boxdata = box.show()
 if box.OK:
@@ -34,7 +34,8 @@ dotdur = .75
 
 
 # setup task (get send_ttl, crcl, iti_fix)
-task = mgsTask(None, fullscreen=isfullscreen, useArrington=useArrington)
+ET_type = 'arrington' if useArrington else None
+task = mgsTask(None, fullscreen=isfullscreen, ET_type=ET_type)
 
 # start eyetracking file
 seconds = datetime.datetime.strftime(datetime.datetime.now(), "%H%M%S")
