@@ -531,7 +531,8 @@ class mgsTask:
                  fullscreen=True,
                  pp_address=0xDFF8,
                  zeroTTL=True,
-                 recVideo=False):
+                 recVideo=False,
+                 usePD=False):
 
         # compensate for mdiway pause
         self.addTime = 0
@@ -578,6 +579,7 @@ class mgsTask:
 
         # how far off the horizonal do we display cross and images?
         self.vertOffset = vertOffset
+        self.usePD = usePD
 
         # do we tell arrington to record eye video?
         self.recVideo = recVideo
@@ -612,6 +614,17 @@ class mgsTask:
         self.imgoverview.image = 'img/instruction/overview.png'
 
         self.timer = core.Clock()
+
+        # photodiode settings
+        print(win.size[0])
+        print(vertOffset)
+        self.pd_rect = visual.Rect(win, size=[win.size[0]-1, vertOffset+1],
+                                      lineColor=(0,0,0), fillColor=(1,1,1))
+        self.pd_colors = {'iti': (1,1,1),
+                          'cue': (0,0,0),
+                          'vgs': (1,1,1),
+                          'isi': (0,0,0),
+                          'mgs': (.5,.5,.5)}
 
         # could have just one and change the color
         self.iti_fix = visual.TextStim(win, text='+', name='iti_fixation',
@@ -668,7 +681,7 @@ class mgsTask:
         self.known_key_text = [
                                (self.accept_keys['known'], 'known'),
                                (self.accept_keys['maybeknown'], 'known'),
-                               (self.accept_keys['maybeunknown'], 'unkown'),
+                               (self.accept_keys['maybeunknown'], 'unknown'),
                                (self.accept_keys['unknown'], 'unknown')
                                ]
 
@@ -834,6 +847,11 @@ class mgsTask:
         self.run_iti()
         return(starttime)
 
+    def photodiode(self, event):
+        if self.usePD:
+            self.pd_rect.color = self.pd_colors.get(event)
+            self.pd_rect.draw()
+
     def run_iti(self, iti=0):
         """
         simple iti. flush logs
@@ -842,6 +860,7 @@ class mgsTask:
         """
         self.iti_fix.draw()
         self.win.callOnFlip(self.log_and_code, 'iti', None, None)
+        self.photodiode('iti')
         showtime = self.win.flip()
         logging.flush()
         if(iti > 0):
@@ -863,6 +882,7 @@ class mgsTask:
 
         self.crcl.pos = imgpos
         self.crcl.draw()
+        self.photodiode('vgs')
         self.win.callOnFlip(self.log_and_code, 'img', posstr, imgtype,
                             logh, takeshots, num=2, trialno=trialno)
         wait_until(imgon)
@@ -903,6 +923,7 @@ class mgsTask:
 
         # get ready red target
         self.cue_fix.draw()
+        self.photodiode('cue')
         self.win.callOnFlip(self.log_and_code, 'cue', t['side'], t['imgtype'],
                             logh, takeshots, 1, trialno=t['trial'])
 
@@ -915,6 +936,7 @@ class mgsTask:
 
         # back to fix
         self.isi_fix.draw()
+        self.photodiode('isi')
         self.win.callOnFlip(self.log_and_code, 'isi', t['side'], t['imgtype'],
                             logh, takeshots, 3, trialno=t['trial'])
 
@@ -925,6 +947,7 @@ class mgsTask:
         # -- empty screen nothing to draw
         self.win.callOnFlip(self.log_and_code, 'mgs', t['side'], t['imgtype'],
                             logh, takeshots, 4, t['trial'])
+        self.photodiode('mgs')
         wait_until(mgson)
         mgsflipt = self.win.flip()
 

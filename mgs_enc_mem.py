@@ -39,7 +39,7 @@ usePP_opt = {'mri': False, 'eeg': True, 'test': False, 'ieeg': True,
 # what are we doing with the parallel port
 ET_opts = {
         'mri': 'arrington',
-        'unkown': 'arrington',
+        'unknown': 'arrington',
         'behave': 'ASL',
         'ieeg': 'pylink',
         'eeg': None,
@@ -69,7 +69,7 @@ getReadyMsg = 'Waiting for scanner (pulse trigger)'
 host_type = host_tasktype()
 default_type = host_type.tasktype
 if default_type == 'unknown':
-    print('unkown host, defaulting to mri')
+    print('unknown host, defaulting to mri')
     default_type = 'mri'
 
 nruns = nruns_opt[default_type]
@@ -149,6 +149,8 @@ else:
     box.addField("Time Point", timepoint, choices=[0, 1, 2, 3, 4])
     box_key.append('nruns')
     box.addField("total # runs", nruns)
+    box_key.append('usePD')
+    box.addField("PhotoDiode?", calEyeScreen)
     box_key.append('vertOffset')
     box.addField("Vert offset (fraction of screen)", vertOffset)
     box_key.append('midwayPause')
@@ -175,6 +177,7 @@ else:
         midwayPause = boxdata[box_key.index('midwayPause')]
         recVideo = boxdata[box_key.index('recVideo')]
         calEyeScreen = boxdata[box_key.index('calEyeScreen')]
+        usePD = boxdata[box_key.index('usePD')]
     else:
         sys.exit(1)
 
@@ -223,7 +226,7 @@ else:
 win = create_window(isfullscreen)
 task = mgsTask(win, ET_type=ET_type, usePP=usePP, vertOffset=vertOffset,
                pp_address=pp_address, zeroTTL=zeroTTL,
-               recVideo=recVideo)
+               recVideo=recVideo, usePD=usePD)
 
 
 # # instructions
@@ -267,13 +270,16 @@ for runi in range(start_runnum-1, nruns):
     logging.flush()  # when its okay to write
 
     # trial settings and timing
+    task_info = {'subjid': subjid, 'epoch': seconds}
+    if sys.version_info[0] < 3:
+        tlist = trialdf.T.to_dict().values() # if py3, remove .values
+    else:
+        tlist = trialdf.T.to_dict()
+    # pyglet label errors? need pip install pglyet==1.3  today
     sacc_trials = data.TrialHandler2(
-                    trialdf.T.to_dict().values(),
-                    1,
-                    method='sequential',
-                    extraInfo={'subjid': subjid,
-                               'epoch': seconds,
-                               })
+                    trialList = tlist,
+                    nReps=1,
+                    method='sequential', extraInfo=task_info)
 
     # ## Run calibration if we need it
     if calEyeScreen:

@@ -9,7 +9,7 @@ class Hosts:
     """
     def __init__(self, tasktype, name=None, pp_address=None, ET=None):
         self.tasktype = tasktype
-        self.name = name if name else (tasktype + '_unkown')
+        self.name = name if name else (tasktype + '_unknown')
         # default to pyparallel default
         # maybe could just pass None?
         if not pp_address:
@@ -36,7 +36,7 @@ def host_tasktype():
                 'JulliesiMac.local'],
         'practice': ['eyelab130xx'],  # behave instead
         'behave': ['eyelab130', 'eprime'],  # 20180814 -- eyelab130 died!
-        'test': ['reese']}
+        'test': ['reese', 'kitchen']}
 
     host_pp = {
         'eyelab130': 0x0378,
@@ -49,7 +49,7 @@ def host_tasktype():
         'UBUNTU': 'pylink'}
 
     # default to uknown task
-    tasktype = 'unkown'
+    tasktype = 'unknown'
     if re.search('.*.wireless.pitt.edu', hostname):
         tasktype = 'mri'
     else:
@@ -58,7 +58,7 @@ def host_tasktype():
                 tasktype = typekey
                 print("%s matches %s" % (hostname, tasktype))
 
-    if tasktype == 'unkown':
+    if tasktype == 'unknown':
         print("dont know about host '%s', task type is unknown" % hostname)
 
     return(Hosts(tasktype, hostname,
