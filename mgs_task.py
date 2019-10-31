@@ -490,13 +490,13 @@ def msg_screen(win, textbox, msg='no message given', pos=(0, 0)):
     event.waitKeys()
 
 
-def create_window(fullscr):
+def create_window(fullscr, screen=0):
     """ create window either fullscreen or 800,600
     hide mouse cursor and make active
     """
     # setup screen
     if fullscr:
-        win = visual.Window(fullscr=fullscr)
+        win = visual.Window(fullscr=fullscr, screen=screen)
     else:
         win = visual.Window([800, 600])
 
