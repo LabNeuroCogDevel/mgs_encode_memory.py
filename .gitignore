@@ -23,3 +23,4 @@ viewpoint/
 analysis/testeyedata/
 rsync.bash
 rsync_fetch.bash
+subj_info/

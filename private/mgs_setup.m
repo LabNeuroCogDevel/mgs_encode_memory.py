@@ -1,7 +1,6 @@
-function [w, hid, et] = mgs_setup(subj)
+function [w, hid, et] = mgs_setup(p_id)
  addpath('/home/abel/matlabTasks/taskHelperFunctions/')
- et = 1; % default to using
- if ismember('test',{subj})
+ if ismember('test',{p_id})
      bg = [0 0 0];
      screen = 0;
      res = [0 0 800 600];
@@ -13,7 +12,7 @@ function [w, hid, et] = mgs_setup(subj)
     [w,~] = initializeScreen();
     DaqDOut(hid,0,0);
     % max 9char name
-    subjetname = subj(1:min(length(subj),9));
-    setup_eyelink(subjetname); % TODO: if fail, set et to zero?
+    etname = p_id(1:min(length(p_id),8));
+    et = setup_eyelink(etname, w); % TODO: if fail, set et to zero?
  end
 end
