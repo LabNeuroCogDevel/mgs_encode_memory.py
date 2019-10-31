@@ -45,7 +45,7 @@ accept_keys = {'known': '1',
 # sort by modification date
 # used in dropdown dialog
 
-nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unkown': 3, 'behave': 2}
+nruns_opt = {'mri': 3, 'eeg': 4, 'test': 2, 'unknown': 3, 'behave': 2}
 
 # glob all the paths provided, flatten, order by modified time
 globs = [glob.glob(x) for x in pkl_glb]

@@ -39,7 +39,7 @@ usePP_opt = {'mri': False, 'eeg': True, 'test': False, 'ieeg': True,
 # what are we doing with the parallel port
 ET_opts = {
         'mri': 'arrington',
-        'unkown': 'arrington',
+        'unknown': 'arrington',
         'behave': 'ASL',
         'ieeg': 'pylink',
         'eeg': None,
@@ -69,7 +69,7 @@ getReadyMsg = 'Waiting for scanner (pulse trigger)'
 host_type = host_tasktype()
 default_type = host_type.tasktype
 if default_type == 'unknown':
-    print('unkown host, defaulting to mri')
+    print('unknown host, defaulting to mri')
     default_type = 'mri'
 
 nruns = nruns_opt[default_type]

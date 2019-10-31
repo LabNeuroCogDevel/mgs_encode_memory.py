@@ -668,7 +668,7 @@ class mgsTask:
         self.known_key_text = [
                                (self.accept_keys['known'], 'known'),
                                (self.accept_keys['maybeknown'], 'known'),
-                               (self.accept_keys['maybeunknown'], 'unkown'),
+                               (self.accept_keys['maybeunknown'], 'unknown'),
                                (self.accept_keys['unknown'], 'unknown')
                                ]
 
