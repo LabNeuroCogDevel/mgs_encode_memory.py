@@ -13,6 +13,8 @@ function prep_event(w, e, varargin)
   elseif strncmp(e, 'dly', 3) || strncmp(e, 'isi', 3)
       drawCross(w, [255 255 0]) % yellow
   end
+  
+  % Screen('DrawingFinished', w);
 end
 
 function pos = pos_from_str(e)
