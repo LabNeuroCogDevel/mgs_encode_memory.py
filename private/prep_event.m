@@ -17,6 +17,7 @@ end
 
 function pos = pos_from_str(e)
   % -1 -.5 .5 1
-  pos = ~isempty(regexp(e, 'Near'))*.5 + ~isempty(regexp(e, 'Left'))*-1;
+  pos = ~isempty(regexp(e, 'Near','once'))*.5 +...
+        ~isempty(regexp(e, 'Left','once'))*-1;
   if pos >=1; pos= pos-.5; end
 end
