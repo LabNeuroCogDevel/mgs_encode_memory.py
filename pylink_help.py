@@ -29,8 +29,8 @@ class eyelink:
         # pygaze uses
         #  pylink.getEYELINK().setPupilSizeDiameter(True)
         #  pylink.getEYELINK().sendCommand(cmd)
-        el.sendCommand("screen_pixel_coords = 0 0 %d %d" % sp)
-        el.sendMessage("DISPLAY_COORDS  0 0 %d %d" % sp)
+        el.sendCommand("screen_pixel_coords = 0 0 %d %d" % (sp[0], sp[1]))
+        el.sendMessage("DISPLAY_COORDS  0 0 %d %d" % (sp[0], sp[1]))
         el.sendCommand("select_parser_configuration 0")
         el.sendCommand("scene_camera_gazemap = NO")
         # area or diameter

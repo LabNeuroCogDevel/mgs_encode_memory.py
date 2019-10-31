@@ -29,7 +29,7 @@ def host_tasktype():
     hostname = socket.gethostname()
     type_host_lookup = {
         'EEG': ['Oaco14Datapb1'],
-        'ieeg': ['UNKNOWN_UBUNTU'],
+        'ieeg': ['abel-XPS-13-9380'],
         'mri': ['7T-EPRIME-PC',  # task
                 # recall
                 'mc-wifi-10-215-130-29.wireless.pitt.edu',
@@ -41,12 +41,12 @@ def host_tasktype():
     host_pp = {
         'eyelab130': 0x0378,
         'Oaco14Datapb1': 0xDFF8,
-        'UBUNTU': '/dev/parpart0'}
+        'abel-XPS-13-9380': '/dev/parpart0'}
 
     host_eye = {
         'eyelab130': 'ASL',
         '7T-EPRIME-PC': 'arrington',
-        'UBUNTU': 'pylink'}
+        'abel-XPS-13-9380': 'pylink'}
 
     # default to uknown task
     tasktype = 'unknown'
