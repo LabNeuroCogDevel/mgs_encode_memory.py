@@ -5,4 +5,5 @@ function send_triggers(hid, TTL, ttlstr)
   if ttlstr
       Eyelink('Message', ttlstr);
   end
+  %fprintf('- TTL %d; msg %s - %s\n', TTL, ttlstr, GetSecs());
 end

@@ -13,43 +13,48 @@ function [TTL, msg] = calc_ttl(e, trl, et)
 
 
   trl = num2str(trl);
+  
+        
+  %% img pos
+  if ~isempty(regexp(e, 'Left','once'))
+      TTL=1;
+  elseif ~isempty(regexp(e, 'NearLeft','once'))
+      TTL=2;
+  elseif ~isempty(regexp(e, 'NearRight','once'))
+      TTL=3;
+  elseif ~isempty(regexp(e, 'Right','once'))
+      TTL=4;
+  else
+      TTL=0;
+  end
+  
+  %% img type
+  if ~isempty(regexp(e, 'None','once'))
+      TTL=TTL+10;
+  elseif ~isempty(regexp(e, 'Indoor','once'))
+      TTL=TTL+20;
+  elseif ~isempty(regexp(e, 'Outd0or','once'))
+      TTL=TTL+30;
+  end
+  
   if strncmp(e, 'fix', 3)
-      TTL=10;
+      TTL=10 + TTL;
   elseif strncmp(e, 'cue', 3)
-      TTL=50;
+      TTL=50 + TTL;
   elseif strncmp(e, 'vgs', 3) % || strncmp(e, 'img', 3)
-      
-      % img pos
-      if ~isempty(regexp(e, 'Left','once'))
-          TTL=1;
-      elseif ~isempty(regexp(e, 'NearLeft','once'))
-          TTL=2;
-      elseif ~isempty(regexp(e, 'NearRight','once'))
-          TTL=3;
-      elseif ~isempty(regexp(e, 'Right','once'))
-          TTL=4;
-      end
-      % img type
-      if ~isempty(regexp(e, 'None','once'))
-          TTL=TTL+10;
-      elseif ~isempty(regexp(e, 'Indoor','once'))
-          TTL=TTL+20;
-      elseif ~isempty(regexp(e, 'Outd0or','once'))
-          TTL=TTL+30;
-      end
-      TTL=TTL+100;
+      TTL=100 + TTL;
       
   elseif strncmp(e, 'dly', 3) % || strncmp(e, 'isi', 3)
-      TTL=160;
+      TTL=150 + TTL;
   elseif strncmp(e, 'mgs', 3)
-      TTL=210;
+      TTL=200 + TTL;
   else
       error('unknown event %s', e)
   end
   
   % must be numbers and letters only
   if ~isempty(et)
-      msg = [regexprep(e,'[^A-za-z0-9]',''), trl];
+      msg = [regexprep(e,'[^A-Za-z0-9]',''), trl];
   else
       msg = '';
  end

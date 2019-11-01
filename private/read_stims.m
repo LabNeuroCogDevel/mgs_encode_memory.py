@@ -19,11 +19,12 @@ function [sorted_times, sorted_events] = read_stims(path)
        
        % sanity check
        if ~ all(diff(onsets.(n)) > 0) || ~ all(durs.(n) < 20)
-           error('error reading in %s; onsets not monotonic or durs >20', fname)
+           error('error reading in %s; onsets not monotonic or durs >20', fname);
        end
-       
+
    end
-   
+
+       
    event_names = fieldnames(onsets);
    event = cellfun(@(x) repmat({x},length(onsets.(x)),1), event_names,'Un',0);
    times = cellfun(@(x) onsets.(x), event_names,'Un',0);
@@ -35,5 +36,9 @@ function [sorted_times, sorted_events] = read_stims(path)
    sorted_times = timing(si,:);
    sorted_events = event(si);
 
+      
+   if length(timing) < 10
+       error('too few events (%d<10) in stim onsets "%s"!', length(timing), path);
+   end
    
 end
