@@ -1,8 +1,11 @@
-function drawVGS(w, pos, tex)
+function [hpos, vpos] = drawVGS(w, pos, tex, showdot)
   dotsize = 20; % radius of 10 in python
   % tex = Screen('MakeTexture', w, imread('img/A/inside/sun_aaloiwdypreqzwnn.png'));
   
   [w_wd, w_hgt]=Screen('WindowSize', w);
+  if nargin < 4
+      showdot = 1;
+  end
 
   % images are 255, 255
   imgdim = [255 255]; % todo pull from actual tex?
@@ -22,16 +25,18 @@ function drawVGS(w, pos, tex)
   end
   % back to range = 0 to width
   hpos = hpos + wmax;
-  
+  vpos = w_hgt/2;
   if tex
       imgrect = [0 0 imgdim];
-      rect=CenterRectOnPoint(imgrect, hpos, w_hgt/2);
+      rect=CenterRectOnPoint(imgrect, hpos, vpos);
       Screen('DrawTexture',w, tex, imgrect, rect);
   end
   
   % yellow dot on top
-  rect=CenterRectOnPoint([0 0 dotsize dotsize], hpos, w_hgt/2);
-  Screen( 'FillOval', w, [255 255 0],  rect);
+  if showdot
+      rect=CenterRectOnPoint([0 0 dotsize dotsize], hpos, vpos);
+      Screen( 'FillOval', w, [255 255 0],  rect);
+  end
 end
 
 function scl = imgrat(screenndim, imgdim, scaleby)

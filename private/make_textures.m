@@ -1,14 +1,11 @@
 function [tex_all, texf] = make_textures(w, events, imgset)
 % events is a cell array of chars
 % we care about the vgs ones -- we want a random image from indoor/outdoor
-    imgtype = cellfun(@(x) regexp(x,'(Indoor|Outdoor)','match'), events, 'Un',0);
+    imgtype = cellfun(@(x) regexp(x,'vgs.*(Indoor|Outdoor)','match'), events, 'Un',0);
     
-    files.indoor = Shuffle(dir(fullfile('img/', imgset, '/inside/*png')));
-    files.outdoor_nat = Shuffle(dir(fullfile('img/', imgset, '/outside_nat/*png')));
-    files.outdoor_man = Shuffle(dir(fullfile('img/', imgset, '/outside_man/*png')));
-
+    files = list_images(imgset);
     % outdoor needs to be broken into manmade (_man) and natural (_nat)
-    tex_needed = vertcat(imgtype{:});
+    tex_needed = regexprep(vertcat(imgtype{:}),'vgs_.*_','');
     outidx = find(ismember(tex_needed,'Outdoor'));  
     outidx = Shuffle(outidx);
     texf = cell(1,length(tex_needed));

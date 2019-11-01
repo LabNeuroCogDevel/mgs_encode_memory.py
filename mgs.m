@@ -1,4 +1,4 @@
-function mgs(subj, imgset, trialsperblock)
+function savefile = mgs(subj, imgset, trialsperblock)
   % clear everything
   %  sca; close all; clearvars;
 
@@ -22,6 +22,7 @@ function mgs(subj, imgset, trialsperblock)
       modality = 'ieeg';
   end
   event_info = read_events(modality);
+  event_info.imgset = imgset;
   
   % initialze screen, DAQ, and eyetracking
   [w, hid, et] = mgs_setup(subj);
