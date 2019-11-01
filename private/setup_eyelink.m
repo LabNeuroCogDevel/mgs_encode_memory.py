@@ -7,7 +7,8 @@ function el = setup_eyelink(etname, w)
     % limited to a total of 9 characters
     err = Eyelink('OpenFile', etname);
     if err
-        error('cannot create %s on eyelink; filename limit is 9 chars?',...
+        disp(err)
+        error('cannot create %s on eyelink; filename limit is 8 chars?',...
             etname)
     end
  

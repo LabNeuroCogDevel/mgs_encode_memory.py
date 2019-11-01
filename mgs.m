@@ -7,6 +7,7 @@ function mgs(subj, imgset)
   end
   if nargin < 2
       imgset = input('imgset (A|B): ','s');
+      validatestring(imgset,{'A','B','C'});
   end
 
   % initialze screen, DAQ, and eyetracking
@@ -23,6 +24,11 @@ function mgs(subj, imgset)
   % show instructions
   instructions(w)
   
+  % how to save 
+  savename = [subj '_' imgset '_' datestr(now(),'yyyymmddHHMMSS')];
+  savefile = fullfile('subj_info/ieeg/',[savename '.mat']);
+  save(savefile, 'onsets', 'events', 'imgs_used');
+  
   % start eye recording
   if ~isempty(et), Eyelink('StartRecording'); end
   
@@ -35,7 +41,11 @@ function mgs(subj, imgset)
   send_triggers(hid, 0, startmsg);
   starttime = screenstart + .5;
   
-  for eidx=1:length(onsets)
+  % stuct for storing onset times
+  eventtimes = struct();
+  %ntrial = length(onsets);
+  ntrial = 24; % TODO: insert breaks
+  for eidx=1:ntrial
       
       % event prep - events are: cue vgs dly mgs
       this_e = events{eidx};
@@ -43,6 +53,8 @@ function mgs(subj, imgset)
       [ttl, ttlmsg] = calc_ttl(this_e, trial, et);
       etime = Screen('Flip', w, starttime + onsets(eidx,1));
       send_triggers(hid, ttl, ttlmsg);
+      
+      fprintf('%d/%d: %s for %.2f @ %f\n', trial, ntrial, this_e, onsets(eidx,2), etime)
       
       % last event of a trail is mgs
       % followed by fix (but not in onset times)
@@ -52,9 +64,17 @@ function mgs(subj, imgset)
           fixon = etime + onsets(eidx,2);
           prep_event(w, 'fix')
           [ttl, ttlmsg] = calc_ttl('fix', trial, et);
-          Screen('Flip', w, fixon); % mgs dur is always 2s
+          fixon = Screen('Flip', w, fixon); % mgs dur is always 2s
           send_triggers(hid, ttl, ttlmsg)
+          fprintf('fix @ %f\n', fixon)
+          eventtimes(trial).fix = fixon;
+
       end
+      
+      % save output
+      eventtimes(trial).(this_e) = etime;
+      save(savefile, 'onsets','events', 'imgs_used','starttime', 'eventtimes', 'trial');
+      %fprintf('saved to %s @ %f\n', savefile,  GetSecs())
   end
   
   % stop recording

@@ -12,7 +12,7 @@ function [w, hid, et] = mgs_setup(p_id)
     hid = DaqFind;
     [w,~] = initializeScreen();
     DaqDOut(hid,0,0);
-    % max 9char name
+    % max 8char name
     etname = p_id(1:min(length(p_id),8));
     et = setup_eyelink(etname, w); % TODO: if fail, set et to zero?
  end
