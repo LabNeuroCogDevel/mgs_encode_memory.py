@@ -1,17 +1,30 @@
-function mgs(subj)
+function mgs(subj, imgset)
   % clear everything
   %  sca; close all; clearvars;
+
   if nargin < 1
       subj = input('participant id: ','s');
   end
-  
+  if nargin < 2
+      imgset = input('imgset (A|B): ','s');
+  end
+
   % initialze screen, DAQ, and eyetracking
   [w, hid, et] = mgs_setup(subj);
   % if eyetracking, what do we tell the eye tracker when we start
-  if et, startmsg = 'START'; else, startmsg=''; end
+  if ~isempty(et), startmsg = 'START'; else, startmsg=''; end
   
   % read "1D" onset:duration files and sort:[onset, duration] + {event}
-  [onsets, event] = read_stims('stims/ieeg/3479197962273054302');
+  [onsets, events] = read_stims('stims/ieeg/3479197962273054302');
+  
+  % make textures for events that need it
+  [event_tex, imgs_used] = make_textures(w, events, imgset);
+  
+  % show instructions
+  instructions(w)
+  
+  % start eye recording
+  if ~isempty(et), Eyelink('StartRecording'); end
   
   % initialze with fixation
   trial = 1;
@@ -24,9 +37,9 @@ function mgs(subj)
   
   for eidx=1:length(onsets)
       
-      % event prep
-      this_e = event{eidx};
-      prep_event(w, this_e);
+      % event prep - events are: cue vgs dly mgs
+      this_e = events{eidx};
+      prep_event(w, this_e, event_tex(eidx));
       [ttl, ttlmsg] = calc_ttl(this_e, trial, et);
       etime = Screen('Flip', w, starttime + onsets(eidx,1));
       send_triggers(hid, ttl, ttlmsg);
@@ -43,4 +56,9 @@ function mgs(subj)
           send_triggers(hid, ttl, ttlmsg)
       end
   end
+  
+  % stop recording
+  if ~isempty(et), Eyelink('StopRecording'); end
+  % have a lot of textures open, close them
+  Screen('CloseAll')
 end

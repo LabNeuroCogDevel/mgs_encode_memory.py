@@ -6,6 +6,7 @@ function prep_event(w, e, varargin)
   elseif strncmp(e, 'vgs', 3)
       % -1 -.5 .5 1
       pos = pos_from_str(e);
+      drawVGS(w, pos, varargin{1});
       % img_tex = varargin{1};
       % TODO: show image at correct pos
   elseif strncmp(e, 'mgs', 3)
@@ -15,11 +16,4 @@ function prep_event(w, e, varargin)
   end
   
   % Screen('DrawingFinished', w);
-end
-
-function pos = pos_from_str(e)
-  % -1 -.5 .5 1
-  pos = ~isempty(regexp(e, 'Near','once'))*.5 +...
-        ~isempty(regexp(e, 'Left','once'))*-1;
-  if pos >=1; pos= pos-.5; end
 end

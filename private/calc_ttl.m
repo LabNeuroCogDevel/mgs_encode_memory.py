@@ -16,7 +16,7 @@ function [TTL, msg] = calc_ttl(e, trl, et)
   end
   
   % must be numbers and letters only
-  if et
+  if ~isempty(et)
       msg = [regexprep(e,'[^A-za-z0-9]',''), trl];
   else
       msg = '';

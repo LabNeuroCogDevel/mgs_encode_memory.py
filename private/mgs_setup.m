@@ -1,12 +1,13 @@
 function [w, hid, et] = mgs_setup(p_id)
  addpath('/home/abel/matlabTasks/taskHelperFunctions/')
+
  if ismember('test',{p_id})
      bg = [0 0 0];
      screen = 0;
      res = [0 0 800 600];
      w = Screen('OpenWindow', screen, bg, res);
      hid = 0;
-     et = 0;
+     et = [];
  else
     hid = DaqFind;
     [w,~] = initializeScreen();
