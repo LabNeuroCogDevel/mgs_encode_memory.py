@@ -1,4 +1,4 @@
-function savefile = mgs(subj, imgset, trialsperblock)
+function savefile = mgs(subj, imgset, nblock)
   % clear everything
   %  sca; close all; clearvars;
 
@@ -7,6 +7,12 @@ function savefile = mgs(subj, imgset, trialsperblock)
   end
   if nargin < 2
       imgset = input('imgset (A|B): ','s');
+  end
+  if nargin < 3
+      nblock = input('number of runs (3): ');
+      if isempty(nblock)
+          nblock=3;
+      end
   end
 %   if nargin < 3
 %       trialsperblock = input('trialsperblock: ');
@@ -21,7 +27,7 @@ function savefile = mgs(subj, imgset, trialsperblock)
   else
       modality = 'ieeg';
   end
-  event_info = read_events(modality);
+  event_info = read_events(modality, nblock);
   event_info.imgset = imgset;
   
   % initialze screen, DAQ, and eyetracking
@@ -51,16 +57,19 @@ function savefile = mgs(subj, imgset, trialsperblock)
   % start with 500ms of fix
   screenstart = Screen('Flip', w);
   send_triggers(hid, 0, startmsg);
-  starttime = screenstart + .5;
+  ntrials = max([event_info.trial]);
+  nblocks = max([event_info.block]);
   
+  starttime = zeros(1, nblocks);
+  starttime(1) = screenstart + .5; % half second of fix before start
   % stuct for storing onset times
   eventtimes = struct();
   nevents = length(event_info.onsets);
-  ntrials = 24; % TODO: insert breaks
   for eidx=1:nevents
       % event info
       this_e = event_info.events{eidx};
-      onset = starttime + event_info.onsets(eidx,1);
+      cblock = event_info.block(eidx);
+      onset = starttime(cblock) + event_info.onsets(eidx,1);
       e_dur   = event_info.onsets(eidx,2);
       trial = event_info.trial(eidx);
       
@@ -72,7 +81,9 @@ function savefile = mgs(subj, imgset, trialsperblock)
       etime = Screen('Flip', w, onset);
       send_triggers(hid, ttl, ttlmsg);
       
-      fprintf('%d/%d: %s for %.2f @ %f\n', trial, ntrials, this_e, e_dur, etime)
+      fprintf('%d/%d (blk %d): %s for %.2f @ %.2f (%.3f)\n',...
+              trial, ntrials, cblock, this_e, e_dur, ...
+              event_info.onsets(eidx,1), etime);
       
       % last event of a trail is mgs
       % should be followed by fix (but not in onset times)
@@ -80,13 +91,8 @@ function savefile = mgs(subj, imgset, trialsperblock)
       if strncmp(this_e, 'mgs', 3)
           % do fix between trials
           fixon = etime + e_dur;
-          prep_event(w, 'fix')
-          [ttl, ttlmsg] = calc_ttl('fix', trial, et);
-          fixon = Screen('Flip', w, fixon); % mgs dur is always 2s
-          send_triggers(hid, ttl, ttlmsg)
-          fprintf('fix @ %f\n', fixon)
-          eventtimes(trial).fix = fixon;
-
+          fixon_flip = showfix(w, trial, hid, et, fixon);
+          eventtimes(trial).fix = fixon_flip;
       end
       
       % save output
@@ -94,13 +100,24 @@ function savefile = mgs(subj, imgset, trialsperblock)
       save(savefile, 'event_info','imgs_used','starttime', 'eventtimes', 'trial');
       %fprintf('saved to %s @ %f\n', savefile,  GetSecs())
       
-      if trial >= ntrials
-          break
+      % starting new block
+      if cblock ~= event_info.block(min(eidx+1,nevents))
+          WaitSecs(.5); % show last fixation for half a second
+          msg = sprintf('Finished %d/%d!', cblock, nblocks);
+          ttlmsg='';
+          if ~isempty(et), ttlmsg=sprintf('BLOCKEND%d',cblock); end
+          send_triggers(hid, 0, ttlmsg);
+          disp_til_key(w, msg);
+          % show fix for .5 seconds
+          fixon_flip = showfix(w, trial, hid, et, fixon);
+          cblock = event_info.block(eidx+1);
+          starttime(cblock) = fixon_flip + .5;
       end
   end
   
   % stop recording
   if ~isempty(et), Eyelink('StopRecording'); end
+  disp_til_key(w, 'Finished!\n Thank you!!')
   % have a lot of textures open, close them
   Screen('CloseAll')
 end

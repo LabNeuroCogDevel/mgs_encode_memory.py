@@ -28,7 +28,8 @@ function [tex_all, texf] = make_textures(w, events, imgset)
         fi=fi+1;
     end
     % make dir struct into texture
-    tex = cellfun(@(f) Screen('MakeTexture',w,imread(fullfile(f.folder,f.name))), texf);
+    tex = cellfun(@(f) Screen('MakeTexture',w, imread(fullfile(f.folder,f.name))), texf);
+    
     % put a bunch of no textures everywhere
     tex_all = zeros(1,length(imgtype));
     % add actually textures where we need them

@@ -1,5 +1,4 @@
 function [w, hid, et] = mgs_setup(p_id)
- addpath('/home/abel/matlabTasks/taskHelperFunctions/')
 
  if ismember('test',{p_id})
      bg = [0 0 0];
@@ -10,10 +9,18 @@ function [w, hid, et] = mgs_setup(p_id)
      et = [];
  else
     hid = DaqFind;
+    % initializeScreen from 
+    addpath('/home/abel/matlabTasks/taskHelperFunctions/')
     [w,~] = initializeScreen();
     DaqDOut(hid,0,0);
     % max 8char name
     etname = p_id(1:min(length(p_id),8));
     et = setup_eyelink(etname, w); % TODO: if fail, set et to zero?
  end
+ 
+ % doesn't help with circle artifact
+ % Screen('BlendFunction', w, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+ 
+ KbName('UnifyKeyNames');
+ RestrictKeysForKbCheck([]);
 end

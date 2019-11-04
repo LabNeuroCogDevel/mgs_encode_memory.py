@@ -8,7 +8,7 @@ function [hpos, vpos] = drawVGS(w, pos, tex, showdot)
   end
 
   % images are 255, 255
-  imgdim = [255 255]; % todo pull from actual tex?
+  imgdim = [225 225]; % todo pull from actual tex?
   img_rad = imgdim(1)/2; 
   
   % calc position as if range is -w/2 to w/2

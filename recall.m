@@ -1,11 +1,12 @@
 function recall(matfile)
 
 if nargin < 1
-    matfile = uigetfile('*.mat');
+    [matfile, matdir] = uigetfile('*.mat');
+    matfile = fullfile(matdir,matfile);
 end
 
 if isempty(matfile) || ~exist(matfile,'file')
-    error('need a mgsrun matfile')
+    error('need a mgsrun matfile not %s', matfile)
 end
 
 %% parse data we gathered

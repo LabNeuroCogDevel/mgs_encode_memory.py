@@ -10,10 +10,9 @@ function instructions(w)
         '5. Relax: Look at the white cross in the center when it comes back.\n\n'...
         'NOTE: you do not need to remember the images for this task ' ...
         'but you may be asked about them later'];
-    DrawFormattedText(w, msg, 0, 0, [255 255 255]);
-    Screen('Flip',w);
-    WaitSecs(.5);
-    KbWait();
+    
+    disp_til_key(w, msg, 10);
+
     
     img = imread('img/instruction/overview.png');
     tex = Screen('MakeTexture',w, img);
