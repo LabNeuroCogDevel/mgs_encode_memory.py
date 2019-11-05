@@ -9,26 +9,23 @@ function savefile = mgs(subj, imgset, nblock)
       imgset = input('imgset (A|B): ','s');
   end
   if nargin < 3
-      nblock = input('number of runs (3): ');
+      nblock = input('number of runs (3) [ignored if resume]: ');
       if isempty(nblock)
           nblock=3;
       end
   end
-%   if nargin < 3
-%       trialsperblock = input('trialsperblock: ');
-%   end
+
   validatestring(imgset,{'A','B','C'});
 
+  % create a matfile we can load from
+  savefile = resume_or_new(subj, imgset, nblock);
+  load(savefile, 'event_info','imgs_used','starttime', 'eventtimes', 'trial');
+
   
-  % read "1D" onset:duration files and sort:[onset, duration] + {event}
-  %[onsets, events] = read_stims('stims/ieeg/3479197962273054302');
-  if strcmp(subj,'test')
-      modality='test';
-  else
-      modality = 'ieeg';
-  end
-  event_info = read_events(modality, nblock);
-  event_info.imgset = imgset;
+  % some settings
+  ntrials = max([event_info.trial]);
+  nblocks = max([event_info.block]);
+  cblock = event_info.block(trial);
   
   % initialze screen, DAQ, and eyetracking
   [w, hid, et] = mgs_setup(subj);
@@ -41,13 +38,6 @@ function savefile = mgs(subj, imgset, nblock)
   % show instructions
   instructions(w)
   
-  % how to save 
-  savename = [subj '_' imgset '_' datestr(now(),'yyyymmddHHMMSS')];
-  savefile = fullfile('subj_info/ieeg/',[savename '.mat']);
-  savedir = fileparts(savefile);
-  if ~exist(savedir,'dir'), mkdir(savedir); end
-  save(savefile, 'event_info', 'imgs_used');
-  
   % start eye recording
   if ~isempty(et), Eyelink('StartRecording'); end
   
@@ -57,15 +47,13 @@ function savefile = mgs(subj, imgset, nblock)
   % start with 500ms of fix
   screenstart = Screen('Flip', w);
   send_triggers(hid, 0, startmsg);
-  ntrials = max([event_info.trial]);
-  nblocks = max([event_info.block]);
+
   
-  starttime = zeros(1, nblocks);
-  starttime(1) = screenstart + .5; % half second of fix before start
+  starttime(cblock) = screenstart + .5; % half second of fix before start
   % stuct for storing onset times
   eventtimes = struct();
   nevents = length(event_info.onsets);
-  for eidx=1:nevents
+  for eidx=trial:nevents
       % event info
       this_e = event_info.events{eidx};
       cblock = event_info.block(eidx);
