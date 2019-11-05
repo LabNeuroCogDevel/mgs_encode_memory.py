@@ -1,4 +1,4 @@
-function recall(matfile)
+function savename = recall(matfile)
 
 if nargin < 1
     [matfile, matdir] = uigetfile('*.mat');
@@ -47,6 +47,8 @@ rand_imgs = ...
 known_fullpath = cellfun(@(x) fullfile(x.folder,x.name), known_img, 'Un',0);
 imgs_test = Shuffle([rand_imgs(1:length(known_img)), known_fullpath]);
 
+fprintf('Have seen %d images\n', length(known_img));
+fprintf('Have %d image tests\n', length(imgs_test));
 %% setup screen
 w = mgs_setup('test');
 Screen('TextColor', w, [255 255 255]); % white text
@@ -65,6 +67,21 @@ RestrictKeysForKbCheck(acceptKeys);
 savename = regexprep('.mat$',['_recall' datestr(now(),'yyyymmddHHMMSS') '.mat'], matfile);
 info=struct();
 save(savename,'imgs_test', 'side', 'known_img', 'info')
+
+%% instructions
+disp_til_key(w, 'Recall Task\n use keys 1 to 4')
+disp_til_key(w, [...
+           'STEPS:\n\n' ...
+           '1. Do you remember the image?\n' ...
+           '   push 1 if you already saw the image.\n' ...
+           '   push 2 if you saw the image, but are uncertian\n' ...
+           '   push 3 if the image is new, but are uncertian\n' ...
+           '   push 4 if the image is new\n\n' ...
+           '2. If you have seen the image:\n' ...
+           '   push 1 if you saw it on the far left\n' ...
+           '   push 2 if you saw it on the near left\n' ...
+           '   push 3 if you saw it on the near right\n'... 
+           '   push 4 if you saw it on the far right\n'], 10);
 
 %% get input
 for idx=1:length(imgs_test)
@@ -148,7 +165,9 @@ for idx=1:length(imgs_test)
     end
     score = score + mostly_img*100 + 50*exact_img;
     
-    fprintf('seen: %d\tpos: %d\tscore: %d\n', kc_saw, kc_pos, score);
+    fprintf('%d/%d\tseen: %d\tpos: %d\tscore: %d\n',...
+        idx, length(imgs_test), ...
+        kc_saw, kc_pos, score);
     
     info(idx).img=img;
     info(idx).img=imgtype;

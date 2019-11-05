@@ -1,20 +1,22 @@
 function instructions(w)
+    % start
+    disp_til_key(w, 'Memory Eye Task')
 
     % cue
     prep_event(w, 'cue', 0);
-    disp_til_key(w, 'Blue cross means get ready', 'center', 50)
+    disp_til_key(w, 'Prep: get ready to look at a dot', 'center', 50)
     % vgs
     % TODO: add image under dot?
     prep_event(w, 'vgs_Left', 0, []);
-    disp_til_key(w, 'Look to the dot; remember position\nsometimes there might be an image', 'center', 50)
+    disp_til_key(w, 'Look: look at the dot\nRemember that spot until it disappears', 'center', 50)
     % dly
     prep_event(w, 'dly', 0);
-    disp_til_key(w, 'Look back to center. yellow cross means remember', 'center', 50)
+    disp_til_key(w, 'Wait: go back to center and focus on the yellow cross\nuntil it disappears', 'center', 50)
     % mgs
-    disp_til_key(w, 'Empty screen. Look to remembered location', 'center', 50)
+    disp_til_key(w, 'Recall: look to where dot was and focus there\nuntil a new cross appears', 'center', 50)
     % fix
     prep_event(w,'fix')
-    disp_til_key(w, 'look back to center. relax', 'center', 50)
+    disp_til_key(w, 'Relax: wait for the blue cross to signal a new round', 'center', 50)
 
     msg = [...
         '1. Prep: Look at the blue cross.' ...
