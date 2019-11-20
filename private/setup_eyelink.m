@@ -1,4 +1,9 @@
 function el = setup_eyelink(etname, w)
+
+    % give an indication to the participant
+    DrawFormattedText(w, 'Calibrating!', 'center','center', [255 255 255])
+    Screen('Flip',w);
+
     err = Eyelink('Initialize');
     if err
         error('failed to connect to eyetracker! did you run eyelink_setup.bash?')
