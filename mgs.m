@@ -1,4 +1,4 @@
-function savefile = mgs(subj, imgset, nblock)
+function savefile = mgs(subj, imgset, nblock, use_et)
   % clear everything
   %  sca; close all; clearvars;
 
@@ -8,15 +8,21 @@ function savefile = mgs(subj, imgset, nblock)
   if nargin < 2
       imgset = input('imgset (A|B): ','s');
   end
+  % nblock
   if nargin < 3
       nblock = input('number of runs (3): ');
       if isempty(nblock)
           nblock=3;
       end
   end
-%   if nargin < 3
-%       trialsperblock = input('trialsperblock: ');
-%   end
+  % use_et
+  if nargin < 4
+      use_et = input('use eyetracking (1|0, defulat to 1): ');
+      if isempty(use_et)
+          use_et=1;
+      end
+  end
+
   validatestring(imgset,{'A','B','C'});
 
   
@@ -31,7 +37,7 @@ function savefile = mgs(subj, imgset, nblock)
   event_info.imgset = imgset;
   
   % initialze screen, DAQ, and eyetracking
-  [w, hid, et] = mgs_setup(subj);
+  [w, hid, et] = mgs_setup(subj, use_et);
   % if eyetracking, what do we tell the eye tracker when we start
   if ~isempty(et), startmsg = 'START'; else, startmsg=''; end
     
