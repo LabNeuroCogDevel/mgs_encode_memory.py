@@ -1,6 +1,14 @@
-function savefile = resume_or_new(subj, imgset, nblock)
-  % read "1D" onset:duration files and sort:[onset, duration] + {event}
-  %[onsets, events] = read_stims('stims/ieeg/3479197962273054302');
+function savefile = resume_or_new(subj, imgset, nblock, autoconfirm)
+  % return what file we should save outputs. initilize some settings if they do not exist
+  % * `subject` can be any string
+  % * `imgset` should be 'A' 'B' or 'C'
+  % * `nblock` is the total number of blocks (runs) - probably 3
+  % * `autoconfirm` should be 'y' or 'n'
+  %
+  % populates and saves like
+  %   save(savefile, 'event_info','imgs_used','starttime', 'eventtimes', 'trial');
+  % TODO: eventtimes not initilzed if not resume?
+
   if strcmp(subj,'test')
       modality='test';
   else
@@ -16,7 +24,11 @@ function savefile = resume_or_new(subj, imgset, nblock)
   % are there other files we could load from?
   if ~isempty(othermats)
       warnings('have other safe files in %s', fullfile(savepath, saveprefix));
-      resume = input('do you want to resume? no creates new matfile (y|n): ',s);
+      if nargin > 3
+         resume = autoconfirm
+      else
+         resume = input('do you want to resume? no creates new matfile (y|n): ',s);
+      end
       validatestring(resume,{'y','n'})
       if length(othermats) == 1
           savefile = fullfile(othermats(1).folder, othermats(1).name);
@@ -42,6 +54,8 @@ function savefile = resume_or_new(subj, imgset, nblock)
       event_info.imgset = imgset;
       starttime = zeros(1, nblock);
       trial = 1;
+      % stuct for storing event onset (flip) times as they happen
+      eventtimes = struct();
   else
       % restart from begining of block
       cblock = event_info.block(trial);
