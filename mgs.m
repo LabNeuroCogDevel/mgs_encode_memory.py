@@ -85,9 +85,9 @@ function savefile = mgs(subj, imgset, nblock, use_et)
           ttlmsg='';
           if ~isempty(et), ttlmsg=sprintf('BLOCKEND%d',e.cblock); end
           send_triggers(hid, 0, ttlmsg);
-          disp_til_key(w, msg);
+          keyhit = disp_til_key(w, msg);
           % show fix for .5 seconds
-          fixon_flip = showfix(w, e.trial, hid, et, fixon);
+          fixon_flip = showfix(w, e.trial, hid, et, keyhit);
           cblock = event_info.block(eidx+1);
           starttime(cblock) = fixon_flip + .5;
       end
