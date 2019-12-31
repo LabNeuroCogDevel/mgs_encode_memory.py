@@ -43,7 +43,7 @@ function savefile = mgs(subj, imgset, nblock, use_et)
   if ~isempty(et), startmsg = 'START'; else, startmsg=''; end
     
   % make textures for events that need it
-  [event_tex, imgs_used] = make_textures(w, event_info.events, imgset);
+  event_tex = make_textures(w, imgs_used, event_info.events);
   
   % show instructions
   instructions(w)

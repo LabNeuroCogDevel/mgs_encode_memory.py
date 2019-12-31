@@ -9,11 +9,11 @@ function e = event_from_info(event_info, starttime, event_tex, eidx)
    e.trial = event_info.trial(eidx); % 1 - 24 (likely)
 
    % event onset time relative to start of run
-   e.relative_onset = event_info.onsets(eidx,1); 
+   e.rel_onset = event_info.onsets(eidx,1); 
    % absolute onset -- exact time to flip
-   e.onset = starttime(cblock) + relative_onset; 
+   e.onset = starttime(e.cblock) + e.rel_onset; 
    % how long it should last (also initially read from 1D)
    e.dur   = event_info.onsets(eidx,2);
-   e.tex = event_tex(eid);
+   e.tex = event_tex(eidx);
    e.eidx = eidx;
 end
