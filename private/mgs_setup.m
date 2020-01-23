@@ -1,4 +1,4 @@
-function [w, hid, et] = mgs_setup(p_id, use_et)
+function [w, hid, et] = mgs_setup(p_id, use_et, skip_hid)
 
  % setup keys - potentioally undo recall key restrictions
  KbName('UnifyKeyNames');
@@ -8,6 +8,8 @@ function [w, hid, et] = mgs_setup(p_id, use_et)
  hid = 0;
  et = [];
  if nargin < 2, use_et = 0; end
+ % but if use_hid is 0, we dont need to prompt
+ if nargin < 3, skip_hid = 0; end
 
  % the 'test' subject is special
  if ismember('test',{p_id})
@@ -27,12 +29,16 @@ function [w, hid, et] = mgs_setup(p_id, use_et)
  end
  
  %% do we send a trigger
- try
-    hid = DaqFind;
-    DaqDOut(hid,0,0);
- catch e
-   quitwithout('DAQ TTL triggers', e)
- end
+if skip_hid
+  fprintf('contining without DAQ and not trying!\n')
+else
+   try
+      hid = DaqFind;
+      DaqDOut(hid,0,0);
+   catch e
+        quitwithout('DAQ TTL triggers', e)
+   end
+end
  
  % do we really want eye tracking?
  if ~use_et
