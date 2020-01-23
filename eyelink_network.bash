@@ -3,4 +3,4 @@
 ip link set enxa0cec830fcb1 down
 ip addr add 100.1.1.2/16 dev enxa0cec830fcb1 
 ip link set enxa0cec830fcb1 up
-ping -c 100.1.1.1
+ping -c1 100.1.1.1
