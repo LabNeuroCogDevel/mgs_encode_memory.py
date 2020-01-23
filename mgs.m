@@ -19,6 +19,7 @@ function savefile = mgs(subj, imgset, nblock, use_et)
   end
   % should we use eyetracking?
   if nargin < 4
+      fprintf('MAKE SURE EYE IS TRACKED/IDed by eyelink\n')
       use_et = input('use eyetracking (1|0, defulat to 1): ');
       if isempty(use_et)
           use_et=1;
