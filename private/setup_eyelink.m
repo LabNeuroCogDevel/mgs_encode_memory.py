@@ -6,6 +6,7 @@ function el = setup_eyelink(etname, w)
 
     err = Eyelink('Initialize');
     if err
+        disp(err)
         error('failed to connect to eyetracker! did you run eyelink_setup.bash?')
     end
 
