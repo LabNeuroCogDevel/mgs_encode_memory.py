@@ -17,4 +17,11 @@ event_tex = make_textures(w, imgs_used, event_info.events);
 prep_event(w, 'fix')
 starttime = Screen('Flip', w);
 % go
-e = event_from_info(event_info, starttime, event_tex, 1);
+for i=1:2
+   e = event_from_info(event_info, starttime, event_tex, i);
+   [etime fixon_flip] = task_event(hid, w, et, e, 72)
+end
+
+trail=80;
+save(savefile, 'event_info','imgs_used','starttime', 'eventtimes', 'trial');
+% mgs(subj,imgset,nblock,use_et);
