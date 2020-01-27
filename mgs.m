@@ -12,17 +12,11 @@ function savefile = mgs(subj, imgset, nblock, use_et)
   end
   % nuber of runs/blocks - probably 3
   if nargin < 3
-      nblock = input('number of runs (3) [ignored if resume]: ');
-      if isempty(nblock)
-          nblock=3;
-      end
+      nblock = input_def('number of runs (3) [ignored if resume]: ', 3);
   end
   % should we use eyetracking?
   if nargin < 4
-      use_et = input('use eyetracking (1|0, defulat to 1): ');
-      if isempty(use_et)
-          use_et=1;
-      end
+      use_et = input_def('use eyetracking (1|0, defulat to 1): ', 1);
   end
 
   % validate input
@@ -40,13 +34,21 @@ function savefile = mgs(subj, imgset, nblock, use_et)
   % initialze screen, DAQ, and eyetracking
   [w, hid, et] = mgs_setup(subj, use_et);
   % if eyetracking, what do we tell the eye tracker when we start
-  if ~isempty(et), startmsg = 'START'; else, startmsg=''; end
-    
+  if ~isempty(et), startmsg = sprintf('START%d',cblock); else, startmsg=''; end
+
   % make textures for events that need it
   event_tex = make_textures(w, imgs_used, event_info.events);
   
   % show instructions
-  instructions(w)
+  % if cblock is > 1, ask if we should show instructions. default to no 
+  if cblock <= 1 || input_def('see instructions (0|1, default to 0): ', 0) > 0;
+     instructions(w)
+  end
+
+  % notify what block we are on when not starting on the first
+  if cblock > 1
+     disp_til_key(w, sprintf('Starting %d/%d', cblock, nblocks))
+  end
   
   % start eye recording
   if ~isempty(et), Eyelink('StartRecording'); end
