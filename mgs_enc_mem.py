@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- py-which-shell: "python2"; -*-
+#!/usr/bin/env python
 
 # https://github.com/psychopy/psychopy/blob/master/psychopy/demos/coder/experiment%20control/TrialHandler.py
 # on archlinux, python is python3
@@ -268,7 +267,7 @@ for runi in range(start_runnum-1, nruns):
 
     # trial settings and timing
     sacc_trials = data.TrialHandler2(
-                    trialdf.T.to_dict().values(),
+                    list(trialdf.T.to_dict().values()),
                     1,
                     method='sequential',
                     extraInfo={'subjid': subjid,

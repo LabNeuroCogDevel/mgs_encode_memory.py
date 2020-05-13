@@ -36,7 +36,7 @@ def host_tasktype():
                 'JulliesiMac.local'],
         'practice': ['eyelab130xx'],  # behave instead
         'behave': ['eyelab130', 'eprime'],  # 20180814 -- eyelab130 died!
-        'test': ['reese']}
+        'test': ['reese', 'kt']}
 
     host_pp = {
         'eyelab130': 0x0378,

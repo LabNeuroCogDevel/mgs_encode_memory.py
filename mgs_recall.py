@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- elpy-rpc-python-command: "python"; -*-
-# -*- py-which-shell: "python2"; -*-
+# -*- py-which-shell: "python"; -*-
 # -*- elpy-use-ipython: "ipython"; -*-
-# (setq elpy-rpc-python-command "python")  (setq py-which-shell "python2") 
+# (setq elpy-rpc-python-command "python")  (setq py-which-shell "python")
 # (setq elpy-use-ipython "ipython")
 from __future__ import division
 from psychopy import visual, data, gui
@@ -56,7 +56,7 @@ settings = {'recall_from': allsubjs,
             'fullscreen': True,
             'instructions': True,
             'firstrun': 1,
-            'lastrun': nruns_opt[host_tasktype()]}
+            'lastrun': nruns_opt[host_tasktype().tasktype]}
 
 # --- test vs actual settings
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
@@ -94,10 +94,8 @@ trialdf = recallFromPickle(pckl, settings['lastrun'], settings['firstrun']-1)
 
 # set correct keys and format for trialhandler
 trialdict = trialdf.reset_index().T.to_dict().values()
-trialdict = [
-        dict(x.items() +
-             {'corkeys': response_should_be(x['pos'], accept_keys)}.items())
-        for x in trialdict]
+trialdict = [dict(x, corkeys=response_should_be(x['pos'], accept_keys))
+             for x in trialdict]
 
 seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d%H%M%S")
 
@@ -213,7 +211,7 @@ task.win.close()
 namesarray = [subjid, vdate_str(), tasktype, str(timepoint)]
 # add runs to output file name if non-standard
 if settings['firstrun'] != 1 or \
-   settings['lastrun'] != nruns_opt[host_tasktype()]:
+   settings['lastrun'] != nruns_opt[host_tasktype().tasktype]:
     namesarray.append('runs%d-%d' % (settings['firstrun'],
                                      settings['lastrun']))
 namesarray.append('recall-%s_%s.csv' % (imgset, seconds))

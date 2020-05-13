@@ -1323,7 +1323,9 @@ def recallFromPickle(pckl, lastrunidx=3, firstrunidx=0):
     use a pckl file to define a trial list for recall
     """
     # load run info
-    with open(pckl, 'rU') as p:
+    # 20200512 -- fails with rU, try rb
+    # with open(pckl, 'rU') as p:
+    with open(pckl, 'rb') as p:
         print(pckl)
         run_data = pickle.load(p)
 
