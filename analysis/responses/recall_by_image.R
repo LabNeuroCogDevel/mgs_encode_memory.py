@@ -16,15 +16,25 @@ bname <- function(x) as.character(x) %>% gsub("\\\\+", "/", .) %>% basename()
 read_task_recall <- function(recall_f) {
     g <- file.path(dirname(recall_f), "*_view.csv")
     recall <- read.csv(recall_f) %>%
-      mutate(imgfile = bname(imgfile))
-    task <- Sys.glob(g) %>% lapply(read.csv) %>% bind_rows %>% mutate(imgfile=bname(imgfile))
+      mutate(
+          scene = stringr::str_extract(imgfile,"(inside|outside_(man|nat))"),
+          imgfile = bname(imgfile))
+    task <- Sys.glob(g) %>%
+        lapply(read.csv, stringsAsFactors=F) %>%
+        bind_rows %>%
+        mutate(imgfile=bname(imgfile))
     b <- merge(recall, task, all.x=T, by="imgfile")
 
+    # add info from file name
     b$ld8 <- stringr::str_extract(recall_f,"\\d{5}_\\d{8}")
+    b$set = stringr::str_extract(recall_f,"(?<=mgsenc-)[AB]")
+
     b %>%
         mutate(corkeys = gsub("[^0-9,]", "", corkeys)) %>%
         tidyr::separate(corkeys,c("know_cor","dir_cor")) %>%
-        select(ld8, dly, mgs, know_cor, know_key, dir_cor, dir_key, score, pos, side, imgfile)
+        select(ld8, dly, mgs, know_cor, know_key,
+               dir_cor, dir_key, score, pos, side,
+               set, scene, imgfile)
     
 }
 
@@ -59,7 +69,7 @@ all_tskrcl %>%
 
 cnts <-
     all_tskrcl %>%
-    group_by(imgfile, respstr, seen) %>%
+    group_by(set, scene, imgfile, respstr, seen) %>%
     tally(name="picked") %>% ungroup() 
     #group_by(imgfile) %>%
     #dplyr::mutate(total=sum(picked), )
