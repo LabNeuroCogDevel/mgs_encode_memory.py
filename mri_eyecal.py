@@ -14,7 +14,7 @@ ET_type = 'arrington' # arrington at 7T, pylink (eyelink) for PF and almost at i
 box = gui.Dlg()
 box.addField("traking type/file name:", tracking_type)
 box.addField("fullscreen", isfullscreen)
-box.addField("send events to ET", ["None", "arrington", "pylink"])
+box.addField("send events to ET", choices=["None", "arrington", "pylink"])
 box.addField("number dots", 40)
 boxdata = box.show()
 if box.OK:
