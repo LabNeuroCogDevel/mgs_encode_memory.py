@@ -10,17 +10,17 @@ import os
 
 tracking_type = "pupil"
 isfullscreen = True
-useArrington = True
+ET_type = 'arrington' # arrington at 7T, pylink (eyelink) for PF and almost at iEEG
 box = gui.Dlg()
 box.addField("traking type/file name:", tracking_type)
 box.addField("fullscreen", isfullscreen)
-box.addField("send events to ET", useArrington)
+box.addField("send events to ET", ["None", "arrington", "pylink"])
 box.addField("number dots", 40)
 boxdata = box.show()
 if box.OK:
     tracking_type = boxdata[0]
     isfullscreen = boxdata[1]
-    useArrington = boxdata[2]
+    ET_type = boxdata[2]
     npoints = int(boxdata[3])*2
 else:
     sys.exit(1)
@@ -34,7 +34,7 @@ dotdur = .75
 
 
 # setup task (get send_ttl, crcl, iti_fix)
-ET_type = 'arrington' if useArrington else None
+ET_type = None  if ET_type == "None" else ET_type
 task = mgsTask(None, fullscreen=isfullscreen, ET_type=ET_type)
 
 # start eyetracking file
@@ -79,7 +79,7 @@ def print_and_ttl(msg, pos):
     if pos == 0:
         event = "fix"
         side = "center"
-    if useArrington:
+    if ET_type:
         task.send_code(event, side, pos)
     else:
         print("%s %s %.02f" % (event, side, pos))

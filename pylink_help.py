@@ -21,6 +21,7 @@ class eyelink:
     """
     quick access to eyelink
     should use pyGaze instead
+    20210330 - should use iohub insetad? see psychoeye.py
     """
     def __init__(self, sp):
         """ initialize eyetracker
