@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
-# -*- py-which-shell: "python2"; -*-
+#!/usr/bin/env python3
+# -*- py-which-shell: "ipython"; -*-
+# -*- elpy-use-ipython: "ipython"; -*-
 # python -m doctest -v mgs_task.py
 
 from __future__ import division
@@ -555,9 +556,15 @@ class mgsTask:
         # # parallel port triggers or eyetracking
         if self.ET_type == "arrington":
             self.init_vpx()
+        elif self.ET_type == "iohub_eyelink":
+            # 20210329 using psychopy documentation instead of pylink
+            # for ringrewrads. can maybe use pylink instead
+            pass
+            
         elif self.ET_type == "pylink":
             from pylink_help import eyelink
             self.eyelink = eyelink(win.size)
+
         if self.usePP:
             self.pp_address = pp_address
             self.zeroTTL    = zeroTTL
