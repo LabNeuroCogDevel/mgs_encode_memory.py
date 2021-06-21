@@ -25,7 +25,9 @@ function [w, hid, et] = mgs_setup(p_id, use_et, skip_hid)
      fprintf('WARNING: could not find taskHelperFunctions!')
  else
     addpath(helpdir)
+    disp('running initializeScreen from taskHerlperFuncions (2nd screen)')
     [w,~] = initializeScreen();
+    disp('connected to second screen')
  end
  
  %% do we send a trigger

@@ -7,7 +7,7 @@ function el = setup_eyelink(etname, w)
     err = Eyelink('Initialize');
     if err
         disp(err)
-        error('failed to connect to eyetracker! did you run eyelink_setup.bash?')
+        error('failed to connect to eyetracker! did you run eyelink_network.bash? did the DEV ethernet change. try eyelink_run_sample. or open 100.1.1.1 in a browser')
     end
 
     % limited to a total of 9 characters
