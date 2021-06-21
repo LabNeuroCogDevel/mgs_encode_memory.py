@@ -190,7 +190,7 @@ for ri in range(ntrials):
 
     # show dot
     doton = nextonset
-    imgpos = replace_img(task.img, None, this_pos, task.imgratsize)
+    imgpos = replace_img(task.img, None, this_pos, task.imgratsize, defsize=(10,10))
     task.crcl.pos = imgpos
     task.crcl.draw()
     task.win.callOnFlip(print_and_ttl, 'dot', this_pos, this_rew)
