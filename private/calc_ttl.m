@@ -33,7 +33,7 @@ function [TTL, msg] = calc_ttl(e, trl, et)
       TTL=TTL+10;
   elseif ~isempty(regexp(e, 'Indoor','once'))
       TTL=TTL+20;
-  elseif ~isempty(regexp(e, 'Outd0or','once'))
+  elseif ~isempty(regexp(e, 'Outdoor','once'))
       TTL=TTL+30;
   end
   
