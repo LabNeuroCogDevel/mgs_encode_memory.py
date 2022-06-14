@@ -56,7 +56,7 @@ settings = {'recall_from': allsubjs,
             'fullscreen': True,
             'instructions': True,
             'firstrun': 1,
-            'lastrun': nruns_opt[host_tasktype().tasktype]}
+            'lastrun': nruns_opt[str(host_tasktype())]}
 
 # --- test vs actual settings
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
@@ -69,7 +69,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     lastrun = nruns_opt['test'] if len(sys.argv) <= 3 else int(sys.argv[3])
 
     # no instructions, pick first (in time) data file
-    settings = {'recall_from': allsubjs[0],
+    settings = {'recall_from': allsubjs[-1],
                 'fullscreen': False,
                 'instructions': False,
                 'firstrun': firstrun,

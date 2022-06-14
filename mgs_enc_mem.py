@@ -5,7 +5,7 @@
 # ^M-: (run-python "/usr/bin/python2")
 
 from __future__ import division
-from psychopy import data, logging, gui, core  # , event
+from psychopy import data, logging, gui, core, event
 import datetime  # set timepoint default, start time
 import sys
 import os
@@ -300,18 +300,23 @@ for runi in range(start_runnum-1, nruns):
             # and pause
             task.send_code('end', None, None)
 
+            print("# TASK BREAK @ %.04f" % break_at)
             # wait for a keep press then flip
             task.instruction_flip()
 
             # dispaly another screen before going into task
             task.textbox.pos = (-.2, 0)
-            task.textbox.text = 'Ready!?'
+            task.textbox.text = getReadyMsg
             task.textbox.draw()
-            task.instruction_flip()
+            win.flip()
+            event.waitKeys(keyList=scannerTriggerKeys)
 
             # compensate for break in future onsets
-            task.addTime = core.getTime() - break_at
+            resumeTime = core.getTime()
+            task.addTime = resumeTime - break_at
+            # maybe causing a few ms delay here
             task.send_code('start', None, None)
+            print("# TASK resume @ %.04f" % resumeTime)
 
         # run the trial
         fliptimes = task.sacc_trial(t, blockstarttime + task.addTime,

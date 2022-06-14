@@ -7,6 +7,39 @@ require(cowplot)
 #library(gazetools) # https://github.com/RyanHope/gazetools
 #library(saccades) # https://github.com/tmalsburg/saccades
 
+# make asl range look like avotech range (bound at 1)
+# center is 0,0
+asl_range1 <- function(x) {
+  mx <- 263
+  hf <- mx/2
+  (pmin(x,mx)-hf)/hf
+}
+
+read_asl <- function(filename){
+ # filename="/Volumes/L/bea_res/Data/Temporary Raw Data/7T/11738_20181213/11738_20181213_mgs1.eyd"
+ if(grepl('eyd$', filename)){
+    eyed <-read.table(text=system(intern=T,glue::glue("/Volumes/Hera/Projects/autoeyescore/dataFromAnyEyd.pl '{filename}'")),header=T)
+ } else {  
+    eyed <-read.table(filename,header = T)
+ }
+ ld8   <- stringr::str_extract(filename, "\\d{5}_\\d{8}")
+ runno <- stringr::str_extract(filename, "\\d+(?=eyd$|txt$|tsv$)")
+
+ # started with avotec, so match those names. need trial,event,side,{x,y}_gaze, totaltime
+ names(eyed)<-c("XDAT","pupilwidth","x_gaze", "y_gaze")
+ d <- eyed[(which(eyed$XDAT!=254)[1]):nrow(eyed),] %>%
+      mutate(totaltime=1:nrow(.)*(1/60), # seconds
+             XDAT=ifelse(XDAT==129,254,XDAT), # eeg stop code 129
+             trial=cumsum(c(1,diff(XDAT%in%254)<0)),
+             side=cut(XDAT%%10,breaks=0:4,labels=c("Left","NearLeft","NearRight","Right")),
+             event=cut(XDAT, breaks=c(0,50,100,150,200,250,Inf),labels=c("fix","cue","img","isi","mgs","iti")),
+             scene=cut(floor(XDAT/10)%%5,breaks=0:3,labels=c("None","Indoor","Outdoor")),
+x_correctedgaze=asl_range1(x_gaze),
+y_correctedgaze=asl_range1(y_gaze)
+) %>%
+     group_by(XDAT,trial) %>% mutate(event_onset=first(totaltime)) %>% ungroup
+}
+
 # read avotec text output using perl pipe to add event
 # add ld8 and runno as parsed from filename
 # add trial by changes event change to iti (iti included as first part of trial)
@@ -48,7 +81,8 @@ plot_eyedf <- function(edf) {
     filter(event %in% c("img", "mgs")) %>%
     ggplot +
     aes(x=x_correctedgaze, y=y_correctedgaze, color=event) +
-    geom_path(arrow=arrow(ends="first", type="closed")) +
+    geom_path(#arrow=arrow(ends="first", type="closed")
+) +
     facet_wrap(~trial) +
     scale_x_continuous(limits=c(-1.5, 1.5)) +
     scale_y_continuous(limits=c(-1.5, 1.5)) +
@@ -79,7 +113,7 @@ fixation_summary <- function (rundf, fixation_event="isi",
   d <- rundf %>%
        mutate(tt=paste(trial, event, side)) %>%
        select(time=totaltime, x=x_gaze, y=y_gaze, trial=tt)
-  f <- detect.fixations(d, smooth.coordinates=T, smooth.saccades=T) %>%
+  f <- saccades::detect.fixations(d, smooth.coordinates=T, smooth.saccades=T) %>%
      separate(trial, c("trial", "event", "side")) %>%
      mutate(trial=as.numeric(trial)) %>%
      # add onsets

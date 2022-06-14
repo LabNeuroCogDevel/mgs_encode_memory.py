@@ -738,7 +738,7 @@ class mgsTask:
         self.winvolume.unmute_all()
 
     def init_vpx(self):
-        if not hasattr(self, 'vpx'):
+        if not hasattr(self, 'vpx') or not self.vpx:
             from ctypes import cdll, CDLL
             # vpxDll="C:/ARI/VP/VPX_InterApp.dll"
             if not os.path.exists(self.vpxDll):
