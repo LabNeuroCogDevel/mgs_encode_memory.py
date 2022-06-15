@@ -237,8 +237,7 @@ def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255), vertOff
         (iw, ih) = defsize
 
     (sw, sh) = img.win.size
-    # was pixel in psychopy2. now cross is too big?
-    img.units = 'norm' #'pix'
+    img.units = 'pix'  # was 'pixel' in psychopy2
 
     # resize img
     scalew = ratio(sw, iw, imgpercent)
