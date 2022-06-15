@@ -532,7 +532,7 @@ class mgsTask:
                  ET_type=None,
                  usePP=False,
                  fullscreen=True,
-                 pp_address=0xDFF8,
+                 pp_address=0xD010, #0xDFF8, # updated 20220614 new eeg
                  zeroTTL=True,
                  recVideo=False):
 
@@ -763,6 +763,7 @@ class mgsTask:
             if not hasattr(self, 'port'):
                 # might need to 'pip install pyparallel'
                 from psychopy import parallel
+                print("using port: %x" % self.pp_address)
                 self.port = parallel.ParallelPort(address=self.pp_address)
 
     def log_and_code(self, event, side, catagory, logh=None, takeshots=None,
