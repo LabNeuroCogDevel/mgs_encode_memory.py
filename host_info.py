@@ -28,7 +28,7 @@ def host_tasktype():
     """ return a host object with task hostname and parallel port info """
     hostname = socket.gethostname()
     type_host_lookup = {
-        'EEG': ['Oaco14Datapb1'],
+        'eeg': ['Oaco14Datapb1','DESKTOP-I2CP6M6'],
         'ieeg': ['abel-XPS-13-9380'],
         'mri': ['7T-EPRIME-PC',  # task
                 # recall
@@ -41,6 +41,7 @@ def host_tasktype():
     host_pp = {
         'eyelab130': 0x0378,
         'Oaco14Datapb1': 0xDFF8,
+        'DESKTOP-I2CP6M6': 0xD010,
         'abel-XPS-13-9380': '/dev/parpart0'}
 
     host_eye = {

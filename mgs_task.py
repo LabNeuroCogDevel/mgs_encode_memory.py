@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# -*- py-which-shell: "python2"; -*-
+#!/usr/bin/env python
+# -*- py-which-shell: "python3"; -*-
 # python -m doctest -v mgs_task.py
 
 from __future__ import division
@@ -237,7 +237,8 @@ def replace_img(img, filename, horz, imgpercent=.04, defsize=(225, 255), vertOff
         (iw, ih) = defsize
 
     (sw, sh) = img.win.size
-    img.units = 'pixels'
+    # was pixel in psychopy2. now cross is too big?
+    img.units = 'norm' #'pix'
 
     # resize img
     scalew = ratio(sw, iw, imgpercent)
@@ -511,6 +512,8 @@ def create_window(fullscr, screen=0):
 
     return(win)
 
+def double_size(vec,scale=2):
+    return [x * scale for x in vec]
 
 class mgsTask:
     # initialize all the compoents we need
@@ -594,7 +597,7 @@ class mgsTask:
 
         # allocate screen parts
         self.img = visual.ImageStim(win, name="imgdot", interpolate=True)
-        self.crcl = visual.Circle(win, radius=10, lineColor=None,
+        self.crcl = visual.Circle(win, units='pix', radius=10, lineColor=None,
                                   fillColor='yellow', name="circledot")
         #  ,AutoDraw=False)
         self.crcl.units = 'pix'
@@ -621,9 +624,13 @@ class mgsTask:
         self.cue_fix = visual.TextStim(win, text='+', name='cue_fixation',
                                        color='royalblue', bold=True)
         # double size
-        self.iti_fix.size = 2
-        self.isi_fix.size = 2
-        self.cue_fix.size = 2
+        #  in psychopy2 size was 1, now is [.1,.1]
+        # and new size is reasonable! (matches old double) so
+        # this doesn't actually do anything (scale=1)
+        self.iti_fix.size = double_size(self.iti_fix.size, 1)
+        self.isi_fix.size = double_size(self.isi_fix.size, 1)
+        self.cue_fix.size = double_size(self.cue_fix.size, 1)
+        
         self.textbox = visual.TextStim(win, text='**', name='generic_textbox',
                                        alignHoriz='left', color='white',
                                        wrapWidth=2)
@@ -1196,7 +1203,7 @@ def gen_run_info(nruns, datadir, imgset, task='mri'):
         # if we have it, just return it
         if os.path.exists(runs_info_file):
             print('reusing timing/image selection from %s' % runs_info_file)
-            with open(runs_info_file, 'rU') as f:
+            with open(runs_info_file, 'rb') as f:
                 return(pickle.load(f))
 
     # images
