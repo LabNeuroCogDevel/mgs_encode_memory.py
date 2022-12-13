@@ -512,7 +512,10 @@ def create_window(fullscr, screen=0):
     return(win)
 
 def double_size(vec,scale=2):
-    return [x * scale for x in vec]
+    try:
+        return [x * scale for x in vec]
+    except:
+        return [.2, .2]
 
 class mgsTask:
     # initialize all the compoents we need
@@ -546,7 +549,10 @@ class mgsTask:
         # thisscript=os.path.abspath(os.path.dirname(__file__))
         # self.vpxDll = os.path.join(thisscript,"VPX_InterApp.dll")
         #self.vpxDll = 'C:\\Users\\Public\\Desktop\\tasks\\EyeTracking_ViewPointConnect\\VPX_InterApp.dll'
-        self.vpxDll = 'C:\\Users\\Luna\\Desktop\\VPx32\\Interfaces\\VPx32-Client\\VPX_InterApp_32.dll'
+        self.vpxDll = 'C:\\Users\\Luna\\Desktop\\VPx32-Client\\VPX_InterApp_32.dll'
+        # 20221212- 64bit dll with 32bit python errors:
+        # OSError: [WinError 193] %1 is not a valid Win32 application
+        #self.vpxDll = 'C:\\Users\\Luna\\Desktop\\VPx64-Client\\VPX_InterApp_64.dll'
         #self.vpxDll = 'C:\Users\Luna\Desktop\VPx32\Interfaces\Programing\SDK\\VPX_InterApp_32.dll'
         self.usePP = usePP
         # ## eyetracking -- updated later if to be used
@@ -749,10 +755,12 @@ class mgsTask:
             # vpxDll="C:/ARI/VP/VPX_InterApp.dll"
             if not os.path.exists(self.vpxDll):
                 Exception('cannot find eyetracking dll @ ' + self.vpxDll)
+            print("# avotech dll: " + self.vpxDll)
             cdll.LoadLibrary(self.vpxDll)
             self.vpx = CDLL(self.vpxDll)
             if self.vpx.VPX_GetStatus(1) < 1:
                 Exception('ViewPoint is not running!')
+            print("# VPX status: %s" % self.vpx.VPX_GetStatus(1))
             self.vpx.VPX_SendCommand('say "mgs_task is connected"')
 
     def init_PP(self):

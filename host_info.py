@@ -32,6 +32,7 @@ def host_tasktype():
         'ieeg': ['abel-XPS-13-9380'],
         'mri': ['7T-EPRIME-PC',  # task
                 # recall
+                'MRRCNewwin7-PC', # 2022-12-12
                 'mc-wifi-10-215-130-29.wireless.pitt.edu',
                 'JulliesiMac.local'],
         'practice': ['eyelab130xx'],  # behave instead
@@ -47,6 +48,7 @@ def host_tasktype():
     host_eye = {
         'eyelab130': 'ASL',
         '7T-EPRIME-PC': 'arrington',
+        'MRRCNewwin7-PC': 'arrington',
         'abel-XPS-13-9380': 'pylink'}
 
     # default to uknown task
