@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from psychopy import visual, core, event
 import re
 
@@ -14,7 +14,8 @@ class showCal:
         self.nrow, self.ncol = (3, 3)
 
         if(w is None):
-            w = visual.Window([800, 600])
+            print("creating window b/c one wasn't given to showCal")
+            w = visual.Window() # always fullscreen
             w.color = (-1,-1,-1)
             w.flip() # flip to get color change
 
@@ -38,12 +39,12 @@ class showCal:
             self.w,
             units='pix',
             radius=self.outerRadius,
-            lineWidth=0)
+            lineColor=None)
         self.innerC = visual.Circle(
             self.w,
             units='pix',
             radius=innerRadius,
-            lineWidth=0)
+            lineColor=None)
         self.txt = visual.TextStim(
             self.w, name='num', color='white', units='pix')
 
