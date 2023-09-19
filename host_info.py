@@ -36,7 +36,9 @@ def host_tasktype():
                 'mc-wifi-10-215-130-29.wireless.pitt.edu',
                 'JulliesiMac.local'],
         'practice': ['eyelab130xx'],  # behave instead
-        'behave': ['eyelab130', 'eprime'],  # 20180814 -- eyelab130 died!
+         # 20180814 -- eyelab130 died!
+         # 20230919 - behave with new linux host for SR Research Eyelink
+        'behave': ['eyelab130', 'eprime', 'eyetracker-task'],
         'test': ['reese', 'kt']}
 
     host_pp = {
