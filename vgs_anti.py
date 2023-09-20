@@ -110,11 +110,12 @@ task = mgsTask(None,
 gobal_quit_key()
 
 # tell the eye tracker we want a new file
-# only get 8 characters for eyelink. make them count
 sub_ses = settings['subjid'] + '_' + str(settings['timepoint']) + "_" + settings['dateid'] + settings['tasktype']
-# e.g. anti1259
 task.eyetracking_newfile(sub_ses)
-task.eyelink.el.sendMessage("NAME: %s"%sub_ses)
+if settings['ET_type'] == 'pylink':
+    # eyelink only gets 8 characters, and will be something like the date
+    # so we'll send a message to the file so we have some way of looking at it
+    task.eyelink.el.sendMessage("NAME: %s"%sub_ses)
 
 # instructions
 if settings['instructions']:
