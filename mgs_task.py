@@ -702,11 +702,11 @@ class mgsTask:
             fname = str(fname)
             # setup for eye recording video
             self.runEyeName = fname.replace(".txt", "")
-            self.vpx.VPX_SendCommand('dataFile_Pause 1')
-            self.vpx.VPX_SendCommand('dataFile_NewName "%s"' % fname)
+            self.vpx_send('dataFile_Pause 1')
+            self.vpx_send('dataFile_NewName "%s"' % fname)
             if self.verbose:
                 print("tried to open eyetracking file %s" % fname)
-                self.vpx.VPX_SendCommand('say "newfile %s"' % fname)
+                self.vpx_send('say "newfile %s"' % fname)
 
         elif self.eyelink:
             self.eyelink.open(fname[1:6])
@@ -723,10 +723,10 @@ class mgsTask:
             self.send_code('start', None, None)
             # causes 10ms delay
         if self.vpx:
-            self.vpx.VPX_SendCommand('dataFile_Pause 0')
+            self.vpx_send('dataFile_Pause 0')
             if self.recVideo:
                 print("send eyeMoive_NewName cmd")
-                self.vpx.VPX_SendCommand('eyeMovie_NewName "%s.avi"' %
+                self.vpx_send('eyeMovie_NewName "%s.avi"' %
                                          self.runEyeName)
         elif self.eyelink:
             self.eyelink.start()
@@ -739,10 +739,10 @@ class mgsTask:
             self.send_code('end', None, None)
             # causes 10ms delay
         if self.vpx:
-            self.vpx.VPX_SendCommand('dataFile_Close 0')
+            self.vpx_send('dataFile_Close 0')
             if self.recVideo:
                 print("send end movie cmd")
-                self.vpx.VPX_SendCommand('eyeMovie_Close')
+                self.vpx_send('eyeMovie_Close')
         elif self.eyelink:
             self.eyelink.stop()
 
@@ -761,8 +761,15 @@ class mgsTask:
             if self.vpx.VPX_GetStatus(1) < 1:
                 Exception('ViewPoint is not running!')
             print("# VPX status: %s" % self.vpx.VPX_GetStatus(1))
-            self.vpx.VPX_SendCommand('say "mgs_task is connected"')
+            self.vpx_send('say "mgs_task is connected"')
 
+
+    def vpx_send(self, cmd):
+        """
+        VPX needs ascii encoding. py3 default is utf8
+        2023-01-13 @ 7T with new comp"""
+        return self.vpx.VPX_SendCommand(cmd.encode('ascii'))
+        
     def init_PP(self):
         # TODO: TEST SOMEWHERE
         if self.usePP:
@@ -810,7 +817,7 @@ class mgsTask:
         set eyetracking event to either arrington or eyelink
         """
         if self.vpx:
-            self.vpx.VPX_SendCommand('dataFile_InsertString "%s"' % ttlstr)
+            self.vpx_send('dataFile_InsertString "%s"' % ttlstr)
         elif self.eyelink:
             self.eyelink.trigger(ttlstr)
 
@@ -818,7 +825,7 @@ class mgsTask:
         if self.verbose:
             print("eye code %s" % ttlstr)
             if self.vpx:
-                self.vpx.VPX_SendCommand('say "sent %s"' % ttlstr)
+                self.vpx_send('say "sent %s"' % ttlstr)
 
     def send_ttl(self, thistrigger):
         """
