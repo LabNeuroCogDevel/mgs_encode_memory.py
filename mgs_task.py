@@ -708,11 +708,24 @@ class mgsTask:
                 print("tried to open eyetracking file %s" % fname)
                 self.vpx_send('say "newfile %s"' % fname)
 
-        elif self.eyelink:
-            self.eyelink.open(fname[1:6])
+        if self.eyelink:
+            savename = fname[0:8]
+            if savename != fname:
+                # save as month day hour minute if name is too long 12311259
+                # will fetch later using recieveDataFile()
+                # TODO: consider
+                # len(str(hex(4212312356))[2:])  include 2digit year as hex
+                # turns into 9 digits after 2042
+                # could savely includ seconds instead of year
+                # or different encoding that uses all letters base 36?
+                # numpy.base_repr(xxxxxx, 36)
+                # len(base_repr(991231235959,36)) == 8 (2dig year)
+                # len(base_repr(int(datetime.datetime(2099,12,31,23,59,59).strftime("%s")),36)) == 7
+                savename = datetime.datetime.strftime(datetime.datetime.now(), "%m%d%H%M")
+            self.eyelink.open(savename)
             if self.verbose:
                 print("open eyetracking file with truncated name '%s'" %
-                      fname[1:6])
+                      savename)
 
     def start_aux(self):
         """
@@ -777,7 +790,9 @@ class mgsTask:
             if not hasattr(self, 'port'):
                 # might need to 'pip install pyparallel'
                 from psychopy import parallel
-                print("using port: %x" % self.pp_address)
+                # address is hex for windows, but str for linux
+                #print("using port: %x" % self.pp_address)
+                print(f"using port: {self.pp_address}")
                 self.port = parallel.ParallelPort(address=self.pp_address)
 
     def log_and_code(self, event, side, catagory, logh=None, takeshots=None,

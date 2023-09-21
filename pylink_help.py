@@ -39,11 +39,17 @@ class eyelink:
         self.el = el
         self.sp = sp
 
-    def open(self, dfn):
+    def open(self, dfn, folder=None):
         """open file"""
         # pygaze note: cannot be more than 8 characters?!
-        if len(dfn) > 6:
-            raise Exception("%s is too long of a file name!" % dfn)
+        #if folder:
+        #    folder = "/elcl/data/%s" % folder
+        #    # create_path does not exit?
+        #    #self.el.sendCommand("create_path %s 1" % folder)
+        #    # data_file_path is for local computer not ET host
+        #    #self.el.sendCommand("data_file_path = '%s'" % folder)
+        if len(dfn) > 8:
+            raise Exception("%s is too long of a file name. 8 char is max!" % dfn)
         self.el.openDataFile(dfn + '.EDF')
 
     def start(self):

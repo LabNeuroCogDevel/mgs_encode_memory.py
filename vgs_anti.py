@@ -2,6 +2,7 @@
 # -*- elpy-use-ipython: "ipython"; -*-
 
 from psychopy import gui
+import psychopy
 import numpy as np
 import pandas as pd
 import sys
@@ -12,6 +13,10 @@ from mgs_task import mgsTask, wait_until,\
 from host_info import host_tasktype
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+def gobal_quit_key(key='escape'):
+    if not psychopy.event.globalKeys.get(key):
+        psychopy.event.globalKeys.add(key=key, func=psychopy.core.quit, name='shutdown')
 
 #
 # vgs or anti (color of cross, value of trigger code)
@@ -101,6 +106,17 @@ task = mgsTask(None,
                fullscreen=settings['fullscreen'],
                pp_address=host.pp_address)
 
+# escape to exit
+gobal_quit_key()
+
+# tell the eye tracker we want a new file
+sub_ses = settings['subjid'] + '_' + str(settings['timepoint']) + "_" + settings['dateid'] + settings['tasktype']
+task.eyetracking_newfile(sub_ses)
+if settings['ET_type'] == 'pylink':
+    # eyelink only gets 8 characters, and will be something like the date
+    # so we'll send a message to the file so we have some way of looking at it
+    task.eyelink.el.sendMessage("NAME: %s"%sub_ses)
+
 # instructions
 if settings['instructions']:
     task.textbox.pos = (-.9, 0)
@@ -163,6 +179,11 @@ wait_until(nextonset + .5)
 # save
 seconds = datetime.datetime.strftime(datetime.datetime.now(), "%Y%M%d%H%M%S")
 saveas = os.path.join(datadir, 'runinfo_%s.csv' % seconds)
+if settings['ET_type'] == 'pylink':
+    saveas_edf = os.path.join(datadir, '%s.edf' % seconds)
+    task.eyelink.el.closeDataFile()
+    task.eyelink.el.receiveDataFile("",saveas_edf)
+
 print('saving to %s' % saveas)
 pd.DataFrame(timing).to_csv(saveas)
 # end task: send code and put up end screen
