@@ -1,0 +1,14 @@
+subj	seqno	ndcm	pname	tr	matrix	acqdir	dname	fullpath
+190312152607	1 	3	circle_localizer	20	 0 256 256 0	ROW 	001	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/001/
+190312152607	2 	7	trufi_sag 	5.43	 0 256 256 0	ROW 	002	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/002/
+190312152607	3 	29	t2_tse_tra	4790	 0 256 256 0	ROW 	003	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/003/
+190312152607	4 	224	t1_mprage_sag_ns_tilt 	1630	 0 256 256 0	ROW 	004	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/004/
+190312152607	5 	203	ep2d_diff_mddw6 	3900	 128 0 0 128	COL 	005	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/005/
+190312152607	6 	244	ep2d_bold_9VGSANTI	1500	 64 0 0 64	COL 	006	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/006/
+190312152607	7 	244	ep2d_bold_9VGSANTI	1500	 64 0 0 64	COL 	007	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/007/
+190312152607	8 	244	ep2d_bold_9VGSANTI	1500	 64 0 0 64	COL 	008	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/008/
+190312152607	9 	244	ep2d_bold_9VGSANTI	1500	 64 0 0 64	COL 	009	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/009/
+190312152607	10	229	ep2d_bold_MGS 	1500	 64 0 0 64	COL 	010	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/010/
+190312152607	11	229	ep2d_bold_MGS 	1500	 64 0 0 64	COL 	011	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/011/
+190312152607	13	229	ep2d_bold_MGS 	1500	 64 0 0 64	COL 	013	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/013/
+190312152607	14	30	t1_mprage_sag_ns_tilt 	1630	 0 256 256 0	ROW 	014	/Volumes/Hera/Raw/MRprojects/CogLong/190312152607/014/

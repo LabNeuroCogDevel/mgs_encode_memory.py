@@ -1,0 +1,1014 @@
+*** Header Start ***
+VersionPersist: 1
+LevelName: Session
+LevelName: Block
+LevelName: Trial
+LevelName: SubTrial
+LevelName: LogLevel5
+LevelName: LogLevel6
+LevelName: LogLevel7
+LevelName: LogLevel8
+LevelName: LogLevel9
+LevelName: LogLevel10
+Experiment: MGS Encode - v
+SessionDate: 05-20-2008
+SessionTime: 17:29:48
+Subject: 1259
+Session: 1
+RandomSeed: 544603256
+Group: 1
+Display.RefreshRate: 59.820
+*** Header End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 1
+	Location: 108
+	Procedure: LongCueShortDelay108
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 1
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 2
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 3
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 4
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 5
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 6
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 2
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 7
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 3
+	Location: 7
+	Procedure: LongCueLongDelay7
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 8
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 4
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 9
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 4
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 10
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 4
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 11
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 4
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 12
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 4
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 13
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 5
+	Location: 214
+	Procedure: ShortCueLongDelay214
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 14
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 15
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 16
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 17
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 18
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 19
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 6
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 20
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 7
+	Location: 532
+	Procedure: LongCueLongDelay532
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 21
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 8
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 22
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 8
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 23
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 8
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 24
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 9
+	Location: 7
+	Procedure: ShortCueLongDelay7
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 25
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 26
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 27
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 28
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 29
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 30
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 10
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 31
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 11
+	Location: 108
+	Procedure: ShortCueShortDelay108
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 32
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 12
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 33
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 12
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 34
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 13
+	Location: 426
+	Procedure: LongCueShortDelay426
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 35
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 36
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 37
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 38
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 39
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 40
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 14
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 41
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 15
+	Location: 426
+	Procedure: ShortCueShortDelay426
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 42
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 16
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 43
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 16
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 44
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 16
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 45
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 17
+	Location: 214
+	Procedure: LongCueLongDelay214
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 46
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 18
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 47
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 18
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 48
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 19
+	Location: 633
+	Procedure: LongCueShortDelay633
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 49
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 20
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 50
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 20
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 51
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 20
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 52
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 21
+	Location: 426
+	Procedure: LongCueLongDelay426
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 53
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 22
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 54
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 22
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 55
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 22
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 56
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 22
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 57
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 22
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 58
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 23
+	Location: 108
+	Procedure: ShortCueLongDelay108
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 59
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 60
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 61
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 62
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 63
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 64
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 65
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 24
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 66
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 25
+	Location: 7
+	Procedure: ShortCueShortDelay7
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 67
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 26
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 68
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 26
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 69
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 26
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 70
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 26
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 71
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 26
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 72
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 27
+	Location: 532
+	Procedure: LongCueShortDelay532
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 73
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 28
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 74
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 28
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 75
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 28
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 76
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 29
+	Location: 108
+	Procedure: LongCueLongDelay108
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 77
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 30
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 78
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 30
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 79
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 30
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 80
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 30
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 81
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 31
+	Location: 532
+	Procedure: ShortCueLongDelay532
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 82
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 32
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 83
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 32
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 84
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 33
+	Location: 633
+	Procedure: ShortCueShortDelay633
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 85
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 34
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 86
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 34
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 87
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 34
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 88
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 34
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 89
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 34
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 90
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 35
+	Location: 214
+	Procedure: LongCueShortDelay214
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 91
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 36
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 92
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 36
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 93
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 36
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 94
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 37
+	Location: 633
+	Procedure: ShortCueLongDelay633
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 95
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 38
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 96
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 38
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 97
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 38
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 98
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 38
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 99
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 38
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 100
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 39
+	Location: 532
+	Procedure: ShortCueShortDelay532
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 101
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 102
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 103
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 104
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 105
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 106
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 107
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 108
+	Running: MgsErExpt
+	*** LogFrame End ***
+	Level: 2
+	*** LogFrame Start ***
+	MgsErExpt: 40
+	Location:  
+	Procedure: Fix
+	MgsErExpt.Cycle: 1
+	MgsErExpt.Sample: 109
+	Running: MgsErExpt
+	*** LogFrame End ***
+Level: 1
+*** LogFrame Start ***
+Experiment: MGS Encode - v
+SessionDate: 05-20-2008
+SessionTime: 17:29:48
+Subject: 1259
+Session: 1
+RandomSeed: 544603256
+Group: 1
+Display.RefreshRate: 59.820
+Clock.Information: <?xml version="1.0"?>\n<Clock xmlns:dt="urn:schemas-microsoft-com:datatypes"><Description dt:dt="string">E-Prime Primary Realtime Clock</Description><StartTime><Timestamp dt:dt="int">0</Timestamp><DateUtc dt:dt="string">2008-05-20T21:29:48Z</DateUtc></StartTime><FrequencyChanges><FrequencyChange><Frequency dt:dt="r8">3579545</Frequency><Timestamp dt:dt="r8">107918062296</Timestamp><Current dt:dt="r8">0</Current><DateUtc dt:dt="string">2008-05-20T21:29:48Z</DateUtc></FrequencyChange></FrequencyChanges></Clock>\n
+*** LogFrame End ***
