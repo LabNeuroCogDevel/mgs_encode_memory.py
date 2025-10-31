@@ -7,6 +7,7 @@ import numpy
 import math
 import numpy.matlib
 import numpy.random
+import subprocess
 from psychopy import visual, core,  event, logging
 import glob
 import re
@@ -517,6 +518,14 @@ def double_size(vec,scale=2):
     except:
         return [.2, .2]
 
+
+## 2025-10-31
+PORTS = {
+        'eegtask': "/dev/parport0", # 2025-10-31 - linux eeg
+        "xxx": 53264 # 2025-10 - win11
+        }
+HOST = subprocess.run("hostname", capture_output=True).stdout.decode().strip()
+
 class mgsTask:
     # initialize all the compoents we need
     def __init__(self,
@@ -534,7 +543,7 @@ class mgsTask:
                  ET_type=None,
                  usePP=False,
                  fullscreen=True,
-                 pp_address=0xD010, #0xDFF8, # updated 20220614 new eeg
+                 pp_address=PORTS.get(HOST,0xD010), #0xDFF8, # updated 20220614 new eeg; 2025-10-31: use PORTS variable
                  zeroTTL=True,
                  recVideo=False):
 
@@ -1014,7 +1023,7 @@ class mgsTask:
         else:
             t = [(None, None)]
         # wait to finish
-        while(maxtime != numpy.Inf and timer.getTime() < maxtime):
+        while(maxtime != numpy.inf and timer.getTime() < maxtime):
             pass
         # give key and rt
         return(t[0])
@@ -1051,7 +1060,7 @@ class mgsTask:
             self.recall_txt[i].pos = self.recall_sides[i].pos
             self.recall_txt[i].text = str(keys[i])
 
-    def recall_trial(self, imgfile, rspmax=numpy.Inf):
+    def recall_trial(self, imgfile, rspmax=numpy.inf):
         """
         run a recall trial.
         globals:
